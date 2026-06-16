@@ -34,9 +34,9 @@ namespace HealthAxis.Api.Controllers
             }
             var result = await doctorservice.AddAsync(entity);
             if (result is null) return NotFound();
-            return CreatedAtAction("GetById", new { id = result.Id }, result);
+            return CreatedAtAction("GetById", new { id = result.DoctorId }, result);
         }
-
+        [HttpPut("{id}")]
         public async Task<IActionResult> Update(int id, [FromBody] DoctorDto entity)
         {
             if (!ModelState.IsValid)
