@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using HealthAxis.Api.Migrations;
 using HealthAxis.Api.Models;
 using HealthAxis.Api.Models.Dtos;
 using HealthAxis.Api.Repositories;
@@ -27,7 +28,9 @@ namespace HealthAxis.Api.Services.Impl
         public async Task<DoctorDto> UpdateAsync(int id, DoctorDto entity)
         {
             var doctor = mapper.Map<Doctor>(entity);
-            var updated= await repository.UpdateAsync(id , doctor);
+            doctor.DoctorId = id;
+
+            var updated = await repository.UpdateAsync(id , doctor);
             return mapper.Map<DoctorDto>(updated);
         }
     }
