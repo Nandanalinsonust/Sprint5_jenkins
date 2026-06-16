@@ -1,4 +1,9 @@
 using HealthAxis.Api.Data;
+using HealthAxis.Api.Mappings;
+using HealthAxis.Api.Repositories;
+using HealthAxis.Api.Repositories.Impl;
+using HealthAxis.Api.Services;
+using HealthAxis.Api.Services.Impl;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,6 +16,12 @@ builder.Services.AddOpenApi();
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbCon"));
+});
+builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+builder.Services.AddScoped<IDoctorService, DoctorService>();
+builder.Services.AddAutoMapper(cfg =>
+{
+    cfg.AddProfile<MappingProfile>();
 });
 
 var app = builder.Build();
