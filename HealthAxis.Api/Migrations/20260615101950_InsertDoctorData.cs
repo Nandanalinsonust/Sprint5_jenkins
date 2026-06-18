@@ -7,6 +7,7 @@
 namespace HealthAxis.Api.Migrations
 {
     /// <inheritdoc />
+
     public partial class InsertDoctorData : Migration
     {
         /// <inheritdoc />

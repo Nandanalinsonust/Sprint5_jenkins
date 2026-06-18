@@ -1,11 +1,13 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
 namespace HealthAxis.Api.Migrations
 {
     /// <inheritdoc />
+    /// 
+
     public partial class aspnetidentityadded : Migration
     {
         /// <inheritdoc />

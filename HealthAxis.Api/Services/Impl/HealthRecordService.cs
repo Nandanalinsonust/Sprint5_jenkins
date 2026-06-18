@@ -43,5 +43,11 @@ namespace HealthAxis.Api.Services.Impl
             var data = await repository.GetByPatientIdAsync(patientId);
             return mapper.Map<List<HealthRecordDto>>(data);
         }
+
+        public async Task<List<HealthRecordDto>> GetByDoctorIdAsync(int doctorId)
+        {
+            var data = await repository.GetByDoctorIdAsync(doctorId);
+            return mapper.Map<List<HealthRecordDto>>(data);
+        }
     }
 }

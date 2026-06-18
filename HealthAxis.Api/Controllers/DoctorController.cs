@@ -1,50 +1,53 @@
-﻿using AutoMapper;
-using HealthAxis.Api.Models.Dtos;
+﻿using HealthAxis.Api.Models.Dtos;
 using HealthAxis.Api.Services;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HealthAxis.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DoctorController(IDoctorService doctorservice,IMapper mapper) : ControllerBase
+    public class DoctorController(IDoctorService doctorservice) : ControllerBase
     {
         [HttpGet]
-
-        public async Task<IActionResult> GetAll()
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin")]
+        public async Task<IActionResult> GetAllDoctors()
         {
             var result = await doctorservice.GetAllAsync();
             return Ok(result);
         }
+
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById([FromRoute] int id)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Patient,Admin")]
+        public async Task<IActionResult> GetDoctorById(int id)
         {
             var result = await doctorservice.GetByIdAsync(id);
             if (result is null) return NotFound();
             return Ok(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] DoctorDto entity)
+        [HttpGet("name/{name}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Patient,Admin")]
+        public async Task<IActionResult> GetDoctorsByName(string name)
         {
-            if(!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            var result = await doctorservice.AddAsync(entity);
-            if (result is null) return NotFound();
-            return CreatedAtAction("GetById", new { id = result.DoctorId }, result);
+            var result = await doctorservice.GetByNameAsync(name);
+            return Ok(result);
         }
-        [HttpPut("{id}")]
-        public async Task<IActionResult> Update(int id, [FromBody] DoctorDto entity)
+
+        [HttpGet("specialisation/{specialisation}")]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetDoctorsBySpecialisation(string specialisation)
         {
-            if (!ModelState.IsValid)
-            {
-                return BadRequest();
-            }
-            var result = await doctorservice.UpdateAsync(id,entity);
-            if (result is null) return NotFound();
+            var result = await doctorservice.GetBySpecialisationAsync(specialisation);
+            return Ok(result);
+        }
+
+        [HttpGet("availability/{doctorId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Patient,Admin")]
+        public async Task<IActionResult> GetDoctorAvailability(int doctorId, [FromQuery] DateTime date)
+        {
+            var result = await doctorservice.GetAvailabilityAsync(doctorId, date);
             return Ok(result);
         }
     }

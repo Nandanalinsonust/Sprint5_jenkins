@@ -7,24 +7,39 @@ using System.Text;
 
 namespace HealthAxis.Api.Services.Impl
 {
-    public class AuthService(UserManager<IdentityUser> userManager,IConfiguration config) : IAuthService
+    public class AuthService(UserManager<IdentityUser> userManager, IConfiguration config) : IAuthService
     {
-        public async Task<(bool Success, string Message, string token, int ExpiresIn)> Login(LoginDto request)
+        public async Task<(bool Success, string Message, AuthResponse? Data, int ExpiresIn)> Login(LoginDto request)
         {
             var user = await userManager.FindByEmailAsync(request.Email);
-            if(user is null)
+
+            if (user is null)
             {
-                return (false, "Invalid Crendentials", string.Empty, 0);
+                return (false, "Invalid credentials", null, 0);
             }
 
-            var isPasswordValid = await userManager.CheckPasswordAsync(user , request.Password);
+            var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
+
             if (!isPasswordValid)
             {
-                return (false, "Invalid credentials", string.Empty, 0);
+                return (false, "Invalid credentials", null, 0);
             }
+
             var token = await GenerateToken(user);
-            var expiry = int.Parse(config.GetSection("Jwt")["AccessTokenExpirationMinutes"]!);
-            return (true, "User Logged in Successfully", token, expiry);
+
+            var roles = await userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault() ?? "";
+
+            var expiry = int.Parse(config["Jwt:AccessTokenExpirationMinutes"]!);
+
+            var response = new AuthResponse
+            {
+                Token = token,
+                Role = role,
+                UserId = user.Id
+            };
+
+            return (true, "User Logged in Successfully", response, expiry);
         }
 
         public async Task<(bool Success, string Message, string UserId)> Register(RegisterDto request)
@@ -33,33 +48,39 @@ namespace HealthAxis.Api.Services.Impl
             {
                 return (false, "Password Do Not Match", string.Empty);
             }
+
             if (request.Role != "Admin" && request.Role != "Patient" && request.Role != "Doctor")
             {
                 return (false, "Invalid role", string.Empty);
-
             }
+
+            var existingUser = await userManager.FindByEmailAsync(request.Email);
+            if (existingUser != null)
+            {
+                return (false, "User already exists", string.Empty);
+            }
+
             var user = new IdentityUser
             {
                 UserName = request.Email,
-                Email = request.Email,
+                Email = request.Email
             };
 
             var result = await userManager.CreateAsync(user, request.Password);
 
-            if(!result.Succeeded)
+            if (!result.Succeeded)
             {
                 var errors = string.Join(",", result.Errors.Select(e => e.Description));
                 return (false, errors, string.Empty);
             }
 
             await userManager.AddToRoleAsync(user, request.Role);
-            return (true, "UserRegistered Successfully", user.Id);
+
+            return (true, "User Registered Successfully", user.Id);
         }
 
         private async Task<string> GenerateToken(IdentityUser user)
-
         {
-
             var jwtSettings = config.GetSection("Jwt");
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
@@ -70,16 +91,17 @@ namespace HealthAxis.Api.Services.Impl
 
             var claims = new List<Claim>
             {
-                new Claim(JwtRegisteredClaimNames.Sub,user.Id),
-                new Claim(JwtRegisteredClaimNames.Email,user.Email),
-                new Claim(JwtRegisteredClaimNames.Jti,Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.NameIdentifier,user.Id)
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
             };
 
-            foreach(var role in roles)
+            foreach (var role in roles)
             {
                 claims.Add(new Claim(ClaimTypes.Role, role));
             }
+
             var expirationMinutes = int.Parse(jwtSettings["AccessTokenExpirationMinutes"]!);
 
             var token = new JwtSecurityToken(
@@ -88,9 +110,9 @@ namespace HealthAxis.Api.Services.Impl
                 claims: claims,
                 expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
                 signingCredentials: credentials
-                );
-            return new JwtSecurityTokenHandler().WriteToken(token);
+            );
 
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using HealthAxis.Api.Models.Dtos;
 using HealthAxis.Api.Services;
-using Microsoft.AspNetCore.Authentication.OAuth;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HealthAxis.Api.Controllers
@@ -10,13 +10,17 @@ namespace HealthAxis.Api.Controllers
     public class AuthController(IAuthService authService) : ControllerBase
     {
         [HttpPost("register")]
-        public async Task<IActionResult> Register(RegisterDto request)
+        [AllowAnonymous]
+        public async Task<IActionResult> Register([FromBody] RegisterDto request)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var result = await authService.Register(request);
 
             if (!result.Success)
             {
-                return BadRequest(new {message = result.Message});
+                return BadRequest(new { message = result.Message });
             }
 
             return Ok(new
@@ -27,20 +31,24 @@ namespace HealthAxis.Api.Controllers
         }
 
         [HttpPost("login")]
-        public async Task<IActionResult> Login(LoginDto request)
+        [AllowAnonymous]
+        public async Task<IActionResult> Login([FromBody] LoginDto request)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
             var result = await authService.Login(request);
 
             if (!result.Success)
             {
-                return Unauthorized(new {message = result.Message});
+                return Unauthorized(new { message = result.Message });
             }
 
             return Ok(new
             {
                 message = result.Message,
-                token = result.token,
-                expiry = result.ExpiresIn
+                data = result.Data,
+                expiresIn = result.ExpiresIn
             });
         }
     }

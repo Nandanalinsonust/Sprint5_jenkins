@@ -1,56 +1,47 @@
 ﻿using HealthAxis.Api.Models.Dtos;
 using HealthAxis.Api.Services;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HealthAxis.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class HealthRecordController : ControllerBase
+    [Authorize]
+    public class HealthRecordController(IHealthRecordService service) : ControllerBase
     {
-        private readonly IHealthRecordService service;
-
-        public HealthRecordController(IHealthRecordService service)
+        [HttpPost]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Doctor")]
+        public async Task<IActionResult> CreateHealthRecord([FromBody] HealthRecordDto dto)
         {
-            this.service = service;
-        }
-
-        [HttpGet]
-        public async Task<IActionResult> GetAll()
-        {
-            var result = await service.GetAllAsync();
-            return Ok(result);
+            if (!ModelState.IsValid) return BadRequest(ModelState);
+            var result = await service.AddAsync(dto);
+            return CreatedAtAction(nameof(GetHealthRecordById), new { id = result.HealthRecordId }, result);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetById(int id)
+        public async Task<IActionResult> GetHealthRecordById(int id)
         {
             var result = await service.GetByIdAsync(id);
-
-            if (result == null)
-                return NotFound();
-
+            if (result is null) return NotFound();
             return Ok(result);
         }
 
         [HttpGet("patient/{patientId}")]
-        public async Task<IActionResult> GetByPatientId(int patientId)
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Patient,Doctor")]
+        public async Task<IActionResult> GetRecordsByPatientId(int patientId)
         {
             var result = await service.GetByPatientIdAsync(patientId);
             return Ok(result);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] HealthRecordDto entity)
+        [HttpGet("doctor/{doctorId}")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Doctor")]
+        public async Task<IActionResult> GetRecordsByDoctorId(int doctorId)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await service.AddAsync(entity);
-
-            return CreatedAtAction(nameof(GetById),
-                new { id = result.HealthRecordId },
-                result);
+            var result = await service.GetByDoctorIdAsync(doctorId);
+            return Ok(result);
         }
     }
 }

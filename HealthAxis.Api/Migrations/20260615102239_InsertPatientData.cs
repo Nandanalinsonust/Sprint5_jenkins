@@ -1,5 +1,5 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
 #nullable disable
 
@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace HealthAxis.Api.Migrations
 {
     /// <inheritdoc />
+
     public partial class InsertPatientData : Migration
     {
         /// <inheritdoc />

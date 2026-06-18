@@ -2,6 +2,7 @@
 
 #nullable disable
 
+
 namespace HealthAxis.Api.Migrations
 {
     /// <inheritdoc />

@@ -6,31 +6,44 @@ namespace HealthAxis.Api.Models.Dtos
     {
         public int PatientId { get; set; }
 
+        public string FullName { get; set; } = string.Empty;
+
+        public DateTime DateOfBirth { get; set; }
+
+        public string Gender { get; set; } = string.Empty;
+
+        public string Email { get; set; } = string.Empty;
+
+        public string PhoneNumber { get; set; } = string.Empty;
+
+        public string? InsuranceID { get; set; }
+
+        public bool IsActive { get; set; }
+    }
+
+    public class CreatePatientDto
+    {
         [Required]
         [MinLength(2)]
-        [RegularExpression(@"^[A-Z][A-Za-z\s]+$", ErrorMessage = "Name should contain only alphabets")]
-        public required string FullName { get; set; }
+        [RegularExpression(@"^[A-Z][A-Za-z\s]+$")]
+        public string FullName { get; set; } = string.Empty;
 
         [Required]
         public DateTime DateOfBirth { get; set; }
 
         [Required]
-        [RegularExpression("^(Male|Female|Transgender|Other)$",
-            ErrorMessage = "Gender must be valid")]
-        public required string Gender { get; set; }
+        [RegularExpression("^(Male|Female|Transgender|Other)$")]
+        public string Gender { get; set; } = string.Empty;
 
         [Required]
-        [EmailAddress(ErrorMessage = "Invalid Email")]
-        public required string Email { get; set; }
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        [Phone(ErrorMessage = "Invalid Phone Number")]
-        public required string PhoneNumber { get; set; }
+        [Phone]
+        public string PhoneNumber { get; set; } = string.Empty;
 
-        [RegularExpression(@"^$|^INS\d{4}$",
-            ErrorMessage = "Format must be INSXXXX")]
+        [RegularExpression(@"^$|^INS\d{4}$")]
         public string? InsuranceID { get; set; }
-
-        public bool IsActive { get; set; }
     }
 }

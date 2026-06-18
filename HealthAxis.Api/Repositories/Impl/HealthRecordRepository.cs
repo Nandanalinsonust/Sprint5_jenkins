@@ -16,9 +16,14 @@ namespace HealthAxis.Api.Repositories.Impl
         public async Task<List<HealthRecord>> GetByPatientIdAsync(int patientId)
         {
             return await context.HealthRecords
-                .Include(hr => hr.Doctor)
-                .Include(hr => hr.Patient)
-                .Where(hr => hr.PatientId == patientId)
+                .Where(h => h.PatientId == patientId)
+                .ToListAsync();
+        }
+
+        public async Task<List<HealthRecord>> GetByDoctorIdAsync(int doctorId)
+        {
+            return await context.HealthRecords
+                .Where(h => h.DoctorId == doctorId)
                 .ToListAsync();
         }
     }
