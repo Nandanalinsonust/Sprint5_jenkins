@@ -20,8 +20,13 @@ namespace HealthAxis.Api.Models.Dtos
     public class CreateDoctorDto
     {
         [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+
+        [Required]
         [MinLength(2)]
         [RegularExpression(@"^[A-Z][A-Za-z\s]+$")]
+
         public string FullName { get; set; } = string.Empty;
 
         [Required]

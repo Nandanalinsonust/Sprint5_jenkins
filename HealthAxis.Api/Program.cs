@@ -1,6 +1,7 @@
 using HealthAxis.Api;
 using HealthAxis.Api.Data;
 using HealthAxis.Api.Mappings;
+using HealthAxis.Api.Models;
 using HealthAxis.Api.Repositories;
 using HealthAxis.Api.Repositories.Impl;
 using HealthAxis.Api.Services;
@@ -9,8 +10,8 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
 using Microsoft.OpenApi;
+using System.Text;
 using System.Text.Json;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -28,7 +29,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbCon"));
 });
-builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
+builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
 

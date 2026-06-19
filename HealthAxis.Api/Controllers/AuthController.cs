@@ -51,5 +51,18 @@ namespace HealthAxis.Api.Controllers
                 expiresIn = result.ExpiresIn
             });
         }
+        [HttpPost("change-password")]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+        {
+            var result = await authService.ChangePassword(
+                dto.Email,
+                dto.OldPassword,
+                dto.NewPassword);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(result.Message);
+        }
     }
 }

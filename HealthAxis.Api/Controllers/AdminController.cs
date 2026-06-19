@@ -1,5 +1,6 @@
 ﻿using HealthAxis.Api.Models.Dtos;
 using HealthAxis.Api.Services;
+using HealthAxis.Api.Services.Impl;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -9,15 +10,20 @@ namespace HealthAxis.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin")]
-    public class AdminController(IDoctorService doctorService, IPatientService patientService, IAppointmentService appointmentService) : ControllerBase
+    public class AdminController(IDoctorService doctorService, IPatientService patientService, IAppointmentService appointmentService,IAuthService authService) : ControllerBase
     {
         [HttpPost("doctors")]
         public async Task<IActionResult> CreateDoctor([FromBody] CreateDoctorDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
+
             var result = await doctorService.AddAsync(dto);
+
+            await authService.CreateDoctorUser(dto.Email);
+
             return CreatedAtAction("GetAllDoctors", new { id = result.DoctorId }, result);
         }
+
 
         [HttpPut("doctors/{id}")]
         public async Task<IActionResult> UpdateDoctor(int id, [FromBody] UpdateDoctorDto dto)
