@@ -9,13 +9,53 @@ namespace HealthAxis.Api.Services.Impl
         IAppointmentRepository repository,
         IMapper mapper) : IAppointmentService
     {
-        public async Task<AppointmentDto> AddAsync(AppointmentDto entity)
+        public async Task<AppointmentDto> AddAsync(CreateAppointmentDto dto)
         {
-            var appointment = mapper.Map<Appointment>(entity);
+            var today = DateTime.Today;
+            var now = DateTime.Now;
+
+            if (dto.ScheduledDate.Date < today)
+                throw new Exception("Cannot book appointment in the past");
+
+            if (dto.ScheduledDate.Date == today)
+            {
+                var slotStart = TimeSpan.Parse(dto.TimeSlot.Split('-')[0]);
+                if (slotStart <= now.TimeOfDay)
+                    throw new Exception("Cannot book past time slot for today");
+            }
+
+            var patientAppointments = await repository.GetByPatientIdAsync(dto.PatientId);
+
+            if (patientAppointments.Any(a =>
+                a.DoctorId == dto.DoctorId &&
+                a.ScheduledDate.Date == dto.ScheduledDate.Date))
+            {
+                throw new Exception("You already booked this doctor for the selected date");
+            }
+
+            if (patientAppointments.Any(a =>
+                a.TimeSlot == dto.TimeSlot &&
+                a.ScheduledDate.Date == dto.ScheduledDate.Date))
+            {
+                throw new Exception("You already have an appointment at this time");
+            }
+
+            var doctorAppointments = await repository.GetByDoctorIdAsync(dto.DoctorId);
+
+            if (doctorAppointments.Any(a =>
+                a.TimeSlot == dto.TimeSlot &&
+                a.ScheduledDate.Date == dto.ScheduledDate.Date))
+            {
+                throw new Exception("Doctor is not available at this time slot");
+            }
+
+            var appointment = mapper.Map<Appointment>(dto);
+            appointment.Status = "Pending";
+
             var saved = await repository.CreateAsync(appointment);
+
             return mapper.Map<AppointmentDto>(saved);
         }
-
         public async Task<List<AppointmentDto>> GetAllAsync()
         {
             var data = await repository.GetAllAsync();
@@ -28,7 +68,7 @@ namespace HealthAxis.Api.Services.Impl
             return mapper.Map<AppointmentDto>(result);
         }
 
-        public async Task<AppointmentDto> UpdateAsync(int id, AppointmentDto entity)
+        public async Task<AppointmentDto> UpdateAsync(int id, UpdateAppointmentDto entity)
         {
             var appointment = mapper.Map<Appointment>(entity);
             appointment.AppointmentId = id;

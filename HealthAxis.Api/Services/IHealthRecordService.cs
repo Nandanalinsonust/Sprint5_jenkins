@@ -4,7 +4,7 @@ namespace HealthAxis.Api.Services
 {
     public interface IHealthRecordService
     {
-        Task<HealthRecordDto> AddAsync(HealthRecordDto entity);
+        Task<HealthRecordDto> AddAsync(CreateHealthRecordDto entity);
 
         Task<List<HealthRecordDto>> GetAllAsync();
 

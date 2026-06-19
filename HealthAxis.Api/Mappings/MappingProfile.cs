@@ -9,8 +9,15 @@ namespace HealthAxis.Api.Mappings
         public MappingProfile()
         {
             CreateMap<Doctor, DoctorDto>().ReverseMap();
+            CreateMap<CreateDoctorDto, Doctor>();
+            CreateMap<UpdateDoctorDto, Doctor>();
+
             CreateMap<Patient, PatientDto>().ReverseMap();
+
             CreateMap<Appointment, AppointmentDto>().ReverseMap();
+            CreateMap<CreateAppointmentDto, Appointment>();
+            CreateMap<UpdateAppointmentDto, Appointment>();
+
             CreateMap<HealthRecord, HealthRecordDto>().ReverseMap();
 
 

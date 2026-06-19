@@ -16,7 +16,7 @@ namespace HealthAxis.Api.Services.Impl
             this.mapper = mapper;
         }
 
-        public async Task<HealthRecordDto> AddAsync(HealthRecordDto entity)
+        public async Task<HealthRecordDto> AddAsync(CreateHealthRecordDto entity)
         {
             var record = mapper.Map<HealthRecord>(entity);
             record.VisitDate = DateTime.UtcNow;

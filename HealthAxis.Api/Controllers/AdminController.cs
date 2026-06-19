@@ -12,7 +12,7 @@ namespace HealthAxis.Api.Controllers
     public class AdminController(IDoctorService doctorService, IPatientService patientService, IAppointmentService appointmentService) : ControllerBase
     {
         [HttpPost("doctors")]
-        public async Task<IActionResult> CreateDoctor([FromBody] DoctorDto dto)
+        public async Task<IActionResult> CreateDoctor([FromBody] CreateDoctorDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await doctorService.AddAsync(dto);
@@ -20,7 +20,7 @@ namespace HealthAxis.Api.Controllers
         }
 
         [HttpPut("doctors/{id}")]
-        public async Task<IActionResult> UpdateDoctor(int id, [FromBody] DoctorDto dto)
+        public async Task<IActionResult> UpdateDoctor(int id, [FromBody] UpdateDoctorDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await doctorService.UpdateAsync(id, dto);

@@ -11,7 +11,7 @@ namespace HealthAxis.Api.Controllers
     public class PatientController(IPatientService patientService) : ControllerBase
     {
         [HttpPost]
-        public async Task<IActionResult> CreatePatient([FromBody] PatientDto dto)
+        public async Task<IActionResult> CreatePatient([FromBody] CreatePatientDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await patientService.AddAsync(dto);

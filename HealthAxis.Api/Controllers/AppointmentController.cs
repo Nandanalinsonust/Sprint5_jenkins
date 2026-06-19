@@ -12,7 +12,7 @@ namespace HealthAxis.Api.Controllers
     {
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Patient")]
-        public async Task<IActionResult> CreateAppointment([FromBody] AppointmentDto entity)
+        public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentDto entity)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

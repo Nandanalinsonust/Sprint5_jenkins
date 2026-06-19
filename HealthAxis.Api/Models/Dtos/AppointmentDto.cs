@@ -21,6 +21,10 @@ namespace HealthAxis.Api.Models.Dtos
 
     public class CreateAppointmentDto
     {
+        public int AppointmentId { get; set; }
+
+        [Required]
+        public int PatientId { get; set; }
         [Required]
         public int DoctorId { get; set; }
 
@@ -32,6 +36,20 @@ namespace HealthAxis.Api.Models.Dtos
         public string TimeSlot { get; set; } = string.Empty;
     }
 
+    public class UpdateAppointmentDto
+    {
+        [Required]
+        public int DoctorId { get; set; }
+
+        [Required]
+        public int PatientId { get; set; }
+
+        [Required]
+        public DateTime ScheduledDate { get; set; }
+
+        [Required]
+        public string TimeSlot { get; set; } = string.Empty;
+    }
 
     public class UpdateAppointmentStatusDto
     {

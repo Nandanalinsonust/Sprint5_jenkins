@@ -13,7 +13,7 @@ namespace HealthAxis.Api.Controllers
     {
         [HttpPost]
         [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Doctor")]
-        public async Task<IActionResult> CreateHealthRecord([FromBody] HealthRecordDto dto)
+        public async Task<IActionResult> CreateHealthRecord([FromBody] CreateHealthRecordDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await service.AddAsync(dto);
