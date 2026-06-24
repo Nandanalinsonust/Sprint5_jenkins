@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using HealthAxis.Api.Models;
-using HealthAxis.Api.Models.Dtos;
+using HealthAxis.Shared.Dtos;
 
 namespace HealthAxis.Api.Mappings
 {

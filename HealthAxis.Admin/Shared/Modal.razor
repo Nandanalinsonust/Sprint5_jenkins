@@ -1,0 +1,27 @@
+﻿@if (Show)
+{
+    <div class="modal fade show d-block">
+        <div class="modal-dialog">
+            <div class="modal-content p-3">
+
+                @ChildContent
+
+                <button class="btn btn-secondary mt-2"
+                        @onclick="Close">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+}
+
+@code{
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+
+    private async Task Close()
+    {
+        await OnClose.InvokeAsync();
+    }
+}

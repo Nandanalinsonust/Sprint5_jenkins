@@ -8,6 +8,6 @@ namespace HealthAxis.Api.Repositories
         Task<List<Appointment>> GetByPatientIdAsync(int patientId);
         Task<Appointment?> UpdateStatusAsync(int id, string status);
         Task<bool> DeleteAsync(int id);
-        Task<object> GetSummaryReportAsync();
+        Task<List<AppointmentSummary>> GetSummaryReportAsync();
     }
 }

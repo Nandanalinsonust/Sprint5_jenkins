@@ -8,5 +8,6 @@ namespace HealthAxis.Api.Repositories
         Task<List<Doctor>> GetBySpecialisationAsync(string specialization);
         Task<object> GetAvailabilityAsync(int doctorId, DateTime date);
         Task<bool> DeactivateAsync(int id);
+        Task<Doctor?> GetByUserIdAsync(string userId);
     }
 }

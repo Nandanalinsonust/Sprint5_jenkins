@@ -1,5 +1,6 @@
 ﻿using HealthAxis.Api.Data;
 using HealthAxis.Api.Models;
+using HealthAxis.Shared.Dtos;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthAxis.Api.Repositories.Impl
@@ -47,11 +48,11 @@ namespace HealthAxis.Api.Repositories.Impl
             return true;
         }
 
-        public async Task<object> GetSummaryReportAsync()
+        public async Task<List<AppointmentSummary>> GetSummaryReportAsync()
         {
-            var data = await context.Appointments
+            return await context.Appointments
                 .GroupBy(a => a.ScheduledDate.Date)
-                .Select(g => new
+                .Select(g => new AppointmentSummary
                 {
                     Date = g.Key,
                     Confirmed = g.Count(x => x.Status == "Confirmed"),
@@ -59,8 +60,6 @@ namespace HealthAxis.Api.Repositories.Impl
                     Completed = g.Count(x => x.Status == "Completed")
                 })
                 .ToListAsync();
-
-            return data;
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
+using HealthAxis.Api.Exceptions;
 using HealthAxis.Api.Models;
-using HealthAxis.Api.Models.Dtos;
+using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Repositories;
 
 namespace HealthAxis.Api.Services.Impl
@@ -15,39 +16,29 @@ namespace HealthAxis.Api.Services.Impl
             var now = DateTime.Now;
 
             if (dto.ScheduledDate.Date < today)
-                throw new Exception("Cannot book appointment in the past");
+                throw new InvalidException("Cannot book in the past");
 
-            if (dto.ScheduledDate.Date == today)
-            {
-                var slotStart = TimeSpan.Parse(dto.TimeSlot.Split('-')[0]);
-                if (slotStart <= now.TimeOfDay)
-                    throw new Exception("Cannot book past time slot for today");
-            }
+            var slotStart = TimeSpan.Parse(dto.TimeSlot.Split('-')[0]);
+
+            if (slotStart < TimeSpan.FromHours(9) || slotStart > TimeSpan.FromHours(17))
+                throw new InvalidException("Outside working hours");
+
+            if (dto.ScheduledDate.Date == today && slotStart <= now.TimeOfDay)
+                throw new InvalidException("Invalid time slot");
 
             var patientAppointments = await repository.GetByPatientIdAsync(dto.PatientId);
 
             if (patientAppointments.Any(a =>
-                a.DoctorId == dto.DoctorId &&
-                a.ScheduledDate.Date == dto.ScheduledDate.Date))
-            {
-                throw new Exception("You already booked this doctor for the selected date");
-            }
-
-            if (patientAppointments.Any(a =>
                 a.TimeSlot == dto.TimeSlot &&
                 a.ScheduledDate.Date == dto.ScheduledDate.Date))
-            {
-                throw new Exception("You already have an appointment at this time");
-            }
+                throw new InvalidException("Patient conflict");
 
             var doctorAppointments = await repository.GetByDoctorIdAsync(dto.DoctorId);
 
             if (doctorAppointments.Any(a =>
                 a.TimeSlot == dto.TimeSlot &&
                 a.ScheduledDate.Date == dto.ScheduledDate.Date))
-            {
-                throw new Exception("Doctor is not available at this time slot");
-            }
+                throw new InvalidException("Doctor conflict");
 
             var appointment = mapper.Map<Appointment>(dto);
             appointment.Status = "Pending";
@@ -55,6 +46,25 @@ namespace HealthAxis.Api.Services.Impl
             var saved = await repository.CreateAsync(appointment);
 
             return mapper.Map<AppointmentDto>(saved);
+        }
+
+        public async Task<bool> CancelWithValidation(int id)
+        {
+            var entity = await repository.GetByIdAsync(id);
+
+            if (entity == null) return false;
+
+            var slotStart = DateTime.Parse(entity.ScheduledDate.ToString("yyyy-MM-dd") + " " + entity.TimeSlot.Split('-')[0]);
+
+            if ((slotStart - DateTime.Now).TotalHours < 2)
+                throw new InvalidException("Cannot cancel within 2 hours");
+
+            return await repository.DeleteAsync(id);
+        }
+
+        public async Task<List<AppointmentSummary>> GetSummaryReportAsync()
+        {
+            return await repository.GetSummaryReportAsync();
         }
         public async Task<List<AppointmentDto>> GetAllAsync()
         {
@@ -98,10 +108,12 @@ namespace HealthAxis.Api.Services.Impl
         {
             return await repository.DeleteAsync(id);
         }
-
-        public async Task<object> GetSummaryReportAsync()
+        public async Task<bool> HasDoctorTreatedPatient(int doctorId, int patientId)
         {
-            return await repository.GetSummaryReportAsync();
+            var appointments = await repository.GetByDoctorIdAsync(doctorId);
+
+            return appointments.Any(a => a.PatientId == patientId);
         }
+
     }
 }

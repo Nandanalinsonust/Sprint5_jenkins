@@ -1,10 +1,11 @@
 ﻿using AutoMapper;
 using HealthAxis.Api.Models;
-using HealthAxis.Api.Models.Dtos;
+using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Repositories;
 using HealthAxis.Api.Services.Impl;
 using Moq;
 using Xunit;
+using HealthAxis.Api.Exceptions;
 
 namespace HealthAxis.Tests.ServiceTests
 {
@@ -75,7 +76,7 @@ namespace HealthAxis.Tests.ServiceTests
             var dto = GetValidDto();
             dto.ScheduledDate = DateTime.Today.AddDays(-1);
 
-            await Assert.ThrowsAsync<Exception>(() => _service.AddAsync(dto));
+            await Assert.ThrowsAsync<InvalidException>(() => _service.AddAsync(dto));
         }
 
         [Fact]
@@ -85,7 +86,7 @@ namespace HealthAxis.Tests.ServiceTests
             dto.ScheduledDate = DateTime.Today;
             dto.TimeSlot = "01:00-02:00";
 
-            await Assert.ThrowsAsync<Exception>(() => _service.AddAsync(dto));
+            await Assert.ThrowsAsync<InvalidException>(() => _service.AddAsync(dto));
         }
 
         [Fact]
@@ -99,7 +100,7 @@ namespace HealthAxis.Tests.ServiceTests
                     CreateValidAppointment(dto)
                 });
 
-            await Assert.ThrowsAsync<Exception>(() => _service.AddAsync(dto));
+            await Assert.ThrowsAsync<InvalidException>(() => _service.AddAsync(dto));
         }
 
         [Fact]
@@ -112,7 +113,7 @@ namespace HealthAxis.Tests.ServiceTests
             _repoMock.Setup(r => r.GetByPatientIdAsync(dto.PatientId))
                 .ReturnsAsync(new List<Appointment> { existing });
 
-            await Assert.ThrowsAsync<Exception>(() => _service.AddAsync(dto));
+            await Assert.ThrowsAsync<InvalidException>(() => _service.AddAsync(dto));
         }
 
         [Fact]
@@ -129,7 +130,7 @@ namespace HealthAxis.Tests.ServiceTests
                     CreateValidAppointment(dto)
                 });
 
-            await Assert.ThrowsAsync<Exception>(() => _service.AddAsync(dto));
+            await Assert.ThrowsAsync<InvalidException>(() => _service.AddAsync(dto));
         }
 
         [Fact]

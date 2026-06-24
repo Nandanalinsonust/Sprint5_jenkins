@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HealthAxis.Admin</title>
+    <base href="/" />
+
+    <link rel="stylesheet" href="lib/bootstrap/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="css/app.css" />
+    <link rel="icon" type="image/png" href="favicon.png" />
+    <link href="HealthAxis.Admin.styles.css" rel="stylesheet" />
+
+    <!-- ✅ Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <svg class="loading-progress">
+            <circle r="40%" cx="50%" cy="50%" />
+            <circle r="40%" cx="50%" cy="50%" />
+        </svg>
+        <div class="loading-progress-text"></div>
+    </div>
+
+    <div id="blazor-error-ui">
+        An unhandled error has occurred.
+        Reload
+        <span class="dismiss">🗙</span>
+    </div>
+
+    <!-- ✅ Blazor must load correctly -->
+    <script src="_framework/blazor.webassembly.js"></script>
+
+    <!-- ✅ YOUR FUNCTION -->
+    <script>
+        window.renderChart = (confirmed, completed, cancelled) => {
+
+            const ctx = document.getElementById('chart');
+
+            if (!ctx) return;
+
+            new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Confirmed', 'Completed', 'Cancelled'],
+                    datasets: [{
+                        data: [confirmed, completed, cancelled],
+                        backgroundColor: ['#22c55e', '#f59e0b', '#ef4444'],
+                        borderWidth: 0
+                    }]
+                }
+            });
+        };
+    </script>
+
+</body>
+
+</html>

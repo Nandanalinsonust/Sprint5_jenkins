@@ -1,4 +1,4 @@
-﻿using HealthAxis.Api.Models.Dtos;
+﻿using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -63,6 +63,13 @@ namespace HealthAxis.Api.Controllers
                 return BadRequest(result.Message);
 
             return Ok(result.Message);
+        }
+        [HttpPost("forgot-password")]
+        [AllowAnonymous]
+        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
+        {
+            var result = await authService.ForgotPassword(dto.Email);
+            return Ok(result);
         }
     }
 }

@@ -1,5 +1,5 @@
 ﻿using HealthAxis.Api.Exceptions;
-using HealthAxis.Api.Models.Dtos;
+using HealthAxis.Shared.Dtos;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace HealthAxis.Api.Middleware

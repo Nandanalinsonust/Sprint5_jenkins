@@ -1,4 +1,4 @@
-﻿using HealthAxis.Api.Models.Dtos;
+﻿using HealthAxis.Shared.Dtos;
 
 namespace HealthAxis.Api.Services
 {
@@ -6,7 +6,7 @@ namespace HealthAxis.Api.Services
     {
         Task<PatientDto> AddAsync(CreatePatientDto entity);
 
-        Task<List<PatientDto>> GetAllAsync();
+        Task<List<PatientDto>> GetAllAsync(int page, int pageSize);
 
         Task<PatientDto> GetByIdAsync(int id);
 
@@ -15,5 +15,6 @@ namespace HealthAxis.Api.Services
         Task<List<PatientDto>> GetByNameAsync(string name);
 
         Task<bool> DeactivateAsync(int id);
+        Task<PatientDto> GetByUserIdAsync(string userId);
     }
 }

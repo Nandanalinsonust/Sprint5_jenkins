@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HealthAxis.Api.Models.Dtos
+namespace HealthAxis.Shared.Dtos
 {
     public class AppointmentDto
     {
@@ -59,5 +59,20 @@ namespace HealthAxis.Api.Models.Dtos
 
         [MaxLength(100)]
         public string? CancellationReason { get; set; }
+    }
+    //public class AppointmentReportDto
+    //{
+    //    public DateTime Date { get; set; }
+    //    public int Confirmed { get; set; }
+    //    public int Cancelled { get; set; }
+    //    public int Completed { get; set; }
+    //}
+    public class AppointmentSummaryDto
+    {
+        public DateTime Date { get; set; }
+        public int Pending { get; set; }
+        public int Confirmed { get; set; }
+        public int Completed { get; set; }
+        public int Cancelled { get; set; }
     }
 }

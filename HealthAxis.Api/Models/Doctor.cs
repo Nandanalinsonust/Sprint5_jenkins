@@ -22,6 +22,7 @@ namespace HealthAxis.Api.Models
         public int ConsultationFee { get; set; }
         [Required]
         public bool IsActive { get; set; }
+        public string UserId { get; set; } = string.Empty;
     }
 }
 

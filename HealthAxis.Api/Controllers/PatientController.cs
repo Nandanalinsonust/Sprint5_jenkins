@@ -1,65 +1,80 @@
-﻿using HealthAxis.Api.Models.Dtos;
+﻿using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthAxis.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class PatientController(IPatientService patientService) : ControllerBase
+    [Route("api/[controller]")]
+    public class PatientController(
+        IPatientService patientService,
+        IAppointmentService appointmentService,
+        IDoctorService doctorService) : ControllerBase
     {
         [HttpPost]
-        public async Task<IActionResult> CreatePatient([FromBody] CreatePatientDto dto)
+        [AllowAnonymous]
+        public async Task<IActionResult> CreatePatient(CreatePatientDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
             var result = await patientService.AddAsync(dto);
-            return CreatedAtAction("GetPatientById", new { id = result.PatientId }, result);
+            return Ok(result);
         }
 
         [HttpGet("{id}")]
-        [Authorize]
-        public async Task<IActionResult> GetPatientById(int id)
+        [Authorize(Roles = "Patient,Doctor,Admin")]
+        public async Task<IActionResult> GetPatient(int id)
         {
-            var result = await patientService.GetByIdAsync(id);
-            if (result is null) return NotFound();
-            return Ok(result);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (User.IsInRole("Patient"))
+            {
+                var patient = await patientService.GetByUserIdAsync(userId);
+
+                if (patient.PatientId != id)
+                    return Unauthorized();
+            }
+
+            if (User.IsInRole("Doctor"))
+            {
+                var doctor = await doctorService.GetByUserIdAsync(userId);
+
+                var treated = await appointmentService
+                    .HasDoctorTreatedPatient(doctor.DoctorId, id);
+
+                if (!treated)
+                    return Unauthorized();
+            }
+
+            return Ok(await patientService.GetByIdAsync(id));
+        }
+
+        [HttpGet("me")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> GetMyProfile()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            var patient = await patientService.GetByUserIdAsync(userId);
+            return Ok(patient);
+        }
+
+        [HttpGet("appointments")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> GetMyAppointments()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var patient = await patientService.GetByUserIdAsync(userId);
+
+            return Ok(await appointmentService
+                .GetByPatientIdAsync(patient.PatientId));
         }
 
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllPatients()
         {
-            var result = await patientService.GetAllAsync();
-            return Ok(result);
-        }
-
-        [HttpGet("name/{name}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin")]
-        public async Task<IActionResult> GetPatientsByName(string name)
-        {
-            var result = await patientService.GetByNameAsync(name);
-            return Ok(result);
-        }
-
-        [HttpPut("{id}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Patient,Admin")]
-        public async Task<IActionResult> UpdatePatient(int id, [FromBody] PatientDto dto)
-        {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await patientService.UpdateAsync(id, dto);
-            if (result is null) return NotFound();
-            return Ok(result);
-        }
-
-        [HttpPut("deactivate/{id}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-        public async Task<IActionResult> DeactivatePatient(int id)
-        {
-            var result = await patientService.DeactivateAsync(id);
-            if (!result) return NotFound();
-            return NoContent();
+            return Ok(await patientService.GetAllAsync(1, 10));
         }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HealthAxis.Api.Models.Dtos
+namespace HealthAxis.Shared.Dtos
 {
     public class LoginDto
     {
@@ -27,7 +27,6 @@ namespace HealthAxis.Api.Models.Dtos
         public string ConfirmPassword { get; set; } = string.Empty;
 
         [Required]
-        [RegularExpression("^(Patient|Doctor|Admin)$")]
         public string Role { get; set; } = "Patient";
     }
 
@@ -35,14 +34,27 @@ namespace HealthAxis.Api.Models.Dtos
     {
         public string Token { get; set; } = string.Empty;
 
-        public string Role { get; set; } = string.Empty;
-
-        public string UserId { get; set; } = string.Empty;
+        public string RefreshToken { get; set; } = string.Empty;
     }
+
     public class ChangePasswordDto
     {
-        public string Email { get; set; }
-        public string OldPassword { get; set; }
-        public string NewPassword { get; set; }
+        public string? Email { get; set; }
+        public string? OldPassword { get; set; }
+        public string? NewPassword { get; set; }
+    }
+
+    public class ForgotPasswordDto
+    {
+        public string Email { get; set; } = string.Empty;
+    }
+
+    public class LoginResponseDto
+    {
+        public string Message { get; set; } = string.Empty;
+
+        public AuthResponse Data { get; set; } = new();
+
+        public int ExpiresIn { get; set; }
     }
 }

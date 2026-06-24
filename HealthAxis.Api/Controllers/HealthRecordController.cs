@@ -1,47 +1,78 @@
-﻿using HealthAxis.Api.Models.Dtos;
+﻿using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthAxis.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
+    [Route("api/[controller]")]
     [Authorize]
-    public class HealthRecordController(IHealthRecordService service) : ControllerBase
+    public class HealthRecordController(
+        IHealthRecordService service,
+        IPatientService patientService,
+        IDoctorService doctorService) : ControllerBase
     {
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Doctor")]
-        public async Task<IActionResult> CreateHealthRecord([FromBody] CreateHealthRecordDto dto)
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> Create(CreateHealthRecordDto dto)
         {
-            if (!ModelState.IsValid) return BadRequest(ModelState);
-            var result = await service.AddAsync(dto);
-            return CreatedAtAction(nameof(GetHealthRecordById), new { id = result.HealthRecordId }, result);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var doctor = await doctorService.GetByUserIdAsync(userId);
+
+            dto.DoctorId = doctor.DoctorId;
+
+            return Ok(await service.AddAsync(dto));
+        }
+
+        [HttpGet("me")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> GetMyRecords()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var patient = await patientService.GetByUserIdAsync(userId);
+
+            return Ok(await service.GetByPatientIdAsync(patient.PatientId));
+        }
+
+        [HttpGet("doctor")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> GetDoctorRecords()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var doctor = await doctorService.GetByUserIdAsync(userId);
+
+            var records = await service.GetAllAsync();
+
+            var filtered = records.Where(x =>
+                x.DoctorId == doctor.DoctorId ||
+                service.GetByPatientIdAsync(x.PatientId).Result.Any()).ToList();
+
+            return Ok(filtered);
         }
 
         [HttpGet("{id}")]
-        public async Task<IActionResult> GetHealthRecordById(int id)
+        [Authorize(Roles = "Patient,Doctor,Admin")]
+        public async Task<IActionResult> GetById(int id)
         {
-            var result = await service.GetByIdAsync(id);
-            if (result is null) return NotFound();
-            return Ok(result);
-        }
+            var record = await service.GetByIdAsync(id);
 
-        [HttpGet("patient/{patientId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Patient,Doctor")]
-        public async Task<IActionResult> GetRecordsByPatientId(int patientId)
-        {
-            var result = await service.GetByPatientIdAsync(patientId);
-            return Ok(result);
-        }
+            if (record == null) return NotFound();
 
-        [HttpGet("doctor/{doctorId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Doctor")]
-        public async Task<IActionResult> GetRecordsByDoctorId(int doctorId)
-        {
-            var result = await service.GetByDoctorIdAsync(doctorId);
-            return Ok(result);
+            if (User.IsInRole("Patient"))
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                var patient = await patientService.GetByUserIdAsync(userId);
+
+                if (record.PatientId != patient.PatientId)
+                    return Unauthorized();
+            }
+
+            return Ok(record);
         }
     }
 }

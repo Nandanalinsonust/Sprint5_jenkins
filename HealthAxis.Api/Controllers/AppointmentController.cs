@@ -1,84 +1,96 @@
-﻿using HealthAxis.Api.Models.Dtos;
+﻿using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Services;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace HealthAxis.Api.Controllers
 {
-    [Route("api/[controller]")]
     [ApiController]
-    public class AppointmentController(IAppointmentService service) : ControllerBase
+    [Route("api/[controller]")]
+    [Authorize]
+    public class AppointmentController(
+        IAppointmentService service,
+        IPatientService patientService,
+        IDoctorService doctorService) : ControllerBase
     {
         [HttpPost]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Patient")]
-        public async Task<IActionResult> CreateAppointment([FromBody] CreateAppointmentDto entity)
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> Create(CreateAppointmentDto dto)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            var result = await service.AddAsync(entity);
+            var patient = await patientService.GetByUserIdAsync(userId!);
 
-            return CreatedAtAction(nameof(GetAppointmentById),
-                new { id = result.AppointmentId },
-                result);
+            dto.PatientId = patient.PatientId;
+
+            return Ok(await service.AddAsync(dto));
         }
 
-        [HttpGet("{id}")]
-        public async Task<IActionResult> GetAppointmentById(int id)
+        [HttpGet("my")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> GetMy()
         {
-            var result = await service.GetByIdAsync(id);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-            if (result is null)
-                return NotFound();
+            var patient = await patientService.GetByUserIdAsync(userId!);
 
-            return Ok(result);
+            return Ok(await service.GetByPatientIdAsync(patient.PatientId));
+        }
+
+        [HttpGet("doctor")]
+        [Authorize(Roles = "Doctor")]
+        public async Task<IActionResult> GetDoctorAppointments()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var doctor = await doctorService.GetByUserIdAsync(userId!);
+
+            return Ok(await service.GetByDoctorIdAsync(doctor.DoctorId));
         }
 
         [HttpGet]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-        public async Task<IActionResult> GetAllAppointments()
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> GetAll()
         {
-            var result = await service.GetAllAsync();
-            return Ok(result);
+            return Ok(await service.GetAllAsync());
         }
 
-        [HttpGet("doctor/{doctorId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Doctor")]
-        public async Task<IActionResult> GetAppointmentsByDoctorId(int doctorId)
+        [HttpGet("{id}")]
+        [Authorize(Roles = "Patient,Doctor,Admin")]
+        public async Task<IActionResult> GetById(int id)
         {
-            var result = await service.GetByDoctorIdAsync(doctorId);
-            return Ok(result);
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            var appt = await service.GetByIdAsync(id);
+
+            if (appt == null) return NotFound();
+
+            if (User.IsInRole("Patient"))
+            {
+                var patient = await patientService.GetByUserIdAsync(userId!);
+
+                if (appt.PatientId != patient.PatientId)
+                    return Unauthorized();
+            }
+
+            if (User.IsInRole("Doctor"))
+            {
+                var doctor = await doctorService.GetByUserIdAsync(userId!);
+
+                if (appt.DoctorId != doctor.DoctorId)
+                    return Unauthorized();
+            }
+
+            return Ok(appt);
         }
-
-        [HttpGet("patient/{patientId}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Patient")]
-        public async Task<IActionResult> GetAppointmentsByPatientId(int patientId)
-        {
-            var result = await service.GetByPatientIdAsync(patientId);
-            return Ok(result);
-        }
-
-        [HttpPut("{id}/status")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Patient,Doctor")]
-        public async Task<IActionResult> UpdateAppointmentStatus(int id, [FromBody] UpdateAppointmentStatusDto dto)
-        {
-            var result = await service.UpdateStatusAsync(id, dto.Status);
-
-            if (result is null)
-                return NotFound();
-
-            return Ok(result);
-        }
-
         [HttpDelete("{id}")]
-        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Roles = "Admin")]
-        public async Task<IActionResult> DeleteAppointment(int id)
+        [Authorize(Roles = "Patient,Admin")]
+        public async Task<IActionResult> Delete(int id)
         {
-            var result = await service.DeleteAsync(id);
+            var result = await service.CancelWithValidation(id);
 
-            if (!result)
-                return NotFound();
+            if (!result) return NotFound();
 
             return NoContent();
         }

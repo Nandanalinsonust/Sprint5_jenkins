@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using HealthAxis.Api.Models;
-using HealthAxis.Api.Models.Dtos;
+using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Repositories;
 
 namespace HealthAxis.Api.Services.Impl
@@ -57,5 +57,25 @@ namespace HealthAxis.Api.Services.Impl
         {
             return await repository.DeactivateAsync(id);
         }
+        public async Task AssignUserAsync(int doctorId, string userId)
+        {
+            var doctor = await repository.GetByIdAsync(doctorId);
+            doctor.UserId = userId;
+            await repository.UpdateAsync(doctorId, doctor);
+        }
+        public async Task<DoctorDto> GetByUserIdAsync(string userId)
+        {
+            var doctor = await repository.GetByUserIdAsync(userId);
+            return mapper.Map<DoctorDto>(doctor);
+        }
+        public async Task<List<DoctorDto>> GetAllAsync(int page, int pageSize)
+        {
+            var data = await repository.GetAllAsync();
+
+            return mapper.Map<List<DoctorDto>>(
+                data.Skip((page - 1) * pageSize).Take(pageSize).ToList()
+            );
+        }
+
     }
 }

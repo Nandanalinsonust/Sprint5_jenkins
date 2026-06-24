@@ -41,6 +41,9 @@ namespace HealthAxis.Api.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<bool>("IsFirstLogin")
                         .HasColumnType("bit");
 
@@ -151,6 +154,10 @@ namespace HealthAxis.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("YearsOfExperience")
                         .HasColumnType("int");
 
@@ -166,6 +173,7 @@ namespace HealthAxis.Api.Migrations
                             FullName = "Nandana",
                             IsActive = true,
                             Specialisation = "Cardiology",
+                            UserId = "",
                             YearsOfExperience = 3
                         },
                         new
@@ -175,6 +183,7 @@ namespace HealthAxis.Api.Migrations
                             FullName = "Arun Kumar",
                             IsActive = true,
                             Specialisation = "Dermatology",
+                            UserId = "",
                             YearsOfExperience = 5
                         },
                         new
@@ -184,6 +193,7 @@ namespace HealthAxis.Api.Migrations
                             FullName = "Meera Joseph",
                             IsActive = true,
                             Specialisation = "Pediatrics",
+                            UserId = "",
                             YearsOfExperience = 7
                         },
                         new
@@ -193,6 +203,7 @@ namespace HealthAxis.Api.Migrations
                             FullName = "Rahul Menon",
                             IsActive = true,
                             Specialisation = "Orthopedics",
+                            UserId = "",
                             YearsOfExperience = 4
                         },
                         new
@@ -202,6 +213,7 @@ namespace HealthAxis.Api.Migrations
                             FullName = "Anjali Nair",
                             IsActive = true,
                             Specialisation = "Neurology",
+                            UserId = "",
                             YearsOfExperience = 10
                         },
                         new
@@ -211,6 +223,7 @@ namespace HealthAxis.Api.Migrations
                             FullName = "Sandeep Varma",
                             IsActive = true,
                             Specialisation = "General Medicine",
+                            UserId = "",
                             YearsOfExperience = 2
                         });
                 });
@@ -290,6 +303,10 @@ namespace HealthAxis.Api.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("PatientId");
 
                     b.ToTable("Patients");
@@ -304,7 +321,8 @@ namespace HealthAxis.Api.Migrations
                             Gender = "Female",
                             InsuranceID = "INS1001",
                             IsActive = false,
-                            PhoneNumber = "9876543210"
+                            PhoneNumber = "9876543210",
+                            UserId = ""
                         },
                         new
                         {
@@ -315,7 +333,8 @@ namespace HealthAxis.Api.Migrations
                             Gender = "Male",
                             InsuranceID = "INS1002",
                             IsActive = false,
-                            PhoneNumber = "9123456780"
+                            PhoneNumber = "9123456780",
+                            UserId = ""
                         },
                         new
                         {
@@ -326,7 +345,8 @@ namespace HealthAxis.Api.Migrations
                             Gender = "Female",
                             InsuranceID = "INS1003",
                             IsActive = false,
-                            PhoneNumber = "9988776655"
+                            PhoneNumber = "9988776655",
+                            UserId = ""
                         },
                         new
                         {
@@ -337,7 +357,8 @@ namespace HealthAxis.Api.Migrations
                             Gender = "Male",
                             InsuranceID = "INS1004",
                             IsActive = false,
-                            PhoneNumber = "9012345678"
+                            PhoneNumber = "9012345678",
+                            UserId = ""
                         },
                         new
                         {
@@ -348,7 +369,8 @@ namespace HealthAxis.Api.Migrations
                             Gender = "Female",
                             InsuranceID = "INS1005",
                             IsActive = false,
-                            PhoneNumber = "9345678901"
+                            PhoneNumber = "9345678901",
+                            UserId = ""
                         });
                 });
 

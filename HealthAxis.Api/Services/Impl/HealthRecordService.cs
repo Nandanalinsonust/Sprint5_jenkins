@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using HealthAxis.Api.Models;
-using HealthAxis.Api.Models.Dtos;
+using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Repositories;
 
 namespace HealthAxis.Api.Services.Impl

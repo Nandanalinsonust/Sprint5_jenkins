@@ -1,5 +1,5 @@
-using HealthAxis.Api;
 using HealthAxis.Api.Data;
+using HealthAxis.Api.Filters;
 using HealthAxis.Api.Mappings;
 using HealthAxis.Api.Models;
 using HealthAxis.Api.Repositories;
@@ -104,6 +104,18 @@ builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
 builder.Services.AddScoped<IHealthRecordRepository, HealthRecordRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddCors(p =>
+{
+    p.AddPolicy("CorsPolicy", cfg =>
+    {
+        cfg.WithOrigins("https://localhost:7110")
+        .AllowAnyHeader().AllowAnyMethod();
+    });
+});
+builder.Services.AddControllers(options =>
+{
+    options.Filters.Add<FirstLoginFilter>();
+});
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<MappingProfile>();
@@ -113,9 +125,14 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var services = scope.ServiceProvider;
+
+    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     await RoleSeeder.SeedRolesAsync(roleManager);
+
+    await AdminSeeder.SeedAdminAsync(userManager);
 }
 if (app.Environment.IsDevelopment())
 {
@@ -124,6 +141,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("CorsPolicy");
 app.UseAuthentication();
 app.UseAuthorization();
 

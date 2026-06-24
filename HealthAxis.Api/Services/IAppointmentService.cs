@@ -1,4 +1,4 @@
-﻿using HealthAxis.Api.Models.Dtos;
+﻿using HealthAxis.Shared.Dtos;
 
 namespace HealthAxis.Api.Services
 {
@@ -12,6 +12,9 @@ namespace HealthAxis.Api.Services
         Task<List<AppointmentDto>> GetByPatientIdAsync(int patientId);
         Task<AppointmentDto> UpdateStatusAsync(int id, string status);
         Task<bool> DeleteAsync(int id);
-        Task<object> GetSummaryReportAsync();
+        Task<bool> HasDoctorTreatedPatient(int doctorId, int patientId);
+        Task<bool> CancelWithValidation(int id);
+        Task<List<AppointmentSummary>> GetSummaryReportAsync();
+
     }
 }

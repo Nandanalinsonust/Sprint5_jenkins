@@ -1,4 +1,4 @@
-﻿using HealthAxis.Api.Models.Dtos;
+﻿using HealthAxis.Shared.Dtos;
 
 namespace HealthAxis.Api.Services
 {

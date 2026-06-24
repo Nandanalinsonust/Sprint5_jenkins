@@ -1,5 +1,5 @@
 ﻿using HealthAxis.Api.Models;
-using HealthAxis.Api.Models.Dtos;
+using HealthAxis.Shared.Dtos;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -17,31 +17,42 @@ namespace HealthAxis.Api.Services.Impl
             if (user is null)
                 return (false, "Invalid credentials", null, 0);
 
+            if (!user.IsActive)
+                return (false, "User inactive", null, 0);
+
             var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
 
             if (!isPasswordValid)
                 return (false, "Invalid credentials", null, 0);
 
-            if (user.IsFirstLogin)
-            {
+            var roles = await userManager.GetRolesAsync(user);
+
+            if (user.IsFirstLogin && roles.Contains("Doctor"))
                 return (false, "FirstLogin", null, 0);
-            }
 
             var token = await GenerateToken(user);
 
-            var roles = await userManager.GetRolesAsync(user);
-            var role = roles.FirstOrDefault() ?? "";
-
             var expiry = int.Parse(config["Jwt:AccessTokenExpirationMinutes"]!);
 
+            var refreshToken = GenerateRefreshToken(); 
             var response = new AuthResponse
             {
                 Token = token,
-                Role = role,
-                UserId = user.Id
+                RefreshToken = refreshToken
             };
 
             return (true, "User Logged in Successfully", response, expiry);
+        }
+
+        public async Task<string> ForgotPassword(string email)
+        {
+            var user = await userManager.FindByEmailAsync(email);
+
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+
+            await userManager.ResetPasswordAsync(user, token, "Doctor@123");
+
+            return "Password reset successful";
         }
 
         public async Task<(bool Success, string Message, string UserId)> Register(RegisterDto request)
@@ -56,7 +67,7 @@ namespace HealthAxis.Api.Services.Impl
             {
                 UserName = request.Email,
                 Email = request.Email,
-                IsFirstLogin = false
+                IsFirstLogin = true
             };
 
             var result = await userManager.CreateAsync(user, request.Password);
@@ -135,6 +146,10 @@ namespace HealthAxis.Api.Services.Impl
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
+        }
+        private string GenerateRefreshToken()
+        {
+            return Guid.NewGuid().ToString();
         }
     }
 }

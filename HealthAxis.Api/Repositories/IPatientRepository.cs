@@ -6,5 +6,6 @@ namespace HealthAxis.Api.Repositories
     {
         Task<List<Patient>> GetByNameAsync(string name);
         Task<bool> DeactivateAsync(int id);
+        Task<Patient?> GetByUserIdAsync(string userId);
     }
 }

@@ -1,0 +1,62 @@
+﻿@inherits LayoutComponentBase
+@using HealthAxis.Admin.Shared
+
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+
+<Toast />
+
+<div class="layout-container">
+
+    <!-- ✅ SIDEBAR -->
+    <div class="sidebar">
+
+        <div class="logo">
+            HealthAxis Admin
+        </div>
+
+        <NavLink href="/dashboard" class="menu-item">
+            📊 Dashboard
+        </NavLink>
+
+        <NavLink href="/dashboard" class="menu-item">
+            📅 Appointment Summary
+        </NavLink>
+
+        <NavLink href="/doctors" class="menu-item">
+            👨‍⚕️ Doctors
+        </NavLink>
+
+        <NavLink href="/patients" class="menu-item">
+            👨‍👩‍👧 Patients
+        </NavLink>
+
+        <NavLink href="/users" class="menu-item">
+            👤 Users
+        </NavLink>
+
+        <button class="logout-btn" @onclick="Logout">
+            🚪 Logout
+        </button>
+
+    </div>
+
+    <!-- ✅ CONTENT -->
+    <div class="main-content">
+        @Body
+    </div>
+
+</div>
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await AuthService.InitializeAsync();
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        Nav.NavigateTo("/", true);
+    }
+}

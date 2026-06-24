@@ -29,5 +29,10 @@ namespace HealthAxis.Api.Repositories.Impl
             await context.SaveChangesAsync();
             return true;
         }
+        public async Task<Patient?> GetByUserIdAsync(string userId)
+        {
+            return await context.Patients
+                .FirstOrDefaultAsync(p => p.UserId == userId);
+        }
     }
 }

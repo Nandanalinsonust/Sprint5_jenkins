@@ -1,10 +1,14 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace HealthAxis.Api.Models.Dtos
+namespace HealthAxis.Shared.Dtos
 {
     public class DoctorDto
     {
         public int DoctorId { get; set; }
+
+        [Required(ErrorMessage = "Full name is required")]
+        [RegularExpression(@"^[A-Z][A-Za-z\s]+$",
+            ErrorMessage = "Full name must start with a capital letter and contain only alphabets")]
 
         public string FullName { get; set; } = string.Empty;
 

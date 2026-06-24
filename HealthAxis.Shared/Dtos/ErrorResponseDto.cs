@@ -1,4 +1,4 @@
-﻿namespace HealthAxis.Api.Models.Dtos
+﻿namespace HealthAxis.Shared.Dtos
 {
     public class ErrorResponse
     {

@@ -1,8 +1,9 @@
-﻿using HealthAxis.Api.Models.Dtos;
+﻿using HealthAxis.Api.Models;
+using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Services;
-using HealthAxis.Api.Services.Impl;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace HealthAxis.Api.Controllers
@@ -10,19 +11,30 @@ namespace HealthAxis.Api.Controllers
     [Route("api/[controller]")]
     [ApiController]
     [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme,Roles = "Admin")]
-    public class AdminController(IDoctorService doctorService, IPatientService patientService, IAppointmentService appointmentService,IAuthService authService) : ControllerBase
+    public class AdminController(IDoctorService doctorService, IPatientService patientService, IAppointmentService appointmentService,IAuthService authService, UserManager<ApplicationUser> userManager) : ControllerBase
     {
         [HttpPost("doctors")]
-        public async Task<IActionResult> CreateDoctor([FromBody] CreateDoctorDto dto)
+        public async Task<IActionResult> CreateDoctor(CreateDoctorDto dto)
         {
             if (!ModelState.IsValid) return BadRequest(ModelState);
 
-            var result = await doctorService.AddAsync(dto);
+            var doctor = await doctorService.AddAsync(dto);
 
-            await authService.CreateDoctorUser(dto.Email);
+            var userResult = await authService.CreateDoctorUser(dto.Email);
 
-            return CreatedAtAction("GetAllDoctors", new { id = result.DoctorId }, result);
+            if (!userResult.Success)
+                return BadRequest(userResult.Message);
+
+            var user = await userManager.FindByEmailAsync(dto.Email);
+
+            if (user == null)
+                return BadRequest("User creation failed");
+
+            await doctorService.AssignUserAsync(doctor.DoctorId, user.Id);
+
+            return Ok(doctor);
         }
+
 
 
         [HttpPut("doctors/{id}")]
@@ -42,17 +54,17 @@ namespace HealthAxis.Api.Controllers
             return NoContent();
         }
 
-        [HttpGet("doctors")]
-        public async Task<IActionResult> GetAllDoctors()
+        [HttpGet("doctors/list")]
+        public async Task<IActionResult> GetAllDoctors(int page = 1, int pageSize = 10)
         {
-            var result = await doctorService.GetAllAsync();
+            var result = await doctorService.GetAllAsync(page, pageSize);
             return Ok(result);
         }
 
-        [HttpGet("patients")]
-        public async Task<IActionResult> GetAllPatients()
+        [HttpGet("patients/list")]
+        public async Task<IActionResult> GetAllPatients(int page = 1, int pageSize = 10)
         {
-            var result = await patientService.GetAllAsync();
+            var result = await patientService.GetAllAsync(page, pageSize);
             return Ok(result);
         }
 

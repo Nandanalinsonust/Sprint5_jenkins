@@ -24,5 +24,7 @@ namespace HealthAxis.Api.Models
         [RegularExpression(@"^$|^INS\d{4}$", ErrorMessage = "Format must be INSXXXX (4 digits)")]
         public string? InsuranceID { get; set; }
         public bool IsActive { get; set; }
+        public string UserId { get; set; } = string.Empty;
+
     }
 }
