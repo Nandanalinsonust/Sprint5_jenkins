@@ -145,9 +145,22 @@ namespace HealthAxis.Api.Services.Impl
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
-        private string GenerateRefreshToken()
+        public async Task<(bool Success, string Message)> CreatePatientUser(string email)
         {
-            return Guid.NewGuid().ToString();
+            var user = new ApplicationUser
+            {
+                UserName = email,
+                Email = email
+            };
+
+            var result = await userManager.CreateAsync(user, "Patient@123");
+
+            if (!result.Succeeded)
+                return (false, "User creation failed");
+
+            await userManager.AddToRoleAsync(user, "Patient");
+
+            return (true, "Success");
         }
     }
 }

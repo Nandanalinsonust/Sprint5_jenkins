@@ -1,159 +1,235 @@
 ﻿@page "/patients"
+@attribute [Authorize]
+@layout MainLayout
 
-<h2 class="mb-4">Patient Management</h2>
+@inject HttpClient Http
+
+<h3 class="mb-4">Patient Management</h3>
 
 <!-- ✅ STATS -->
 <div class="row mb-4">
-
     <div class="col-md-4">
         <div class="stat-card">
             <p>Total Patients</p>
-            <h3>@total</h3>
+            <h3>@totalPatients</h3>
         </div>
     </div>
 
     <div class="col-md-4">
         <div class="stat-card">
-            <p>Active</p>
-            <h3>@active</h3>
+            <p>Active Patients</p>
+            <h3>@activePatients</h3>
         </div>
     </div>
 
     <div class="col-md-4">
         <div class="stat-card">
-            <p>Insured</p>
-            <h3>@insured</h3>
+            <p>Inactive Patients</p>
+            <h3>@inactivePatients</h3>
         </div>
     </div>
-
 </div>
 
-<!-- ✅ FILTER -->
-<div class="filter-box mb-4">
+<!-- ✅ SEARCH -->
+<div class="d-flex gap-2 mb-3">
+    <input class="form-control"
+           placeholder="Search patient..."
+           value="@searchTerm"
+           @oninput="OnSearchChanged" />
 
-    <select class="form-control" @bind="sortBy">
-        <option value="">Sort by Name</option>
-        <option value="name">Name</option>
-    </select>
-
-    <select class="form-control" @bind="filterType">
-        <option value="">All</option>
-        <option value="insured">Insured</option>
-        <option value="not">Not Insured</option>
-    </select>
-
+    <button class="btn btn-secondary" @onclick="ClearSearch">
+        Clear
+    </button>
 </div>
 
 <!-- ✅ TABLE -->
 <div class="table-container">
-
     <table class="table table-dark">
-
         <thead>
             <tr>
-                <th>Patient</th>
-                <th>Age</th>
+                <th>Name</th>
+                <th>Email</th>
                 <th>Gender</th>
                 <th>Phone</th>
-                <th>Insurance</th>
                 <th>Status</th>
                 <th></th>
             </tr>
         </thead>
 
         <tbody>
-            @foreach (var p in filteredPatients)
+            @foreach (var p in pagedPatients)
             {
                 <tr>
-                    <td>
-                        <b>@p.FullName</b><br />
-                        <small>ID: @p.PatientId</small>
-                    </td>
-
-                    <td>@GetAge(p.DateOfBirth)</td>
-
+                    <td>@p.FullName</td>
+                    <td>@p.Email</td>
                     <td>@p.Gender</td>
-
                     <td>@p.PhoneNumber</td>
 
                     <td>
-                        @if (!string.IsNullOrEmpty(p.InsuranceID))
-                        {
-                            <span class="badge badge-insured">Insured</span>
-                        }
-                        else
-                        {
-                            <span>Not Insured</span>
-                        }
+                        @(p.IsActive ? "Active" : "Inactive")
                     </td>
 
-                    <td>
-                        <label class="switch">
-                            <input type="checkbox"
-                                   checked="@p.IsActive"
-                                   @onchange="() => TogglePatient(p)" />
-                            <span class="slider"></span>
-                        </label>
-                    </td>
+                    <td class="d-flex gap-2">
 
-
-                    <td>
-                        <button class="btn btn-sm btn-outline-light">
+                        <!-- 👁 VIEW -->
+                        <button class="btn btn-sm btn-secondary"
+                                @onclick="() => OpenView(p)">
                             👁
                         </button>
+
+                        <!-- ❌ DEACTIVATE -->
+                        @if (p.IsActive)
+                        {
+                            <button class="btn btn-sm btn-danger"
+                                    @onclick="() => ConfirmDeactivate(p)">
+                                Deactivate
+                            </button>
+                        }
+
                     </td>
                 </tr>
             }
         </tbody>
-
     </table>
 </div>
 
+<!-- ✅ PAGINATION -->
+<div class="d-flex justify-content-end mt-3">
+
+    @if (pageNumber > 1)
+    {
+        <button class="btn btn-light btn-sm me-2" @onclick="PrevPage">⬅</button>
+    }
+
+    @if ((pageNumber * pageSize) < filteredPatients.Count)
+    {
+        <button class="btn btn-light btn-sm" @onclick="NextPage">➡</button>
+    }
+
+</div>
+@if (showViewModal && selectedPatient != null)
+{
+    <div class="modal-backdrop">
+        <div class="modal-box">
+
+            <div class="modal-header">
+                <h5>Patient Details</h5>
+                <button class="close-btn" @onclick="CloseView">✖</button>
+            </div>
+
+            <p><b>Name:</b> @selectedPatient.FullName</p>
+            <p><b>Email:</b> @selectedPatient.Email</p>
+            <p><b>Gender:</b> @selectedPatient.Gender</p>
+            <p><b>Phone:</b> @selectedPatient.PhoneNumber</p>
+            <p><b>DOB:</b> @selectedPatient.DateOfBirth.ToString("dd MMM yyyy")</p>
+            <p><b>Insurance:</b> @selectedPatient.InsuranceID</p>
+            <p><b>Status:</b> @(selectedPatient.IsActive ? "Active" : "Inactive")</p>
+
+        </div>
+    </div>
+}
 @code {
+    private List<PatientDto> patients = new();
+    private List<PatientDto> filteredPatients = new();
+    private List<PatientDto> pagedPatients = new();
 
-    private List<PatientDto> patients = [];
-    private List<PatientDto> filteredPatients = [];
+    private string searchTerm = "";
 
-    private int total, active, insured;
+    private int pageNumber = 1;
+    private int pageSize = 10;
 
-    private string sortBy = "";
-    private string filterType = "";
+    private int totalPatients;
+    private int activePatients;
+    private int inactivePatients;
+
+    private PatientDto? selectedPatient;
+    private bool showViewModal = false;
 
     protected override async Task OnInitializedAsync()
     {
-
-        ApplyFilter();
+        await LoadPatients();
     }
 
-    private void ApplyFilter()
+    private async Task LoadPatients()
     {
-        var query = patients.AsQueryable();
+        patients = await Http.GetFromJsonAsync<List<PatientDto>>(
+            "api/admin/patients/list") ?? new();
 
-        if (filterType == "insured")
-            query = query.Where(p => !string.IsNullOrEmpty(p.InsuranceID));
+        totalPatients = patients.Count;
+        activePatients = patients.Count(x => x.IsActive);
+        inactivePatients = patients.Count(x => !x.IsActive);
 
-        if (filterType == "not")
-            query = query.Where(p => string.IsNullOrEmpty(p.InsuranceID));
-
-        if (sortBy == "name")
-            query = query.OrderBy(p => p.FullName);
-
-        filteredPatients = query.ToList();
-
-        total = patients.Count;
-        active = patients.Count(p => p.IsActive);
-        insured = patients.Count(p => !string.IsNullOrEmpty(p.InsuranceID));
+        ApplyFilters();
     }
 
-    private int GetAge(DateTime dob)
+    private void ApplyFilters()
     {
-        return DateTime.Now.Year - dob.Year;
+        filteredPatients = patients
+            .Where(p =>
+                string.IsNullOrWhiteSpace(searchTerm) ||
+                p.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+
+        ApplyPagination();
     }
-    private async Task TogglePatient(PatientDto p)
+
+    private void ApplyPagination()
     {
-
-        p.IsActive = !p.IsActive;
-
-        ApplyFilter();
+        pagedPatients = filteredPatients
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
     }
+
+    private void OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        pageNumber = 1;
+        ApplyFilters();
+    }
+
+    private void ClearSearch()
+    {
+        searchTerm = "";
+        ApplyFilters();
+    }
+
+    private void NextPage()
+    {
+        pageNumber++;
+        ApplyPagination();
+    }
+
+    private void PrevPage()
+    {
+        pageNumber--;
+        ApplyPagination();
+    }
+
+    // ✅ VIEW
+    private void OpenView(PatientDto p)
+    {
+        selectedPatient = p;
+        showViewModal = true;
+    }
+
+    private void CloseView()
+    {
+        showViewModal = false;
+    }
+
+    // ✅ DEACTIVATE with confirmation
+    private async Task ConfirmDeactivate(PatientDto p)
+    {
+        var confirm = await JS.InvokeAsync<bool>("confirm",
+            $"Are you sure you want to deactivate {p.FullName}?");
+
+        if (confirm)
+        {
+            await Http.PutAsync($"api/admin/patients/deactivate/{p.PatientId}", null);
+            await LoadPatients();
+        }
+    }
+
+    [Inject] IJSRuntime JS { get; set; }
 }

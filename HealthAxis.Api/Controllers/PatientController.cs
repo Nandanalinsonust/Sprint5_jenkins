@@ -1,5 +1,6 @@
-﻿using HealthAxis.Shared.Dtos;
-using HealthAxis.Api.Services;
+﻿using HealthAxis.Api.Services;
+using HealthAxis.Api.Services.Impl;
+using HealthAxis.Shared.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -11,14 +12,20 @@ namespace HealthAxis.Api.Controllers
     public class PatientController(
         IPatientService patientService,
         IAppointmentService appointmentService,
-        IDoctorService doctorService) : ControllerBase
+        IDoctorService doctorService, IAuthService authService) : ControllerBase
     {
         [HttpPost]
         [AllowAnonymous]
         public async Task<IActionResult> CreatePatient(CreatePatientDto dto)
         {
-            var result = await patientService.AddAsync(dto);
-            return Ok(result);
+            var patient = await patientService.AddAsync(dto);
+
+            var result = await authService.CreatePatientUser(dto.Email);
+
+            if (!result.Success)
+                return BadRequest(result.Message);
+
+            return Ok(patient);
         }
 
         [HttpGet("{id}")]

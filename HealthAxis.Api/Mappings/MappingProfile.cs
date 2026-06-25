@@ -13,6 +13,7 @@ namespace HealthAxis.Api.Mappings
             CreateMap<UpdateDoctorDto, Doctor>();
 
             CreateMap<Patient, PatientDto>().ReverseMap();
+            CreateMap<CreatePatientDto, Patient>();
 
             CreateMap<Appointment, AppointmentDto>().ReverseMap();
             CreateMap<CreateAppointmentDto, Appointment>();

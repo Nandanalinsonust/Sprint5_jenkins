@@ -10,5 +10,6 @@ namespace HealthAxis.Api.Services
 
         Task<(bool Success, string Message)> ChangePassword(string email,string oldPassword,string newPassword);
         Task<string> ForgotPassword(string email);
+        Task<(bool Success, string Message)> CreatePatientUser(string email);
     }
 }
