@@ -1,8 +1,8 @@
 ﻿@page "/"
 @attribute [AllowAnonymous]
+@inject AuthService AuthService 
 @layout LoginLayout
 
-@inject IAuthService AuthService
 @inject NavigationManager Nav
 
 <div class="login-wrapper">

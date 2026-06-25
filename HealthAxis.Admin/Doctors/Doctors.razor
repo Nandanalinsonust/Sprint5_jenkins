@@ -1,0 +1,380 @@
+﻿@page "/doctors"
+@attribute [Authorize]
+@layout MainLayout
+
+@inject HttpClient Http
+
+<h3 class="mb-4">Doctor Management</h3>
+
+<!-- ✅ STATS -->
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <p>Total Doctors</p>
+            <h3>@totalDoctors</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <p>Active Doctors</p>
+            <h3>@activeDoctors</h3>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="stat-card">
+            <p>Inactive Doctors</p>
+            <h3>@inactiveDoctors</h3>
+        </div>
+    </div>
+</div>
+
+<!-- ✅ FILTERS -->
+<div class="d-flex gap-2 mb-3">
+
+    <input class="form-control"
+           placeholder="Search doctor..."
+           @bind="searchTerm"
+           @oninput="OnFilterChanged" />
+
+    @* <select class="form-control"@selectedSpec"
+        @onchange="(e => OnSpecChanged(e))">
+        <option value="">All Specialisation</option>
+        @foreach (var s in specs)
+        {
+            <option value="@s">@s</option>
+        }
+    </select>
+
+    <select class="form=@statusFilter"
+        @onchange="(e => OnStatusChanged(e))">
+        <option value="">All</option>
+        <option value="true">Active</option>
+        <option value="false">Inactive</option>
+    </select> *@
+
+    <button class="btn btn-secondary" @onclick="ClearFilters">
+        Clear
+    </button>
+
+    <button class="btn btn-primary ms-auto" @onclick="OpenAddModal">
+        + Add Doctor
+    </button>
+</div>
+
+<!-- ✅ TABLE -->
+<div class="table-container">
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Specialisation</th>
+                <th>Experience</th>
+                <th>Fee</th>
+                <th>Status</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var doc in pagedDoctors)
+            {
+                <tr>
+                    <td>@doc.FullName</td>
+                    <td>@doc.Specialisation</td>
+                    <td>@doc.YearsOfExperience yrs</td>
+                    <td>₹@doc.ConsultationFee</td>
+
+                    <td>
+                        <label class="switch">
+                            <input type="checkbox"
+                                   checked="@doc.IsActive"
+                                   @onchange="() => ToggleStatus(doc)" />
+                            <span class="slider"></span>
+                        </label>
+                    </td>
+
+                    <td>
+                        <button class="btn btn-sm btn-secondary"
+                                @onclick="() => OpenView(doc)">
+                            👁
+                        </button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+<!-- ✅ PAGINATION -->
+<div class="d-flex justify-content-end mt-3">
+
+    @if (pageNumber > 1)
+    {
+        <button class="btn btn-light btn-sm me-2" @onclick="PrevPage">⬅</button>
+    }
+
+    @if ((pageNumber * pageSize) < filteredDoctors.Count)
+    {
+        <button class="btn btn-light btn-sm" @onclick="NextPage">➡</button>
+    }
+
+</div>
+
+<!-- ✅ ADD MODAL -->
+@if (showAddModal)
+{
+    <div class="modal-backdrop">
+        <div class="modal-box">
+
+            <div class="modal-header">
+                <h5>Add Doctor</h5>
+                <button class="close-btn" @onclick="CloseAdd">✖</button>
+            </div>
+
+            <input class="form-control mb-2" placeholder="Email" @bind="newDoctor.Email" />
+            <input class="form-control mb-2" placeholder="Name" @bind="newDoctor.FullName" />
+
+            <select class="form-control mb-2" @bind="newDoctor.Specialisation">
+                @foreach (var s in specs)
+                {
+                    <option>@s</option>
+                }
+            </select>
+
+            <input type="number" class="form-control mb-2"
+                   @bind="newDoctor.YearsOfExperience" placeholder="Experience" />
+
+            <input type="number" class="form-control mb-2"
+                   @bind="newDoctor.ConsultationFee" placeholder="Fee" />
+
+            <button class="btn btn-success me-2" @onclick="AddDoctor">Add</button>
+            <button class="btn btn-secondary" @onclick="CloseAdd">Cancel</button>
+
+        </div>
+    </div>
+}
+
+<!-- ✅ VIEW + EDIT MODAL -->
+@if (showViewModal && selectedDoctor != null)
+{
+    <div class="modal-backdrop">
+        <div class="modal-box">
+
+            <div class="modal-header">
+                <h5>Doctor Details</h5>
+
+                <div>
+                    <button class="btn btn-warning btn-sm me-2" @onclick="ToggleEdit">
+                        Edit
+                    </button>
+                    <button class="close-btn" @onclick="CloseView">✖</button>
+                </div>
+            </div>
+
+            @if (!isEdit)
+            {
+                <p><b>Name:</b> @selectedDoctor.FullName</p>
+                <p><b>Specialisation:</b> @selectedDoctor.Specialisation</p>
+                <p><b>Experience:</b> @selectedDoctor.YearsOfExperience</p>
+                <p><b>Fee:</b> @selectedDoctor.ConsultationFee</p>
+            }
+            else
+            {
+                <input class="form-control mb-2" @bind="editDoctor.FullName" />
+
+                <select class="form-control mb-2" @bind="editDoctor.Specialisation">
+                    @foreach (var s in specs)
+                    {
+                        <option>@s</option>
+                    }
+                </select>
+
+                <input type="number" class="form-control mb-2"
+                       @bind="editDoctor.YearsOfExperience" />
+
+                <input type="number" class="form-control mb-2"
+                       @bind="editDoctor.ConsultationFee" />
+
+                <button class="btn btn-success me-2" @onclick="SaveEdit">Save</button>
+                <button class="btn btn-secondary" @onclick="ToggleEdit">Cancel</button>
+            }
+
+        </div>
+    </div>
+}
+@code {
+    private List<DoctorDto> doctors = new();
+    private List<DoctorDto> filteredDoctors = new();
+    private List<DoctorDto> pagedDoctors = new();
+
+    private string searchTerm = "";
+    private string selectedSpec = "";
+    private string statusFilter = "";
+
+    private int pageNumber = 1;
+    private int pageSize = 10;
+
+    private int totalDoctors;
+    private int activeDoctors;
+    private int inactiveDoctors;
+
+    private bool showAddModal = false;
+    private bool showViewModal = false;
+    private bool isEdit = false;
+
+    private DoctorDto? selectedDoctor;
+    private CreateDoctorDto newDoctor = new();
+    private UpdateDoctorDto editDoctor = new();
+
+    private List<string> specs = new()
+    {
+        "Cardiologist","Dermatologist","Neurologist",
+        "Pediatrician","Psychiatrist","OrthopedicSurgeon",
+        "Gynecologist","Oncologist","Endocrinologist","GeneralPractitioner"
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDoctors();
+    }
+
+    private async Task LoadDoctors()
+    {
+        doctors = await Http.GetFromJsonAsync<List<DoctorDto>>(
+            "api/admin/doctors/list") ?? new();
+
+        totalDoctors = doctors.Count;
+        activeDoctors = doctors.Count(d => d.IsActive);
+        inactiveDoctors = doctors.Count(d => !d.IsActive);
+
+        ApplyFilters();
+    }
+
+    private void OnFilterChanged(ChangeEventArgs e)
+    {
+        pageNumber = 1;
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        filteredDoctors = doctors.Where(d =>
+            (string.IsNullOrWhiteSpace(searchTerm) ||
+                d.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
+
+            (string.IsNullOrWhiteSpace(selectedSpec) ||
+                d.Specialisation == selectedSpec) &&
+
+            (string.IsNullOrWhiteSpace(statusFilter) ||
+                d.IsActive.ToString().ToLower() == statusFilter)
+        ).ToList();
+
+        ApplyPagination();
+    }
+
+    private void ApplyPagination()
+    {
+        pagedDoctors = filteredDoctors
+            .Skip((pageNumber - 1) * pageSize)
+            .Take(pageSize)
+            .ToList();
+    }
+
+    private void NextPage()
+    {
+        pageNumber++;
+        ApplyPagination();
+    }
+
+    private void PrevPage()
+    {
+        pageNumber--;
+        ApplyPagination();
+    }
+
+    private void ClearFilters()
+    {
+        searchTerm = "";
+        selectedSpec = "";
+        statusFilter = "";
+        pageNumber = 1;
+
+        ApplyFilters();
+    }
+
+    // ✅ Toggle Active / Inactive
+    private async Task ToggleStatus(DoctorDto doc)
+    {
+        if (doc.IsActive)
+        {
+            await Http.PutAsync($"api/admin/doctors/deactivate/{doc.DoctorId}", null);
+        }
+
+        doc.IsActive = !doc.IsActive;
+
+        CalculateStats();
+        ApplyFilters();
+    }
+
+    private void CalculateStats()
+    {
+        totalDoctors = doctors.Count;
+        activeDoctors = doctors.Count(d => d.IsActive);
+        inactiveDoctors = doctors.Count(d => !d.IsActive);
+    }
+
+    // ✅ ADD MODAL
+    private void OpenAddModal() => showAddModal = true;
+
+    private void CloseAdd() => showAddModal = false;
+
+    private async Task AddDoctor()
+    {
+        await Http.PostAsJsonAsync("api/admin/doctors", newDoctor);
+
+        showAddModal = false;
+        newDoctor = new();
+
+        await LoadDoctors();
+    }
+
+    // ✅ VIEW / EDIT
+    private void OpenView(DoctorDto doc)
+    {
+        selectedDoctor = doc;
+
+        editDoctor = new UpdateDoctorDto
+        {
+            DoctorId = doc.DoctorId,
+            FullName = doc.FullName,
+            Specialisation = doc.Specialisation,
+            YearsOfExperience = doc.YearsOfExperience,
+            ConsultationFee = doc.ConsultationFee,
+            IsActive = doc.IsActive
+        };
+
+        showViewModal = true;
+    }
+
+    private void CloseView()
+    {
+        showViewModal = false;
+        isEdit = false;
+    }
+
+    private void ToggleEdit() => isEdit = !isEdit;
+
+    private async Task SaveEdit()
+    {
+        await Http.PutAsJsonAsync(
+            $"api/admin/doctors/{editDoctor.DoctorId}",
+            editDoctor);
+
+        showViewModal = false;
+        isEdit = false;
+
+        await LoadDoctors();
+    }
+}

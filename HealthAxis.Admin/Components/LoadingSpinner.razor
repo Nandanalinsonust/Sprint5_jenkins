@@ -1,0 +1,12 @@
+﻿@if (IsVisible)
+{
+    <div class="spinner-container">
+        <div class="spinner-circle"></div>
+        <p class="spinner-text">@Message</p>
+    </div>
+}
+
+@code {
+    [Parameter] public bool IsVisible { get; set; } = true;
+    [Parameter] public string Message { get; set; } = "Loading...";
+}

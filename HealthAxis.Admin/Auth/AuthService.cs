@@ -1,11 +1,10 @@
-﻿using HealthAxis.Admin.Auth;
+﻿using HealthAxis.Admin.Services;
 using HealthAxis.Shared.Dtos;
-using System.Net.Http.Headers;
 using System.Net.Http.Json;
 
-namespace HealthAxis.Admin.Services.Impl
+namespace HealthAxis.Admin.Auth
 {
-    public class AuthService : IAuthService
+    public class AuthService
     {
         private readonly HttpClient _http;
         private readonly TokenService _tokenService;
@@ -25,7 +24,10 @@ namespace HealthAxis.Admin.Services.Impl
             var response = await _http.PostAsJsonAsync("api/auth/login", dto);
 
             if (!response.IsSuccessStatusCode)
-                return (false, "Invalid credentials");
+            {
+                var error = await response.Content.ReadAsStringAsync();
+                return (false, string.IsNullOrEmpty(error) ? "Invalid credentials" : error);
+            }
 
             var result = await response.Content.ReadFromJsonAsync<LoginResponseDto>();
 
@@ -36,8 +38,6 @@ namespace HealthAxis.Admin.Services.Impl
 
             await _tokenService.SaveTokensAsync(token, "");
 
-            _http.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
 
             _authProvider.NotifyUserLoggedIn(token);
 
@@ -51,8 +51,6 @@ namespace HealthAxis.Admin.Services.Impl
             if (string.IsNullOrEmpty(token))
                 return;
 
-            _http.DefaultRequestHeaders.Authorization =
-                new AuthenticationHeaderValue("Bearer", token);
 
             _authProvider.NotifyUserLoggedIn(token);
         }
@@ -60,8 +58,6 @@ namespace HealthAxis.Admin.Services.Impl
         public async Task LogoutAsync()
         {
             await _tokenService.ClearAsync();
-
-            _http.DefaultRequestHeaders.Authorization = null;
 
             _authProvider.NotifyUserLoggedOut();
         }

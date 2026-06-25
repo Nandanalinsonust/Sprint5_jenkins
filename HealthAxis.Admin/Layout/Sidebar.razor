@@ -1,0 +1,21 @@
+﻿<div class="sidebar @(IsOpen ? "open" : "")">
+
+    <ul>
+        <li @onclick="@(() => Navigate("/dashboard"))">Dashboard</li>
+        <li @onclick="@(() => Navigate("/doctors"))">Doctors</li>
+        <li @onclick="@(() => Navigate("/users"))">Users</li>
+        <li @onclick="@(() => Navigate("/reports"))">Reports</li>
+    </ul>
+
+</div>
+
+@code {
+    [Parameter] public bool IsOpen { get; set; }
+
+    [Inject] NavigationManager Nav { get; set; }
+
+    private void Navigate(string url)
+    {
+        Nav.NavigateTo(url);
+    }
+}

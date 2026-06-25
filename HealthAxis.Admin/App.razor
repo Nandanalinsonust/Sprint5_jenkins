@@ -1,17 +1,43 @@
 ﻿<CascadingAuthenticationState>
     <Router AppAssembly="@typeof(App).Assembly">
+        
         <Found Context="routeData">
+
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+
+                <Authorizing>
+                    <div style="text-align:center; padding:30px;">
+                        <span class="spinner"></span>
+                        <p>Checking authentication...</p>
+                    </div>
+                </Authorizing>
+
                 <NotAuthorized>
-                    <@RedirectToLogin />
+                    @if (context.User?.Identity?.IsAuthenticated != true)
+                    {
+                        <RedirectToLogin />
+                    }
+                    else
+                    {
+                        <div style="text-align:center; padding:30px;">
+                            <h3>🚫 Access Denied</h3>
+                        </div>
+                    }
                 </NotAuthorized>
+
             </AuthorizeRouteView>
 
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+
         </Found>
 
         <NotFound>
-            <p>Page not found</p>
+            <LayoutView Layout="@typeof(MainLayout)">
+                <div style="text-align:center; padding:30px;">
+                    <h3>Page not found</h3>
+                </div>
+            </LayoutView>
         </NotFound>
+
     </Router>
 </CascadingAuthenticationState>

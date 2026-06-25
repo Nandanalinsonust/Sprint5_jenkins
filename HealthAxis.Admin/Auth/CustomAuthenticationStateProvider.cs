@@ -15,17 +15,37 @@ namespace HealthAxis.Admin.Auth
             _js = js;
         }
 
-        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
+        public override Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            var token = await _js.InvokeAsync<string>("localStorage.getItem", "accessToken");
+            return Task.FromResult(
+                new AuthenticationState(_currentUser)
+            );
+        }
 
-            if (string.IsNullOrEmpty(token))
-                return new AuthenticationState(_currentUser);
+        public async Task InitializeAuthAsync()
+        {
+            try
+            {
+                var token = await _js.InvokeAsync<string>(
+                    "localStorage.getItem", "accessToken");
 
-            var identity = new ClaimsIdentity(ParseClaims(token), "jwt");
-            _currentUser = new ClaimsPrincipal(identity);
+                if (!string.IsNullOrEmpty(token))
+                {
+                    var identity = new ClaimsIdentity(ParseClaims(token), "jwt");
+                    _currentUser = new ClaimsPrincipal(identity);
+                }
+                else
+                {
+                    _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
+                }
+            }
+            catch
+            {
+                _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
+            }
 
-            return new AuthenticationState(_currentUser);
+            NotifyAuthenticationStateChanged(
+                Task.FromResult(new AuthenticationState(_currentUser)));
         }
 
         private IEnumerable<Claim> ParseClaims(string jwt)
@@ -33,39 +53,41 @@ namespace HealthAxis.Admin.Auth
             var claims = new List<Claim>();
 
             var payload = jwt.Split('.')[1];
-            payload = Pad(payload);
+            payload = PadBase64(payload);
 
             var bytes = Convert.FromBase64String(payload);
 
-            var kvp = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(bytes);
+            var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(bytes);
 
-            if (kvp == null) return claims;
+            if (keyValuePairs == null)
+                return claims;
 
-            foreach (var item in kvp)
+            foreach (var kvp in keyValuePairs)
             {
-                if (item.Value.ValueKind == JsonValueKind.Array)
+                if (kvp.Value.ValueKind == JsonValueKind.Array)
                 {
-                    foreach (var val in item.Value.EnumerateArray())
+                    foreach (var val in kvp.Value.EnumerateArray())
                     {
-                        claims.Add(new Claim(item.Key, val.ToString()));
+                        claims.Add(new Claim(kvp.Key, val.ToString()));
                     }
                 }
                 else
                 {
-                    claims.Add(new Claim(item.Key, item.Value.ToString()));
+                    claims.Add(new Claim(kvp.Key, kvp.Value.ToString()));
                 }
             }
 
             return claims;
         }
 
-        private string Pad(string s)
+        // ✅ Fix base64 padding
+        private string PadBase64(string base64)
         {
-            return (s.Length % 4) switch
+            return (base64.Length % 4) switch
             {
-                2 => s + "==",
-                3 => s + "=",
-                _ => s
+                2 => base64 + "==",
+                3 => base64 + "=",
+                _ => base64
             };
         }
 
@@ -74,14 +96,16 @@ namespace HealthAxis.Admin.Auth
             var identity = new ClaimsIdentity(ParseClaims(token), "jwt");
             _currentUser = new ClaimsPrincipal(identity);
 
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
+            NotifyAuthenticationStateChanged(
+                Task.FromResult(new AuthenticationState(_currentUser)));
         }
 
         public void NotifyUserLoggedOut()
         {
             _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
 
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_currentUser)));
+            NotifyAuthenticationStateChanged(
+                Task.FromResult(new AuthenticationState(_currentUser)));
         }
     }
 }

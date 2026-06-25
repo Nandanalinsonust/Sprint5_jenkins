@@ -82,5 +82,52 @@ namespace HealthAxis.Api.Controllers
             var result = await appointmentService.GetSummaryReportAsync();
             return Ok(result);
         }
+        [HttpGet("dashboard/counts")]
+        public async Task<IActionResult> GetCounts()
+        {
+            var doctors = await doctorService.GetAllAsync(1, 1000);
+            var patients = await patientService.GetAllAsync(1, 1000);
+            var appointments = await appointmentService.GetAllAsync();
+
+            return Ok(new
+            {
+                totalDoctors = doctors.Count(),
+                totalPatients = patients.Count(),
+                totalAppointments = appointments.Count()
+            });
+        }
+        [HttpGet("dashboard/today-doctor")]
+        public async Task<IActionResult> GetTodayDoctorStats()
+        {
+            var result = await appointmentService.GetAllAsync();
+
+            var today = DateTime.Today;
+
+            var grouped = result
+                .Where(a => a.ScheduledDate.Date == today)
+                .GroupBy(a => a.DoctorId)
+                .Select(g => new
+                {
+                    DoctorId = g.Key,
+                    Count = g.Count()
+                });
+
+            return Ok(grouped);
+        }
+        [HttpGet("dashboard/departments")]
+        public async Task<IActionResult> GetDepartmentStats()
+        {
+            var doctors = await doctorService.GetAllAsync(1, 1000);
+
+            var grouped = doctors
+                .GroupBy(d => d.Specialisation)
+                .Select(g => new
+                {
+                    Department = g.Key,
+                    Count = g.Count()
+                });
+
+            return Ok(grouped);
+        }
     }
 }

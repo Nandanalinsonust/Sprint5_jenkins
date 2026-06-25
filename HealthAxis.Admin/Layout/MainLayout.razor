@@ -1,62 +1,22 @@
 ﻿@inherits LayoutComponentBase
-@using HealthAxis.Admin.Shared
 
-@inject IAuthService AuthService
-@inject NavigationManager Nav
+<div class="app-container">
 
-<Toast />
+    <NavBar OnToggleSidebar="ToggleSidebar" />
 
-<div class="layout-container">
+    <Sidebar IsOpen="isSidebarOpen" />
 
-    <!-- ✅ SIDEBAR -->
-    <div class="sidebar">
-
-        <div class="logo">
-            HealthAxis Admin
-        </div>
-
-        <NavLink href="/dashboard" class="menu-item">
-            📊 Dashboard
-        </NavLink>
-
-        <NavLink href="/dashboard" class="menu-item">
-            📅 Appointment Summary
-        </NavLink>
-
-        <NavLink href="/doctors" class="menu-item">
-            👨‍⚕️ Doctors
-        </NavLink>
-
-        <NavLink href="/patients" class="menu-item">
-            👨‍👩‍👧 Patients
-        </NavLink>
-
-        <NavLink href="/users" class="menu-item">
-            👤 Users
-        </NavLink>
-
-        <button class="logout-btn" @onclick="Logout">
-            🚪 Logout
-        </button>
-
-    </div>
-
-    <!-- ✅ CONTENT -->
-    <div class="main-content">
+    <div class="main-content @(isSidebarOpen ? "shifted" : "")">
         @Body
     </div>
 
 </div>
 
 @code {
-    protected override async Task OnInitializedAsync()
-    {
-        await AuthService.InitializeAsync();
-    }
+    private bool isSidebarOpen = false;
 
-    private async Task Logout()
+    private void ToggleSidebar()
     {
-        await AuthService.LogoutAsync();
-        Nav.NavigateTo("/", true);
+        isSidebarOpen = !isSidebarOpen;
     }
 }

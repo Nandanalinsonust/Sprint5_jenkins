@@ -34,11 +34,9 @@ namespace HealthAxis.Api.Services.Impl
 
             var expiry = int.Parse(config["Jwt:AccessTokenExpirationMinutes"]!);
 
-            var refreshToken = GenerateRefreshToken(); 
             var response = new AuthResponse
             {
-                Token = token,
-                RefreshToken = refreshToken
+                Token = token
             };
 
             return (true, "User Logged in Successfully", response, expiry);
