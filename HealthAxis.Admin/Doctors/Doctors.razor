@@ -30,37 +30,50 @@
     </div>
 </div>
 
-<!-- ✅ FILTERS -->
 <div class="d-flex gap-2 mb-3">
 
+    <!-- ✅ SEARCH -->
     <input class="form-control"
            placeholder="Search doctor..."
-           @bind="searchTerm"
-           @oninput="OnFilterChanged" />
+           value="@searchTerm"
+           @oninput="OnSearchChanged" />
 
-    @* <select class="form-control"@selectedSpec"
-        @onchange="(e => OnSpecChanged(e))">
+    <!-- ✅ SPECIALISATION -->
+    <select class="form-control mb-2"
+            value="@newDoctor.Specialisation"
+            @onchange="OnAddSpecChanged">
+
+
         <option value="">All Specialisation</option>
+
         @foreach (var s in specs)
         {
             <option value="@s">@s</option>
         }
+
     </select>
 
-    <select class="form=@statusFilter"
-        @onchange="(e => OnStatusChanged(e))">
+    <!-- ✅ STATUS -->
+    <select class="form-control"
+            value="@statusFilter"
+            @onchange="OnStatusChanged">
+
         <option value="">All</option>
         <option value="true">Active</option>
         <option value="false">Inactive</option>
-    </select> *@
 
+    </select>
+
+    <!-- ✅ CLEAR -->
     <button class="btn btn-secondary" @onclick="ClearFilters">
         Clear
     </button>
 
+    <!-- ✅ ADD -->
     <button class="btn btn-primary ms-auto" @onclick="OpenAddModal">
         + Add Doctor
     </button>
+
 </div>
 
 <!-- ✅ TABLE -->
@@ -376,5 +389,28 @@
         isEdit = false;
 
         await LoadDoctors();
+    }
+    private void OnSpecChanged(ChangeEventArgs e)
+    {
+        selectedSpec = e.Value?.ToString() ?? "";
+        pageNumber = 1;
+        ApplyFilters();
+    }
+
+    private void OnStatusChanged(ChangeEventArgs e)
+    {
+        statusFilter = e.Value?.ToString() ?? "";
+        pageNumber = 1;
+        ApplyFilters();
+    }
+    private void OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        pageNumber = 1;
+        ApplyFilters();
+    }
+    private void OnAddSpecChanged(ChangeEventArgs e)
+    {
+        newDoctor.Specialisation = e.Value?.ToString() ?? "";
     }
 }

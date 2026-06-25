@@ -1,5 +1,105 @@
-﻿<h3>Users</h3>
+﻿@page "/users"
+@attribute [Authorize]
+@layout MainLayout
 
+@inject HttpClient Http
+
+<h3 class="mb-4">User Management</h3>
+
+<!-- ✅ FILTERS -->
+<div class="d-flex gap-2 mb-3">
+
+    <input class="form-control"
+           placeholder="Search email..."
+           value="@searchTerm"
+           @oninput="OnSearchChanged" />
+
+    <select class="form-control"
+            value="@selectedRole"
+            @onchange="OnRoleChanged">
+
+        <option value="">All Roles</option>
+        <option value="Admin">Admin</option>
+        <option value="Doctor">Doctor</option>
+        <option value="Patient">Patient</option>
+
+    </select>
+
+    <button class="btn btn-secondary" @onclick="ClearFilters">
+        Clear
+    </button>
+
+</div>
+
+<!-- ✅ TABLE -->
+<div class="table-container">
+    <table class="table table-dark">
+        <thead>
+            <tr>
+                <th>Email</th>
+                <th>Role</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var user in filteredUsers)
+            {
+                <tr>
+                    <td>@user.Email</td>
+                    <td>@user.Role</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
 @code {
 
+    private List<UserDto> users = new();
+    private List<UserDto> filteredUsers = new();
+
+    private string searchTerm = "";
+    private string selectedRole = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        users = await Http.GetFromJsonAsync<List<UserDto>>(
+            "api/admin/users") ?? new();
+
+        ApplyFilters();
+    }
+
+    private void ApplyFilters()
+    {
+        filteredUsers = users.Where(u =>
+            (string.IsNullOrWhiteSpace(searchTerm) ||
+             u.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
+
+            (string.IsNullOrWhiteSpace(selectedRole) ||
+             u.Role == selectedRole)
+        ).ToList();
+    }
+
+    private void OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        ApplyFilters();
+    }
+
+    private void OnRoleChanged(ChangeEventArgs e)
+    {
+        selectedRole = e.Value?.ToString() ?? "";
+        ApplyFilters();
+    }
+
+    private void ClearFilters()
+    {
+        searchTerm = "";
+        selectedRole = "";
+        ApplyFilters();
+    }
 }

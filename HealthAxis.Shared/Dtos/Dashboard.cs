@@ -16,3 +16,9 @@ public class DepartmentChartDto
     public string Department { get; set; }
     public int Count { get; set; }
 }
+public class UserDto
+{
+    public string Id { get; set; }
+    public string Email { get; set; }
+    public string Role { get; set; }
+}

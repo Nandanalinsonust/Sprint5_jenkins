@@ -129,5 +129,26 @@ namespace HealthAxis.Api.Controllers
 
             return Ok(grouped);
         }
+        [HttpGet("users")]
+        public async Task<IActionResult> GetUsers()
+        {
+            var users = userManager.Users.ToList();
+
+            var userList = new List<object>();
+
+            foreach (var user in users)
+            {
+                var roles = await userManager.GetRolesAsync(user);
+
+                userList.Add(new
+                {
+                    user.Id,
+                    user.Email,
+                    Role = roles.FirstOrDefault()
+                });
+            }
+
+            return Ok(userList);
+        }
     }
 }
