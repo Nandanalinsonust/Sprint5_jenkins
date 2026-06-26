@@ -1,22 +1,31 @@
-﻿@inherits LayoutComponentBase
+﻿@namespace HealthAxis.Admin.Layout
+@inherits LayoutComponentBase
 
-<div class="app-container">
+@if (Show)
+{
+    <div class="modal fade show d-block">
+        <div class="modal-dialog">
+            <div class="modal-content p-3">
 
-    <NavBar OnToggleSidebar="ToggleSidebar" />
+                @ChildContent
 
-    <Sidebar IsOpen="isSidebarOpen" />
+                <button class="btn btn-secondary mt-2"
+                        @onclick="Close">
+                    Close
+                </button>
 
-    <div class="main-content @(isSidebarOpen ? "shifted" : "")">
-        @Body
+            </div>
+        </div>
     </div>
-
-</div>
+}
 
 @code {
-    private bool isSidebarOpen = false;
+    [Parameter] public bool Show { get; set; }
+    [Parameter] public RenderFragment ChildContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
 
-    private void ToggleSidebar()
+    private async Task Close()
     {
-        isSidebarOpen = !isSidebarOpen;
+        await OnClose.InvokeAsync();
     }
 }

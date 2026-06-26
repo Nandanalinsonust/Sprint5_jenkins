@@ -1,4 +1,5 @@
 ﻿using HealthAxis.Shared.Dtos;
+using HealthAxis.Shared.Enums;
 
 namespace HealthAxis.Api.Services
 {
@@ -10,7 +11,7 @@ namespace HealthAxis.Api.Services
         Task<AppointmentDto> UpdateAsync(int id, UpdateAppointmentDto entity);
         Task<List<AppointmentDto>> GetByDoctorIdAsync(int doctorId);
         Task<List<AppointmentDto>> GetByPatientIdAsync(int patientId);
-        Task<AppointmentDto> UpdateStatusAsync(int id, string status);
+        Task<AppointmentDto> UpdateStatusAsync(int id, AppointmentStatus status);
         Task<bool> DeleteAsync(int id);
         Task<bool> HasDoctorTreatedPatient(int doctorId, int patientId);
         Task<bool> CancelWithValidation(int id);

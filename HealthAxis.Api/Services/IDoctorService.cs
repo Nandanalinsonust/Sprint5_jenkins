@@ -1,4 +1,5 @@
 ﻿using HealthAxis.Shared.Dtos;
+using HealthAxis.Shared.Enums;
 
 namespace HealthAxis.Api.Services
 {
@@ -9,7 +10,7 @@ namespace HealthAxis.Api.Services
         Task<DoctorDto> GetByIdAsync(int id);
         Task<DoctorDto> UpdateAsync(int id, UpdateDoctorDto entity);
         Task<List<DoctorDto>> GetByNameAsync(string name);
-        Task<List<DoctorDto>> GetBySpecialisationAsync(string specialization);
+        Task<List<DoctorDto>> GetBySpecialisationAsync(DoctorSpecialisation specialization);
         Task<object> GetAvailabilityAsync(int doctorId, DateTime date);
         Task<bool> DeactivateAsync(int id);
         Task AssignUserAsync(int doctorId, string userId);

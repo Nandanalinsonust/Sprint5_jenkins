@@ -5,107 +5,175 @@ using System.Text.Json;
 
 namespace HealthAxis.Admin.Auth
 {
+
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private ClaimsPrincipal _currentUser = new(new ClaimsIdentity());
+        private const string TokenStorageKey = "accessToken";
+        private const string AuthenticationType = "jwt";
+
         private readonly IJSRuntime _js;
+
+        private ClaimsPrincipal _currentUser = CreateAnonymousUser();
 
         public CustomAuthenticationStateProvider(IJSRuntime js)
         {
             _js = js;
         }
 
-        public override Task<AuthenticationState> GetAuthenticationStateAsync()
+        public override async Task<AuthenticationState> GetAuthenticationStateAsync()
         {
-            return Task.FromResult(
-                new AuthenticationState(_currentUser)
-            );
+            if (_currentUser.Identity?.IsAuthenticated == true)
+            {
+                return new AuthenticationState(_currentUser);
+            }
+
+            var token = await _js.InvokeAsync<string?>(
+                "localStorage.getItem",
+                TokenStorageKey);
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                return CreateAnonymousAuthenticationState();
+            }
+
+            var claims = ParseClaimsFromJwt(token).ToList();
+
+            if (!claims.Any())
+            {
+                claims.Add(new Claim(ClaimTypes.Name, "Admin"));
+            }
+
+            _currentUser = CreateAuthenticatedUser(claims);
+
+            return new AuthenticationState(_currentUser);
         }
 
-        public async Task InitializeAuthAsync()
+        public void NotifyUserLoggedIn(string token)
         {
-            try
-            {
-                var token = await _js.InvokeAsync<string>(
-                    "localStorage.getItem", "accessToken");
 
-                if (!string.IsNullOrEmpty(token))
-                {
-                    var identity = new ClaimsIdentity(ParseClaims(token), "jwt");
-                    _currentUser = new ClaimsPrincipal(identity);
-                }
-                else
-                {
-                    _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-                }
-            }
-            catch
+            var claims = ParseClaimsFromJwt(token).ToList();
+
+            if (!claims.Any())
             {
-                _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
+                claims.Add(new Claim(ClaimTypes.Name, "Admin"));
             }
+
+            _currentUser = CreateAuthenticatedUser(claims);
 
             NotifyAuthenticationStateChanged(
                 Task.FromResult(new AuthenticationState(_currentUser)));
+
+
         }
 
-        private IEnumerable<Claim> ParseClaims(string jwt)
+        public void NotifyUserLoggedOut()
+        {
+            _currentUser = CreateAnonymousUser();
+
+            NotifyAuthenticationStateChanged(
+                Task.FromResult(CreateAnonymousAuthenticationState()));
+        }
+
+        private static AuthenticationState CreateAnonymousAuthenticationState()
+        {
+            return new AuthenticationState(CreateAnonymousUser());
+        }
+
+        private static ClaimsPrincipal CreateAnonymousUser()
+        {
+            return new ClaimsPrincipal(new ClaimsIdentity());
+        }
+
+        private static ClaimsPrincipal CreateAuthenticatedUser(IEnumerable<Claim> claims)
+        {
+            var identity = new ClaimsIdentity(claims, AuthenticationType);
+
+            return new ClaimsPrincipal(identity);
+        }
+
+        private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
         {
             var claims = new List<Claim>();
 
-            var payload = jwt.Split('.')[1];
-            payload = PadBase64(payload);
+            var tokenParts = jwt.Split('.');
 
-            var bytes = Convert.FromBase64String(payload);
-
-            var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(bytes);
-
-            if (keyValuePairs == null)
-                return claims;
-
-            foreach (var kvp in keyValuePairs)
+            if (tokenParts.Length < 2)
             {
-                if (kvp.Value.ValueKind == JsonValueKind.Array)
+                return claims;
+            }
+
+            try
+            {
+                var payloadBytes = DecodeJwtPayload(tokenParts[1]);
+
+                var keyValuePairs =
+                    JsonSerializer.Deserialize<Dictionary<string, JsonElement>>(payloadBytes);
+
+                if (keyValuePairs is null)
                 {
-                    foreach (var val in kvp.Value.EnumerateArray())
-                    {
-                        claims.Add(new Claim(kvp.Key, val.ToString()));
-                    }
+                    return claims;
                 }
-                else
+
+                foreach (var keyValuePair in keyValuePairs)
                 {
-                    claims.Add(new Claim(kvp.Key, kvp.Value.ToString()));
+                    AddClaims(claims, keyValuePair.Key, keyValuePair.Value);
                 }
+            }
+            catch (FormatException)
+            {
+                return claims;
+            }
+            catch (JsonException)
+            {
+                return claims;
             }
 
             return claims;
         }
 
-        // ✅ Fix base64 padding
-        private string PadBase64(string base64)
+        private static byte[] DecodeJwtPayload(string payload)
         {
-            return (base64.Length % 4) switch
+            var base64 = payload
+                .Replace('-', '+')
+                .Replace('_', '/');
+
+            base64 = AddBase64Padding(base64);
+
+            return Convert.FromBase64String(base64);
+        }
+        private static string AddBase64Padding(string base64)
+        {
+            int remainder = base64.Length % 4;
+
+            if (remainder == 2)
             {
-                2 => base64 + "==",
-                3 => base64 + "=",
-                _ => base64
-            };
+                return base64 + "==";
+            }
+
+            if (remainder == 3)
+            {
+                return base64 + "=";
+            }
+
+            return base64;
         }
 
-        public void NotifyUserLoggedIn(string token)
+        private static void AddClaims(
+            List<Claim> claims,
+            string claimType,
+            JsonElement claimValue)
         {
-            var identity = new ClaimsIdentity(ParseClaims(token), "jwt");
-            _currentUser = new ClaimsPrincipal(identity);
+            if (claimValue.ValueKind == JsonValueKind.Array)
+            {
+                foreach (var value in claimValue.EnumerateArray())
+                {
+                    claims.Add(new Claim(claimType, value.ToString()));
+                }
 
-            NotifyAuthenticationStateChanged(
-                Task.FromResult(new AuthenticationState(_currentUser)));
-        }
+                return;
+            }
 
-        public void NotifyUserLoggedOut()
-        {
-            _currentUser = new ClaimsPrincipal(new ClaimsIdentity());
-
-            NotifyAuthenticationStateChanged(
-                Task.FromResult(new AuthenticationState(_currentUser)));
+            claims.Add(new Claim(claimType, claimValue.ToString()));
         }
     }
 }

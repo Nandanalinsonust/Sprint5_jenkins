@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HealthAxis.Api.Models;
 using HealthAxis.Shared.Dtos;
+using HealthAxis.Shared.Enums;
 using HealthAxis.Api.Repositories;
 using HealthAxis.Api.Services.Impl;
 using Moq;
@@ -27,7 +28,7 @@ namespace HealthAxis.Tests.ServiceTests
             return new CreateDoctorDto
             {
                 FullName = "Test Doctor",
-                Specialisation = "Cardiologist",
+                Specialisation = DoctorSpecialisation.Cardiologist,
                 YearsOfExperience = 5,
                 ConsultationFee = 500
             };
@@ -39,7 +40,7 @@ namespace HealthAxis.Tests.ServiceTests
             {
                 DoctorId = id,
                 FullName = "Updated Doctor",
-                Specialisation = "Dermatologist",
+                Specialisation = DoctorSpecialisation.Dermatologist,
                 YearsOfExperience = 10,
                 ConsultationFee = 800,
                 IsActive = true
@@ -52,7 +53,7 @@ namespace HealthAxis.Tests.ServiceTests
             {
                 DoctorId = id,
                 FullName = "Test Doctor",
-                Specialisation = "Cardiologist",
+                Specialisation = DoctorSpecialisation.Cardiologist.ToString(),
                 YearsOfExperience = 5,
                 ConsultationFee = 500,
                 IsActive = true
@@ -65,7 +66,7 @@ namespace HealthAxis.Tests.ServiceTests
             {
                 DoctorId = id,
                 FullName = "Test Doctor",
-                Specialisation = "Cardiologist",
+                Specialisation = DoctorSpecialisation.Cardiologist,
                 YearsOfExperience = 5,
                 ConsultationFee = 500,
                 IsActive = true
@@ -162,7 +163,7 @@ namespace HealthAxis.Tests.ServiceTests
             _mapperMock.Setup(m => m.Map<List<DoctorDto>>(list))
                 .Returns(new List<DoctorDto> { GetDoctorDto() });
 
-            var result = await _service.GetBySpecialisationAsync("Cardiologist");
+            var result = await _service.GetBySpecialisationAsync(DoctorSpecialisation.Cardiologist);
 
             Assert.Single(result);
         }

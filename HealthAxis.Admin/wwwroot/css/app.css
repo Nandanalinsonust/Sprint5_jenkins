@@ -1,353 +1,121 @@
-/* ================= GENERAL ================= */
+/* ================= GLOBAL ================= */
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
     background-color: #0f172a;
     color: #e2e8f0;
+    margin: 0;
 }
 
-a, .btn-link {
+/* LINKS */
+a {
     color: #60a5fa;
+    text-decoration: none;
 }
 
+/* CONTENT SPACING */
 .content {
-    padding-top: 1rem;
+    padding: 20px;
 }
 
-/* ================= BUTTONS ================= */
-.btn-primary {
-    color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
-}
-
-.btn:focus,
-.form-control:focus {
-    box-shadow: none;
-}
-
-/* ================= LOGIN PAGE ================= */
-.login-bg {
-    height: 100vh;
-    background: linear-gradient(135deg, #111827, #1f2937);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-card {
-    width: 100%;
-    max-width: 1100px;
-    height: 550px;
-    background: #1f2937;
-    border-radius: 16px;
-    overflow: hidden;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.5);
-}
-
-.left-panel {
-    background: #111827;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.image-container img {
-    width: 80%;
-    max-height: 300px;
-}
-
-.right-panel {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.login-box {
-    width: 75%;
-}
-
-.login-title {
-    color: #60a5fa;
-    margin-bottom: 30px;
-}
-
-.custom-input {
+/* INPUT */
+.form-control {
     background: #111827;
     border: 1px solid #374151;
     color: white;
-    padding: 12px;
 }
 
-    .custom-input::placeholder {
+    .form-control::placeholder {
         color: #9ca3af;
     }
 
-.login-btn {
-    background: linear-gradient(90deg, #374151, #4b5563);
-    color: white;
-    padding: 12px;
-    border-radius: 8px;
-}
+    .form-control:focus {
+        border-color: #60a5fa;
+        box-shadow: none;
+    }
 
-/* ================= NAVBAR ================= */
-.navbar {
-    position: fixed;
-    top: 0;
-    width: 100%;
-    height: 50px;
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    background: #0f172a;
-    border-bottom: 1px solid #1e293b;
-    padding: 0 15px;
-    z-index: 1000;
-}
-
-.menu-btn {
-    font-size: 22px;
-    background: none;
+/* BUTTON */
+.btn-primary {
+    background-color: #2563eb;
     border: none;
-    color: #e2e8f0;
-    cursor: pointer;
 }
 
-.nav-center {
-    font-size: 18px;
-    font-weight: bold;
-    color: #60a5fa;
-}
-
-.logout-btn {
-    background: #1e293b;
-    color: #e2e8f0;
-    border: none;
-    padding: 6px 12px;
+.btn {
     border-radius: 6px;
-    cursor: pointer;
+}
+/* ================= LOGIN PAGE ================= */
+
+.login-page {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-    .logout-btn:hover {
-        background: #334155;
-    }
-
-/* ================= SIDEBAR ================= */
-.sidebar {
-    position: fixed;
-    top: 50px;
-    left: -220px;
-    width: 220px;
-    height: 100%;
-    background: linear-gradient(180deg, #0b1324, #0f172a);
-    border-right: 1px solid #1e293b;
-    transition: 0.3s;
-    padding-top: 20px;
-}
-
-    .sidebar.open {
-        left: 0;
-    }
-
-    .sidebar ul {
-        list-style: none;
-        padding: 0;
-    }
-
-    .sidebar li {
-        padding: 12px 16px;
-        color: #94a3b8;
-        cursor: pointer;
-        border-radius: 8px;
-    }
-
-        .sidebar li:hover {
-            background: #1e293b;
-            color: #e2e8f0;
-        }
-
-/* ================= MAIN CONTENT ================= */
-.main-content {
-    margin-top: 50px;
-    padding: 20px;
-    transition: margin-left 0.3s;
-}
-
-    .main-content.shifted {
-        margin-left: 220px;
-    }
-
-/* ================= LOADING SPINNER ================= */
-.spinner {
-    width: 14px;
-    height: 14px;
-    border: 2px solid #60a5fa;
-    border-top: 2px solid transparent;
-    border-radius: 50%;
-    display: inline-block;
-    margin-right: 8px;
-    animation: spin 0.8s linear infinite;
-}
-
-@keyframes spin {
-    100% {
-        transform: rotate(360deg);
-    }
-}
-
-/* ================= DASHBOARD UI ================= */
-.stat-card {
+/* CARD */
+.login-card {
+    display: flex;
+    width: 800px;
+    height: 420px;
     background: #1e293b;
-    padding: 20px;
-    border-radius: 12px;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 0 30px rgba(0,0,0,0.4);
 }
 
-    .stat-card p {
-        color: #94a3b8;
-    }
-
-    .stat-card h3 {
-        color: #e2e8f0;
-    }
-
-/* ================= TABLE ================= */
-.table-container {
-    background: #1e293b;
-    border-radius: 12px;
-    padding: 20px;
+/* LEFT SIDE (IMAGE) */
+.login-left {
+    width: 50%;
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
-/* ================= SWITCH ================= */
-.switch {
-    position: relative;
-    width: 46px;
-    height: 24px;
-}
-
-    .switch input {
-        opacity: 0;
+    .login-left img {
+        width: 80%;
+        max-height: 80%;
+        object-fit: contain;
     }
 
-.slider {
-    position: absolute;
-    inset: 0;
-    background: #374151;
-    border-radius: 34px;
-}
-
-    .slider:before {
-        content: "";
-        position: absolute;
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        top: 3px;
-        background: white;
-        border-radius: 50%;
-        transition: 0.3s;
-    }
-
-.switch input:checked + .slider {
-    background: #22c55e;
-}
-
-    .switch input:checked + .slider:before {
-        transform: translateX(22px);
-    }
-
-/* ================= LOADING SPINNER (CENTER) ================= */
-
-.spinner-container {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(15,23,42,0.6); /* match your dark theme */
+/* RIGHT SIDE (FORM) */
+.login-right {
+    width: 50%;
+    padding: 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
+}
+
+/* TITLE */
+.login-title {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #60a5fa;
+}
+
+/* ================= APP LOADER ================= */
+.app-loader {
+    position: fixed;
+    inset: 0;
+    background: #0f172a;
+    display: flex;
+    justify-content: center;
     align-items: center;
-    z-index: 2000;
+    z-index: 99999;
 }
 
-/* Spinner circle */
-.spinner-circle {
-    width: 40px;
-    height: 40px;
-    border: 4px solid #1e293b;
-    border-top: 4px solid #60a5fa; /* your accent color */
+/* CIRCLE SPINNER */
+.loader-circle {
+    width: 60px;
+    height: 60px;
+    border: 6px solid #1e293b;
+    border-top: 6px solid #60a5fa;
     border-radius: 50%;
-    animation: spin 1s linear infinite;
+    animation: spin-loader 1s linear infinite;
 }
 
-/* Text */
-.spinner-text {
-    margin-top: 10px;
-    color: #e2e8f0;
-    font-size: 14px;
-}
-
-/* Animation */
-@keyframes spin {
+@keyframes spin-loader {
     100% {
         transform: rotate(360deg);
     }
 }
-.modal-backdrop {
-    .modal-backdrop fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 2000;
-}
-
-.modal-box {
-    background: #1e293b;
-    padding: 20px;
-    border-radius: 10px;
-    width: 400px;
-    color: white;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 15px;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 18px;
-}
-
-.modal-backdrop {
-    0;
-    position: fixed;
-    background: rgba(0,0,0,0.6);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.modal-box {
-    background: #1e293b;
-    padding: 20px;
-    border-radius: 10px;
-\=]V    width: 400px;
-    color: white;
-}
-
-.modal-header {
-    display: flex;
-    justify-content: space-between;
-}
-
-.close-btn {
-    background: none;
-    border: none;
-    color: white;
-    font-size: 18px;

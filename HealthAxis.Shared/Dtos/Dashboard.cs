@@ -1,8 +1,8 @@
 ﻿public class DashboardCountDto
 {
-    public int totalDoctors { get; set; }
-    public int totalPatients { get; set; }
-    public int totalAppointments { get; set; }
+    public int TotalDoctors { get; set; }
+    public int TotalPatients { get; set; }
+    public int TotalAppointments { get; set; }
 }
 
 public class DoctorChartDto

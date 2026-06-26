@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using HealthAxis.Api.Models;
 using HealthAxis.Shared.Dtos;
+using HealthAxis.Shared.Enums;
 
 namespace HealthAxis.Api.Mappings
 {
@@ -8,20 +9,30 @@ namespace HealthAxis.Api.Mappings
     {
         public MappingProfile()
         {
-            CreateMap<Doctor, DoctorDto>().ReverseMap();
-            CreateMap<CreateDoctorDto, Doctor>();
-            CreateMap<UpdateDoctorDto, Doctor>();
+            CreateMap<Doctor, DoctorDto>()
+                .ForMember(dest => dest.Specialisation,
+                    opt => opt.MapFrom(src => Enum.Parse<DoctorSpecialisation>(src.Specialisation)));
+
+            CreateMap<CreateDoctorDto, Doctor>()
+                .ForMember(dest => dest.Specialisation,
+                    opt => opt.MapFrom(src => src.Specialisation.ToString()));
+
+            CreateMap<UpdateDoctorDto, Doctor>()
+                .ForMember(dest => dest.Specialisation,
+                    opt => opt.MapFrom(src => src.Specialisation.ToString()));
 
             CreateMap<Patient, PatientDto>().ReverseMap();
             CreateMap<CreatePatientDto, Patient>();
 
-            CreateMap<Appointment, AppointmentDto>().ReverseMap();
+            CreateMap<Appointment, AppointmentDto>()
+                .ForMember(dest => dest.Status,
+                    opt => opt.MapFrom(src => Enum.Parse<AppointmentStatus>(src.Status)));
+
             CreateMap<CreateAppointmentDto, Appointment>();
+
             CreateMap<UpdateAppointmentDto, Appointment>();
 
             CreateMap<HealthRecord, HealthRecordDto>().ReverseMap();
-
-
         }
     }
 }

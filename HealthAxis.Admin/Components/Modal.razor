@@ -1,4 +1,6 @@
-﻿@if (Show)
+﻿@* @namespace HealthAxis.Admin.Components
+
+@if (Show)
 {
     <div class="modal fade show d-block">
         <div class="modal-dialog">
@@ -10,12 +12,13 @@
                         @onclick="Close">
                     Close
                 </button>
+
             </div>
         </div>
     </div>
 }
 
-@code{
+@code {
     [Parameter] public bool Show { get; set; }
     [Parameter] public RenderFragment ChildContent { get; set; }
     [Parameter] public EventCallback OnClose { get; set; }
@@ -24,4 +27,4 @@
     {
         await OnClose.InvokeAsync();
     }
-}
+} *@

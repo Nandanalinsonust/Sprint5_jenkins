@@ -94,5 +94,15 @@ namespace HealthAxis.Api.Controllers
 
             return NoContent();
         }
+
+        [HttpPut("status/{id}")]
+        [Authorize(Roles = "Doctor,Admin")]
+        public async Task<IActionResult> UpdateStatus(int id, UpdateAppointmentStatusDto dto)
+        {
+            var result = await service.UpdateStatusAsync(id, dto.Status);
+
+            return Ok(result);
+        }
+
     }
 }

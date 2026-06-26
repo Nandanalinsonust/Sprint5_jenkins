@@ -3,6 +3,7 @@ using HealthAxis.Api.Exceptions;
 using HealthAxis.Api.Models;
 using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Repositories;
+using HealthAxis.Shared.Enums;
 
 namespace HealthAxis.Api.Services.Impl
 {
@@ -98,11 +99,13 @@ namespace HealthAxis.Api.Services.Impl
             return mapper.Map<List<AppointmentDto>>(data);
         }
 
-        public async Task<AppointmentDto> UpdateStatusAsync(int id, string status)
+
+        public async Task<AppointmentDto> UpdateStatusAsync(int id, AppointmentStatus status)
         {
-            var updated = await repository.UpdateStatusAsync(id, status);
+            var updated = await repository.UpdateStatusAsync(id, status.ToString());
             return mapper.Map<AppointmentDto>(updated);
         }
+
 
         public async Task<bool> DeleteAsync(int id)
         {

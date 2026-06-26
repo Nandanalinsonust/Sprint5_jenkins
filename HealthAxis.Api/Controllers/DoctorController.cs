@@ -1,4 +1,5 @@
 ﻿using HealthAxis.Api.Services;
+using HealthAxis.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
@@ -25,12 +26,14 @@ namespace HealthAxis.Api.Controllers
             return Ok(result);
         }
 
+
         [HttpGet("specialisation/{specialisation}")]
         [AllowAnonymous]
-        public async Task<IActionResult> GetDoctorsBySpecialisation(string specialisation)
+        public async Task<IActionResult> GetDoctorsBySpecialisation(DoctorSpecialisation specialisation)
         {
             return Ok(await doctorService.GetBySpecialisationAsync(specialisation));
         }
+
 
         [HttpGet("name/{name}")]
         [Authorize(Roles = "Patient,Admin")]

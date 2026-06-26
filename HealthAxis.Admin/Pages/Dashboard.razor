@@ -2,17 +2,32 @@
 @attribute [Authorize]
 @layout MainLayout
 
+@using HealthAxis.Shared.Dtos
+@using HealthAxis.Admin.Services.Interfaces
 
-@inject HttpClient Http
-@inject IJSRuntime JS
+@inject IAuthService AuthService
+@inject IAdminService AdminService
+@inject NavigationManager Navigation
 
-<h3 class="mb-4">Dashboard</h3>
+<PageTitle>Admin Dashboard | HealthAxis</PageTitle>
 
-<LoadingSpinner IsVisible="isLoading" />
-
-@if (!isLoading)
+@if (isLoading)
 {
-    <!-- ✅ COUNTS -->
+    <div class="hc-page-loading">
+        <div class="hc-loading-card">
+            <p>Loading dashboard...</p>
+        </div>
+    </div>
+}
+else if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">
+        @errorMessage
+    </div>
+}
+else
+{
+    <!-- ✅ Stats -->
     <div class="row mb-4">
 
         <div class="col-md-4">
@@ -38,105 +53,101 @@
 
     </div>
 
-    <!-- ✅ CHARTS + CALENDAR -->
+    <!-- ✅ Quick Actions -->
     <div class="row">
 
-        <!-- BAR CHART -->
-        <div class="col-md-6">
-            <div class="table-container">
-                <h5>Today's Appointments (Doctors)</h5>
-                <canvas id="barChart"></canvas>
-            </div>
+        <div class="col-md-4">
+            <button class="btn btn-outline-primary w-100" @onclick="GoToDoctors">
+                Manage Doctors
+            </button>
         </div>
 
-        <!-- CALENDAR -->
-        <div class="col-md-3">
-            <div class="table-container">
-                <h5>Select Date</h5>
-                <input type="date" class="form-control" />
-            </div>
+        <div class="col-md-4">
+            <button class="btn btn-outline-success w-100" @onclick="GoToPatients">
+                Manage Patients
+            </button>
         </div>
 
-        <!-- PIE CHART -->
-        <div class="col-md-3">
-            <div class="table-container">
-                <h5>Department Load</h5>
-                <canvas id="pieChart"></canvas>
-            </div>
+        <div class="col-md-4">
+            <button class="btn btn-outline-warning w-100" @onclick="GoToAppointments">
+                Manage Appointments
+            </button>
         </div>
 
     </div>
 }
+
 @code {
     private bool isLoading = true;
-    private bool chartRendered = false;
+    private string? errorMessage;
 
     private int totalDoctors;
     private int totalPatients;
     private int totalAppointments;
 
-    private List<string> doctorLabels = new();
-    private List<int> doctorCounts = new();
-
-    private List<string> departmentLabels = new();
-    private List<int> departmentCounts = new();
-
     protected override async Task OnInitializedAsync()
     {
-        await LoadCounts();
-        await LoadDoctorChart();
-        await LoadDepartmentChart();
+        // ✅ AUTH CHECK (correct)
+        var isAuthenticated = await AuthService.IsAuthenticatedAsync();
 
-        isLoading = false;
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (!isLoading && !chartRendered)
+        if (!isAuthenticated)
         {
-            chartRendered = true;
-            try
-            {
-                await JS.InvokeVoidAsync("renderBarChart", doctorLabels, doctorCounts);
-                await JS.InvokeVoidAsync("renderPieChart", departmentLabels, departmentCounts);
-            }
-            catch
-            {
-                Console.WriteLine("Error");
-            }
-        }
-    
+            Navigation.NavigateTo("/login", true);
+            return;
         }
 
-    private async Task LoadCounts()
-    {
-        var result = await Http.GetFromJsonAsync<DashboardCountDto>(
-            "api/admin/dashboard/counts");
-
-        totalDoctors = result.totalDoctors;
-        totalPatients = result.totalPatients;
-        totalAppointments = result.totalAppointments;
+        await LoadDashboard();
     }
 
-    private async Task LoadDoctorChart()
+    private async Task LoadDashboard()
     {
-        var data = await Http.GetFromJsonAsync<List<DoctorChartDto>>(
-            "api/admin/dashboard/today-doctor");
+        try
+        {
+            isLoading = true;
+            errorMessage = null;
 
-        
-        doctorLabels = data?.Select(x => $"Dr {x.DoctorId}").ToList() ?? new();
-        doctorCounts = data?.Select(x => x.Count).ToList() ?? new();
+            // ✅ API CALLS (your service)
+            var counts = await AdminService.GetCountsAsync();
 
+            if (counts != null)
+            {
+                totalDoctors = counts.TotalDoctors;
+                totalPatients = counts.TotalPatients;
+                totalAppointments = counts.TotalAppointments;
+            }
+        }
+        catch (UnauthorizedAccessException)
+        {
+            // ✅ if token expired
+            Navigation.NavigateTo("/login?sessionExpired=true", true);
+        }
+        catch (HttpRequestException)
+        {
+            errorMessage = "API not reachable.";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = "Unexpected error occurred.";
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            isLoading = false;
+        }
     }
 
-    private async Task LoadDepartmentChart()
+    private void GoToDoctors()
     {
-        var data = await Http.GetFromJsonAsync<List<DepartmentChartDto>>(
-            "api/admin/dashboard/departments");
+        Navigation.NavigateTo("/doctors");
+    }
 
-        
-        departmentLabels = data?.Select(x => x.Department).ToList() ?? new();
-        departmentCounts = data?.Select(x => x.Count).ToList() ?? new();
+    private void GoToPatients()
+    {
+        Navigation.NavigateTo("/patients");
+    }
 
+    private void GoToAppointments()
+    {
+        Navigation.NavigateTo("/appointments");
     }
 }

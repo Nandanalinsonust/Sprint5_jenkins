@@ -1,43 +1,38 @@
-﻿<CascadingAuthenticationState>
+﻿@inject NavigationManager Nav
+
+<CascadingAuthenticationState>
+
     <Router AppAssembly="@typeof(App).Assembly">
-        
+
         <Found Context="routeData">
 
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-
-                <Authorizing>
-                    <div style="text-align:center; padding:30px;">
-                        <span class="spinner"></span>
-                        <p>Checking authentication...</p>
-                    </div>
-                </Authorizing>
+            <AuthorizeRouteView RouteData="@routeData"
+                                DefaultLayout="@typeof(MainLayout)">
 
                 <NotAuthorized>
-                    @if (context.User?.Identity?.IsAuthenticated != true)
-                    {
-                        <RedirectToLogin />
-                    }
-                    else
-                    {
-                        <div style="text-align:center; padding:30px;">
-                            <h3>🚫 Access Denied</h3>
+                    <LayoutView Layout="@typeof(LoginLayout)">
+                        <div class="text-center mt-5">
+                            <h3>🚫 Unauthorized</h3>
+                            <p>You are not authorized to view this page.</p>
+
+                            <button class="btn btn-primary"
+                                    @onclick="@(() => Nav.NavigateTo("/login"))">
+                                Go to Login
+                            </button>
                         </div>
-                    }
+                    </LayoutView>
                 </NotAuthorized>
 
             </AuthorizeRouteView>
 
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-
         </Found>
 
         <NotFound>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <div style="text-align:center; padding:30px;">
-                    <h3>Page not found</h3>
-                </div>
+            <LayoutView Layout="@typeof(LoginLayout)">
+                <p>Page not found</p>
             </LayoutView>
         </NotFound>
 
     </Router>
+
 </CascadingAuthenticationState>

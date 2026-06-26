@@ -1,7 +1,8 @@
 ﻿using AutoMapper;
 using HealthAxis.Api.Models;
-using HealthAxis.Shared.Dtos;
 using HealthAxis.Api.Repositories;
+using HealthAxis.Shared.Dtos;
+using HealthAxis.Shared.Enums;
 
 namespace HealthAxis.Api.Services.Impl
 {
@@ -42,11 +43,13 @@ namespace HealthAxis.Api.Services.Impl
             return mapper.Map<List<DoctorDto>>(data);
         }
 
-        public async Task<List<DoctorDto>> GetBySpecialisationAsync(string specialization)
+
+        public async Task<List<DoctorDto>> GetBySpecialisationAsync(DoctorSpecialisation specialization)
         {
-            var data = await repository.GetBySpecialisationAsync(specialization);
+            var data = await repository.GetBySpecialisationAsync(specialization.ToString());
             return mapper.Map<List<DoctorDto>>(data);
         }
+
 
         public async Task<object> GetAvailabilityAsync(int doctorId, DateTime date)
         {

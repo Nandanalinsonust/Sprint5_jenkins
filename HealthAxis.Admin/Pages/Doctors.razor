@@ -1,4 +1,8 @@
 ﻿@page "/doctors"
+@using HealthAxis.Shared.Enums
+@using HealthAxis.Shared.Dtos
+@namespace HealthAxis.Admin.Pages
+
 @attribute [Authorize]
 @layout MainLayout
 
@@ -37,12 +41,8 @@
            placeholder="Search doctor..."
            value="@searchTerm"
            @oninput="OnSearchChanged" />
-
-    <!-- ✅ SPECIALISATION -->
-    <select class="form-control mb-2"
-            value="@newDoctor.Specialisation"
-            @onchange="OnAddSpecChanged">
-
+    <select class="form-control"
+            @onchange="OnSpecChanged">
 
         <option value="">All Specialisation</option>
 
@@ -52,6 +52,7 @@
         }
 
     </select>
+
 
     <!-- ✅ STATUS -->
     <select class="form-control"
@@ -241,12 +242,7 @@
     private CreateDoctorDto newDoctor = new();
     private UpdateDoctorDto editDoctor = new();
 
-    private List<string> specs = new()
-    {
-        "Cardiologist","Dermatologist","Neurologist",
-        "Pediatrician","Psychiatrist","OrthopedicSurgeon",
-        "Gynecologist","Oncologist","Endocrinologist","GeneralPractitioner"
-    };
+    private List<DoctorSpecialisation> specs = Enum.GetValues<DoctorSpecialisation>().ToList();
 
     protected override async Task OnInitializedAsync()
     {
@@ -278,7 +274,7 @@
                 d.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
 
             (string.IsNullOrWhiteSpace(selectedSpec) ||
-                d.Specialisation == selectedSpec) &&
+                d.Specialisation.ToString() == selectedSpec) &&
 
             (string.IsNullOrWhiteSpace(statusFilter) ||
                 d.IsActive.ToString().ToLower() == statusFilter)
@@ -411,6 +407,10 @@
     }
     private void OnAddSpecChanged(ChangeEventArgs e)
     {
-        newDoctor.Specialisation = e.Value?.ToString() ?? "";
+        if (!string.IsNullOrEmpty(e.Value?.ToString()))
+        {
+            newDoctor.Specialisation =
+                Enum.Parse<DoctorSpecialisation>(e.Value.ToString());
+        }
     }
 }

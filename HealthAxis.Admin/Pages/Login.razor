@@ -1,0 +1,80 @@
+﻿@page "/"
+@page "/login"
+@attribute [AllowAnonymous]
+@namespace HealthAxis.Admin.Pages
+@layout LoginLayout
+
+@inject NavigationManager Nav
+@inject IAuthService AuthService
+
+@* <LoadingSpinner IsVisible="isLoading" Message="Signing in..." /> *@
+
+<div class="login-page">
+
+    <div class="login-card">
+
+        <!-- LEFT IMAGE -->
+        <div class="login-left">
+            <img src="images/Admin.png" alt="Admin Image" />
+        </div>
+
+        <!-- RIGHT FORM -->
+        <div class="login-right">
+
+            <h3 class="login-title">Login as Admin</h3>
+
+            <EditForm Model="@LoginDto" OnValidSubmit="HandleLogin">
+
+                <InputText class="form-control mb-3"
+                           @bind-Value="LoginDto.Email"
+                           placeholder="Enter email" />
+
+                <InputText type="password"
+                           class="form-control mb-3"
+                           @bind-Value="LoginDto.Password"
+                           placeholder="Enter password" />
+
+                @if (!string.IsNullOrEmpty(error))
+                {
+                    <div class="alert alert-danger text-center py-2">
+                        @error
+                    </div>
+                }
+
+                <button class="btn btn-primary w-100 mt-2">
+                    LOGIN
+                </button>
+
+            </EditForm>
+
+        </div>
+
+    </div>
+
+</div>
+
+@code {
+    private LoginDto LoginDto = new();
+
+    private string? error;
+    private bool isLoading = false;
+
+    private async Task HandleLogin()
+    {
+        error = "";
+        isLoading = true;
+
+        var result = await AuthService.LoginAsync(LoginDto);
+
+        isLoading = false;
+
+        if (result.Success)
+        {
+            Nav.NavigateTo("/dashboard",true);
+        }
+        else
+        {
+            error = result.Message;
+        }
+    }
+}

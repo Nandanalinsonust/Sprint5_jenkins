@@ -1,6 +1,7 @@
 ﻿using HealthAxis.Api.Data;
 using HealthAxis.Api.Models;
 using HealthAxis.Shared.Dtos;
+using HealthAxis.Shared.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace HealthAxis.Api.Repositories.Impl
@@ -55,9 +56,11 @@ namespace HealthAxis.Api.Repositories.Impl
                 .Select(g => new AppointmentSummary
                 {
                     Date = g.Key,
-                    Confirmed = g.Count(x => x.Status == "Confirmed"),
-                    Cancelled = g.Count(x => x.Status == "Cancelled"),
-                    Completed = g.Count(x => x.Status == "Completed")
+
+                    Confirmed = g.Count(x => x.Status == AppointmentStatus.Confirmed.ToString()),
+                    Cancelled = g.Count(x => x.Status == AppointmentStatus.Cancelled.ToString()),
+                    Completed = g.Count(x => x.Status == AppointmentStatus.Completed.ToString())
+
                 })
                 .ToListAsync();
         }

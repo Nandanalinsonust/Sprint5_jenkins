@@ -1,0 +1,61 @@
+﻿@page "/patients"
+@attribute [Authorize]
+@layout MainLayout
+@namespace HealthAxis.Admin.Pages
+
+
+@inject HttpClient Http
+
+<h3 class="mb-4">Patient Management</h3>
+
+<LoadingSpinner IsVisible="isLoading" Message="Loading patients..." />
+
+@if (!isLoading)
+{
+    <div class="table-container">
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var p in patients)
+                {
+                    <tr>
+                        <td>@p.FullName</td>
+                        <td>@p.Email</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm"
+                                    @onclick="() => Deactivate(p)">
+                                Deactivate
+                            </button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+
+@code {
+    private List<PatientDto> patients = new();
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        patients = await Http.GetFromJsonAsync<List<PatientDto>>(
+            "api/admin/patients/list") ?? new();
+
+        isLoading = false;
+    }
+
+    private async Task Deactivate(PatientDto p)
+    {
+        await Http.PutAsync($"api/admin/patients/deactivate/{p.PatientId}", null);
+        p.IsActive = false;
+    }
+}

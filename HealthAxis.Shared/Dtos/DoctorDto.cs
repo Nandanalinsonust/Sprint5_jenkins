@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using HealthAxis.Shared.Enums;
 
 namespace HealthAxis.Shared.Dtos
 {
@@ -6,13 +7,9 @@ namespace HealthAxis.Shared.Dtos
     {
         public int DoctorId { get; set; }
 
-        [Required(ErrorMessage = "Full name is required")]
-        [RegularExpression(@"^[A-Z][A-Za-z\s]+$",
-            ErrorMessage = "Full name must start with a capital letter and contain only alphabets")]
-
         public string FullName { get; set; } = string.Empty;
 
-        public string Specialisation { get; set; } = string.Empty;
+        public DoctorSpecialisation Specialisation { get; set; }
 
         public int YearsOfExperience { get; set; }
 
@@ -30,13 +27,10 @@ namespace HealthAxis.Shared.Dtos
         [Required]
         [MinLength(2)]
         [RegularExpression(@"^[A-Z][A-Za-z\s]+$")]
-
         public string FullName { get; set; } = string.Empty;
 
         [Required]
-        [RegularExpression("(Endocrinologist|Oncologist|Gynecologist|OrthopedicSurgeon|Psychiatrist|Pediatrician|Neurologist|Dermatologist|Cardiologist|GeneralPractitioner)",
-            ErrorMessage = "Invalid Specialisation")]
-        public string Specialisation { get; set; } = string.Empty;
+        public DoctorSpecialisation Specialisation { get; set; }
 
         [Required]
         [Range(0, 70)]
@@ -57,7 +51,7 @@ namespace HealthAxis.Shared.Dtos
         public string FullName { get; set; } = string.Empty;
 
         [Required]
-        public string Specialisation { get; set; } = string.Empty;
+        public DoctorSpecialisation Specialisation { get; set; }
 
         public int YearsOfExperience { get; set; }
 

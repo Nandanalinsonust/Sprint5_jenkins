@@ -1,7 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using HealthAxis.Shared.Enums;
 
 namespace HealthAxis.Shared.Dtos
 {
+    // ✅ MAIN DTO (READ)
     public class AppointmentDto
     {
         public int AppointmentId { get; set; }
@@ -14,17 +16,19 @@ namespace HealthAxis.Shared.Dtos
 
         public string TimeSlot { get; set; } = string.Empty;
 
-        public string Status { get; set; } = string.Empty;
+        public AppointmentStatus Status { get; set; }   // ✅ ENUM
 
         public string? CancellationReason { get; set; }
     }
 
+    // ✅ CREATE DTO
     public class CreateAppointmentDto
     {
-        public int AppointmentId { get; set; }
+        // ❌ Removed AppointmentId (IMPORTANT FIX)
 
         [Required]
         public int PatientId { get; set; }
+
         [Required]
         public int DoctorId { get; set; }
 
@@ -32,10 +36,12 @@ namespace HealthAxis.Shared.Dtos
         public DateTime ScheduledDate { get; set; }
 
         [Required]
-        [RegularExpression(@"^\d{2}:\d{2}(-\d{2}:\d{2})?$")]
+        [RegularExpression(@"^\d{2}:\d{2}(-\d{2}:\d{2})?$",
+            ErrorMessage = "Invalid time slot format (HH:mm or HH:mm-HH:mm)")]
         public string TimeSlot { get; set; } = string.Empty;
     }
 
+    // ✅ UPDATE DTO
     public class UpdateAppointmentDto
     {
         [Required]
@@ -51,28 +57,27 @@ namespace HealthAxis.Shared.Dtos
         public string TimeSlot { get; set; } = string.Empty;
     }
 
+    // ✅ UPDATE STATUS DTO
     public class UpdateAppointmentStatusDto
     {
         [Required]
-        [RegularExpression("^(Pending|Confirmed|Cancelled|Completed)$")]
-        public string Status { get; set; } = string.Empty;
+        public AppointmentStatus Status { get; set; }   // ✅ ENUM
 
         [MaxLength(100)]
         public string? CancellationReason { get; set; }
     }
-    //public class AppointmentReportDto
-    //{
-    //    public DateTime Date { get; set; }
-    //    public int Confirmed { get; set; }
-    //    public int Cancelled { get; set; }
-    //    public int Completed { get; set; }
-    //}
+
+    // ✅ REPORT DTO
     public class AppointmentSummaryDto
     {
         public DateTime Date { get; set; }
+
         public int Pending { get; set; }
+
         public int Confirmed { get; set; }
+
         public int Completed { get; set; }
+
         public int Cancelled { get; set; }
     }
 }
