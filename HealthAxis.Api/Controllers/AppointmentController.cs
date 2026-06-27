@@ -15,7 +15,7 @@ namespace HealthAxis.Api.Controllers
         IDoctorService doctorService) : ControllerBase
     {
         [HttpPost]
-        [Authorize(Roles = "Patient")]
+        [Authorize(Roles = "Patient,Admin")]
         public async Task<IActionResult> Create(CreateAppointmentDto dto)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -28,7 +28,7 @@ namespace HealthAxis.Api.Controllers
         }
 
         [HttpGet("my")]
-        [Authorize(Roles = "Patient")]
+        [Authorize(Roles = "Patient,Admin")]
         public async Task<IActionResult> GetMy()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -39,7 +39,7 @@ namespace HealthAxis.Api.Controllers
         }
 
         [HttpGet("doctor")]
-        [Authorize(Roles = "Doctor")]
+        [Authorize(Roles = "Doctor,Admin")]
         public async Task<IActionResult> GetDoctorAppointments()
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -74,7 +74,7 @@ namespace HealthAxis.Api.Controllers
                     return Unauthorized();
             }
 
-            if (User.IsInRole("Doctor"))
+            if (User.IsInRole("Doctor,Admin"))
             {
                 var doctor = await doctorService.GetByUserIdAsync(userId!);
 

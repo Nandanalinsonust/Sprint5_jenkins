@@ -1,9 +1,11 @@
-﻿// ✅ Global chart refs// ✅ Global;
+﻿// ✅ GLOBAL CHART REFS
+window.barChart = null;
 window.pieChart = null;
 
-// ✅ BAR CHART
-window.renderBarChart = (labels, data) => {
+// ✅ DEPARTMENT BAR CHART
+window.renderDepartmentBarChart = (labels, data) => {
     const ctx = document.getElementById("barChart");
+
     if (!ctx || labels.length === 0) return;
 
     if (window.barChart) {
@@ -15,7 +17,7 @@ window.renderBarChart = (labels, data) => {
         data: {
             labels: labels,
             datasets: [{
-                label: 'Appointments Today',
+                label: 'Appointments by Department',
                 data: data,
                 backgroundColor: '#60a5fa'
             }]
@@ -26,9 +28,10 @@ window.renderBarChart = (labels, data) => {
     });
 };
 
-// ✅ PIE CHART
+// ✅ PIE CHART (DOCTOR INSIDE DEPARTMENT)
 window.renderPieChart = (labels, data) => {
     const ctx = document.getElementById("pieChart");
+
     if (!ctx || labels.length === 0) return;
 
     if (window.pieChart) {

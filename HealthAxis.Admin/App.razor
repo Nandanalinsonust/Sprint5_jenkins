@@ -16,7 +16,7 @@
                             <p>You are not authorized to view this page.</p>
 
                             <button class="btn btn-primary"
-                                    @onclick="@(() => Nav.NavigateTo("/login"))">
+                                    @onclick="GoToLogin">
                                 Go to Login
                             </button>
                         </div>
@@ -36,3 +36,10 @@
     </Router>
 
 </CascadingAuthenticationState>
+
+@code {
+    private void GoToLogin()
+    {
+        Nav.NavigateTo("/login");
+    }
+}

@@ -14,10 +14,6 @@
     </div>
 
     <div class="nav-right">
-        @if (isLoading)
-        {
-            <span class="spinner"></span>
-        }
         <button class="logout-btn" @onclick="Logout">
             Logout
         </button>
@@ -36,7 +32,7 @@
 
         await AuthService.LogoutAsync();
 
-        Nav.NavigateTo("/", true);
+        Nav.NavigateTo("/login");
     }
 
     private async Task ToggleSidebar()

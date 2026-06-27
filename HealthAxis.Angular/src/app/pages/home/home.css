@@ -1,0 +1,55 @@
+.container {
+  font-family: Arial;
+}
+
+/* Navbar */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px;
+  background: #1976d2;
+  color: white;
+}
+
+  .navbar a {
+    margin-left: 15px;
+    text-decoration: none;
+    color: white;
+  }
+
+/* Hero */
+.hero {
+  text-align: center;
+  padding: 50px;
+  background: #f5f5f5;
+}
+
+  .hero button {
+    padding: 10px 20px;
+    background: #1976d2;
+    color: white;
+    border: none;
+  }
+
+/* Features */
+.features {
+  display: flex;
+  justify-content: space-around;
+  padding: 30px;
+}
+
+.card {
+  width: 30%;
+  padding: 20px;
+  background: #e3f2fd;
+  border-radius: 10px;
+  text-align: center;
+}
+
+/* Footer */
+footer {
+  text-align: center;
+  background: #222;
+  color: white;
+  padding: 15px;
+}

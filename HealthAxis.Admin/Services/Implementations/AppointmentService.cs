@@ -1,45 +1,42 @@
 ﻿using HealthAxis.Shared.Dtos;
-using System.Net.Http.Json;
 using HealthAxis.Admin.Services.Interfaces;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace HealthAxis.Admin.Services.Implementations
 {
-    public class AppointmentService : IAppointmentService
+    public class AppointmentService : ApiService, IAppointmentService
     {
-        private readonly HttpClient _http;
-
-        public AppointmentService(HttpClient http)
+        public AppointmentService(HttpClient http, IJSRuntime js, NavigationManager nav)
+            : base(http, js, nav)
         {
-            _http = http;
         }
 
         public async Task<List<AppointmentDto>> GetAllAsync()
         {
-            return await _http.GetFromJsonAsync<List<AppointmentDto>>(
-                "api/appointment") ?? new();
+            return await GetAsync<List<AppointmentDto>>("api/admin/appointments/list") ?? new();
         }
 
         public async Task<AppointmentDto?> GetByIdAsync(int id)
         {
-            return await _http.GetFromJsonAsync<AppointmentDto>(
-                $"api/appointment/{id}");
+            return await GetAsync<AppointmentDto>($"api/appointment/{id}");
         }
 
         public async Task<List<AppointmentSummaryDto>> GetSummaryReportAsync()
         {
-            return await _http.GetFromJsonAsync<List<AppointmentSummaryDto>>(
-                "api/admin/reports/appointments") ?? new();
+            return await GetAsync<List<AppointmentSummaryDto>>(
+                "api/reports/appointments") ?? new();
         }
 
         public async Task<List<AppointmentDto>> GetByDoctorIdAsync(int doctorId)
         {
-            return await _http.GetFromJsonAsync<List<AppointmentDto>>(
+            return await GetAsync<List<AppointmentDto>>(
                 $"api/appointment/doctor?doctorId={doctorId}") ?? new();
         }
 
         public async Task<List<AppointmentDto>> GetByPatientIdAsync(int patientId)
         {
-            return await _http.GetFromJsonAsync<List<AppointmentDto>>(
+            return await GetAsync<List<AppointmentDto>>(
                 $"api/appointment/patient?patientId={patientId}") ?? new();
         }
     }

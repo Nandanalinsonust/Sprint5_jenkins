@@ -12,19 +12,25 @@ namespace HealthAxis.Admin.Services.Implementations
         {
         }
 
-        public async Task<DashboardCountDto?> GetCountsAsync()
+        // ✅ DAY / WEEK COUNTS
+        public async Task<DashboardCountDto?> GetCountsAsync(string range)
         {
-            return await GetAsync<DashboardCountDto>("api/admin/dashboard/counts");
+            return await GetAsync<DashboardCountDto>(
+                $"api/admin/dashboard/counts?range={range}");
         }
 
-        public async Task<List<DoctorChartDto>> GetDoctorStatsAsync()
+        // ✅ DEPARTMENT GRAPH
+        public async Task<List<DepartmentChartDto>> GetDepartmentStatsAsync(string range)
         {
-            return await GetAsync<List<DoctorChartDto>>("api/admin/dashboard/today-doctor");
+            return await GetAsync<List<DepartmentChartDto>>(
+                $"api/admin/dashboard/departments?range={range}");
         }
 
-        public async Task<List<DepartmentChartDto>> GetDepartmentStatsAsync()
+        // ✅ DOCTOR INSIDE DEPARTMENT PIE
+        public async Task<List<DoctorChartDto>> GetDoctorByDepartment(string department)
         {
-            return await GetAsync<List<DepartmentChartDto>>("api/admin/dashboard/departments");
+            return await GetAsync<List<DoctorChartDto>>(
+                $"api/admin/dashboard/doctor-by-department?dept={department}");
         }
     }
 }

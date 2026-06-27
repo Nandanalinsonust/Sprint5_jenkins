@@ -1,39 +1,153 @@
 ﻿@page "/users"
+@attribute [Authorize]
+@layout AdminLayout
+
+@using HealthAxis.Shared.Dtos
+
 @inject HttpClient Http
-@namespace HealthAxis.Admin.Pages
+@inject IAuthService AuthService
+@inject NavigationManager Nav
+@inject IJSRuntime JS
 
+<h3 class="mb-4">Users</h3>
 
-<h3>Users</h3>
-<LoadingSpinner IsVisible="isLoading" Message="Loading users..." />
-<table class="table table-dark">
-    <thead>
-        <tr>
-            <th>Email</th>
-            <th>Role</th>
-        </tr>
-    </thead>
+@if (!string.IsNullOrWhiteSpace(errorMessage))
+{
+    <div class="alert alert-danger">@errorMessage</div>
+}
+else if (isLoading)
+{
+    <LoadingSpinner Visible="true" />
+}
+else
+{
+    <!-- ✅ FILTER -->
+    <div class="filter-bar">
 
-    <tbody>
-        @foreach (var u in users)
-        {
-            <tr>
-                <td>@u.Email</td>
-                <td>@u.Role</td>
-            </tr>
-        }
-    </tbody>
-</table>
+        <select class="filter-input" @bind="selectedRole">
+            <option value="">All</option>
+            <option value="Admin">Admin</option>
+            <option value="Doctor">Doctor</option>
+            <option value="Patient">Patient</option>
+        </select>
 
+        <button class="btn-clear" @onclick="ClearFilter">Clear</button>
+
+    </div>
+
+    <!-- ✅ TABLE -->
+    <div class="table-container">
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Role</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!filteredUsers.Any())
+                {
+                    <tr>
+                        <td colspan="2" class="text-center text-white">
+                            No users found
+                        </td>
+                    </tr>
+                }
+                else
+                {
+                    @foreach (var u in filteredUsers)
+                    {
+                        <tr>
+                            <td>@u.Email</td>
+                            <td>
+                                <span class="badge @GetRoleBadge(u.Role)">
+                                    @u.Role
+                                </span>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
+    </div>
+}
 @code {
     private List<UserDto> users = new();
 
     private bool isLoading = true;
+    private string? errorMessage;
+
+    private string selectedRole = "";
 
     protected override async Task OnInitializedAsync()
     {
-        users = await Http.GetFromJsonAsync<List<UserDto>>(
-            "api/admin/users") ?? new();
+        if (!await AuthService.IsAuthenticatedAsync())
+        {
+            Nav.NavigateTo("/login", true);
+            return;
+        }
 
-        isLoading = false;
+        await LoadUsers();
+    }
+
+    private async Task LoadUsers()
+    {
+        try
+        {
+            isLoading = true;
+
+            // ✅ GET TOKEN
+            var token = await JS.InvokeAsync<string>("localStorage.getItem", "accessToken");
+
+            var request = new HttpRequestMessage(HttpMethod.Get, "api/Admin/users");
+
+            request.Headers.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var response = await Http.SendAsync(request);
+
+            if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+            {
+                Nav.NavigateTo("/login?sessionExpired=true", true);
+                return;
+            }
+
+            response.EnsureSuccessStatusCode();
+
+            users = await response.Content.ReadFromJsonAsync<List<UserDto>>() ?? new();
+        }
+        catch
+        {
+            errorMessage = "Failed to load users.";
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+    // ✅ FILTER LOGIC
+    private IEnumerable<UserDto> filteredUsers =>
+        users.Where(u =>
+            string.IsNullOrEmpty(selectedRole) ||
+            u.Role.Equals(selectedRole, StringComparison.OrdinalIgnoreCase)
+        );
+
+    private void ClearFilter()
+    {
+        selectedRole = "";
+    }
+
+    // ✅ OPTIONAL: ROLE COLORS
+    private string GetRoleBadge(string role)
+    {
+        return role switch
+        {
+            "Admin" => "bg-primary",
+            "Doctor" => "bg-success",
+            "Patient" => "bg-info",
+            _ => "bg-secondary"
+        };
     }
 }

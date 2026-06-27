@@ -5,7 +5,6 @@ using System.Text.Json;
 
 namespace HealthAxis.Admin.Auth
 {
-
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
         private const string TokenStorageKey = "accessToken";
@@ -36,11 +35,11 @@ namespace HealthAxis.Admin.Auth
                 return CreateAnonymousAuthenticationState();
             }
 
-            var claims = ParseClaimsFromJwt(token).ToList();
+            var claims = ParseClaimsFromJwt(token);
 
             if (!claims.Any())
             {
-                claims.Add(new Claim(ClaimTypes.Name, "Admin"));
+                return CreateAnonymousAuthenticationState();
             }
 
             _currentUser = CreateAuthenticatedUser(claims);
@@ -50,20 +49,12 @@ namespace HealthAxis.Admin.Auth
 
         public void NotifyUserLoggedIn(string token)
         {
-
-            var claims = ParseClaimsFromJwt(token).ToList();
-
-            if (!claims.Any())
-            {
-                claims.Add(new Claim(ClaimTypes.Name, "Admin"));
-            }
+            var claims = ParseClaimsFromJwt(token);
 
             _currentUser = CreateAuthenticatedUser(claims);
 
             NotifyAuthenticationStateChanged(
                 Task.FromResult(new AuthenticationState(_currentUser)));
-
-
         }
 
         public void NotifyUserLoggedOut()
@@ -141,6 +132,7 @@ namespace HealthAxis.Admin.Auth
 
             return Convert.FromBase64String(base64);
         }
+
         private static string AddBase64Padding(string base64)
         {
             int remainder = base64.Length % 4;

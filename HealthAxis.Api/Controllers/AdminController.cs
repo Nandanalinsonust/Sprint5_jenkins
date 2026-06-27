@@ -150,5 +150,12 @@ namespace HealthAxis.Api.Controllers
 
             return Ok(userList);
         }
+        [HttpGet("appointments/list")]
+        public async Task<IActionResult> GetAllAppointments()
+        {
+            var result = await appointmentService.GetAllAsync();
+            return Ok(result);
+        }
+
     }
 }

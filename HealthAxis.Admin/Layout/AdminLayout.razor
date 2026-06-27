@@ -1,0 +1,41 @@
+﻿@inherits LayoutComponentBase
+
+<div class="admin-shell">
+
+    @if (showSidebar)
+    {
+        <Sidebar IsOpen="@isSidebarOpen" />
+    }
+
+    <div class="admin-main @(showSidebar && isSidebarOpen ? "" : "full")">
+
+        <!-- ✅ Navbar passes toggle -->
+        <Navbar OnToggleSidebar="ToggleSidebar" />
+
+        <div class="admin-content">
+            @Body
+        </div>
+
+    </div>
+
+</div>
+
+@code {
+    private bool showSidebar = false;   // ✅ initially hidden
+    private bool isSidebarOpen = true;
+
+    private void ToggleSidebar()
+    {
+        // ✅ first click → LOAD sidebar
+        if (!showSidebar)
+        {
+            showSidebar = true;
+            isSidebarOpen = true;
+        }
+        else
+        {
+            // ✅ later clicks → just open/close
+            isSidebarOpen = !isSidebarOpen;
+        }
+    }
+}

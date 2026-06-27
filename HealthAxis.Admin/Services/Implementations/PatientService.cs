@@ -1,44 +1,46 @@
 ﻿using HealthAxis.Shared.Dtos;
-using System.Net.Http.Json;
 using HealthAxis.Admin.Services.Interfaces;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace HealthAxis.Admin.Services.Implementations
 {
-    public class PatientService : IPatientService
+    public class PatientService : ApiService, IPatientService
     {
-        private readonly HttpClient _http;
-
-        public PatientService(HttpClient http)
+        public PatientService(HttpClient http, IJSRuntime js, NavigationManager nav)
+            : base(http, js, nav)
         {
-            _http = http;
         }
 
+        // ✅ GET ALL
         public async Task<List<PatientDto>> GetAllAsync()
         {
-            return await _http.GetFromJsonAsync<List<PatientDto>>(
-                "api/admin/patients/list") ?? new();
+            return await GetAsync<List<PatientDto>>("api/admin/patients/list") ?? new();
         }
 
+        // ✅ TOGGLE (Deactivate/Activate)
         public async Task<bool> DeactivateAsync(int id)
         {
-            var res = await _http.PutAsync($"api/admin/patients/deactivate/{id}", null);
-            return res.IsSuccessStatusCode;
+            return await PutAsync($"api/admin/patients/deactivate/{id}");
         }
 
+        // ✅ GET BY ID
         public async Task<PatientDto?> GetByIdAsync(int id)
         {
-            return await _http.GetFromJsonAsync<PatientDto>($"api/patient/{id}");
+            return await GetAsync<PatientDto>($"api/patient/{id}");
         }
 
+        // ✅ ADD
         public async Task<PatientDto> AddAsync(CreatePatientDto dto)
         {
-            var res = await _http.PostAsJsonAsync("api/patient", dto);
-            return await res.Content.ReadFromJsonAsync<PatientDto>();
+            return await PostAsync<CreatePatientDto, PatientDto>(
+                "api/patient", dto) ?? new();
         }
 
+        // ✅ SEARCH
         public async Task<List<PatientDto>> GetByNameAsync(string name)
         {
-            return await _http.GetFromJsonAsync<List<PatientDto>>(
+            return await GetAsync<List<PatientDto>>(
                 $"api/patient/name/{name}") ?? new();
         }
     }

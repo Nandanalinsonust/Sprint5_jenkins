@@ -1,58 +1,61 @@
 ﻿using HealthAxis.Shared.Dtos;
 using HealthAxis.Shared.Enums;
-using System.Net.Http.Json;
 using HealthAxis.Admin.Services.Interfaces;
+using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 
 namespace HealthAxis.Admin.Services.Implementations
 {
-    public class DoctorService : IDoctorService
+    public class DoctorService : ApiService, IDoctorService
     {
-        private readonly HttpClient _http;
-
-        public DoctorService(HttpClient http)
+        public DoctorService(HttpClient http, IJSRuntime js, NavigationManager nav)
+            : base(http, js, nav)
         {
-            _http = http;
         }
 
+        // ✅ GET ALL DOCTORS
         public async Task<List<DoctorDto>> GetAllAsync()
         {
-            return await _http.GetFromJsonAsync<List<DoctorDto>>(
+            return await GetAsync<List<DoctorDto>>(
                 "api/admin/doctors/list") ?? new();
         }
 
+        // ✅ ADD DOCTOR
         public async Task<DoctorDto?> AddAsync(CreateDoctorDto dto)
         {
-            var res = await _http.PostAsJsonAsync("api/admin/doctors", dto);
-            return await res.Content.ReadFromJsonAsync<DoctorDto>();
+            return await PostAsync<CreateDoctorDto, DoctorDto>("api/admin/doctors", dto);
         }
 
         public async Task<DoctorDto?> UpdateAsync(int id, UpdateDoctorDto dto)
         {
-            var res = await _http.PutAsJsonAsync($"api/admin/doctors/{id}", dto);
-            return await res.Content.ReadFromJsonAsync<DoctorDto>();
+            return await PutAsync<UpdateDoctorDto, DoctorDto>(
+                $"api/admin/doctors/{id}", dto);
         }
 
         public async Task<bool> DeactivateAsync(int id)
         {
-            var res = await _http.PutAsync($"api/admin/doctors/deactivate/{id}", null);
-            return res.IsSuccessStatusCode;
+            return await PutAsync($"api/admin/doctors/deactivate/{id}");
         }
 
+        // ✅ GET BY ID
         public async Task<DoctorDto?> GetByIdAsync(int id)
         {
-            return await _http.GetFromJsonAsync<DoctorDto>($"api/doctors/{id}");
+            return await GetAsync<DoctorDto>(
+                $"api/admin/doctors/{id}");
         }
 
+        // ✅ SEARCH BY NAME
         public async Task<List<DoctorDto>> GetByNameAsync(string name)
         {
-            return await _http.GetFromJsonAsync<List<DoctorDto>>(
-                $"api/doctors/name/{name}") ?? new();
+            return await GetAsync<List<DoctorDto>>(
+                $"api/admin/doctors/name/{name}") ?? new();
         }
 
+        // ✅ FILTER BY SPECIALISATION
         public async Task<List<DoctorDto>> GetBySpecialisationAsync(DoctorSpecialisation spec)
         {
-            return await _http.GetFromJsonAsync<List<DoctorDto>>(
-                $"api/doctors/specialisation/{spec}") ?? new();
+            return await GetAsync<List<DoctorDto>>(
+                $"api/admin/doctors/specialisation/{spec}") ?? new();
         }
     }
 }

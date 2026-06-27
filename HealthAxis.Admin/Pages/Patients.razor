@@ -1,61 +1,256 @@
 ﻿@page "/patients"
 @attribute [Authorize]
-@layout MainLayout
-@namespace HealthAxis.Admin.Pages
+@layout AdminLayout
 
+@using HealthAxis.Shared.Dtos
 
-@inject HttpClient Http
+@inject IPatientService PatientService
+@inject IAuthService AuthService
+@inject NavigationManager Nav
 
 <h3 class="mb-4">Patient Management</h3>
 
-<LoadingSpinner IsVisible="isLoading" Message="Loading patients..." />
-
-@if (!isLoading)
+@if (isLoading)
 {
+    <LoadingSpinner Visible="true" />
+}
+else
+{
+    <div class="row mb-4">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <p>Total Patients</p>
+                <h3>@totalPatients</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                <p>Active Patients</p>
+                <h3>@activePatients</h3>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="stat-card">
+                <p>Inactive Patients</p>
+                <h3>@inactivePatients</h3>
+            </div>
+        </div>
+    </div>
+    <!-- ✅ FILTER -->
+    <div class="filter-bar">
+        <input class="filter-input"
+               placeholder="Search name / ID"
+               value="@searchTerm"
+               @oninput="OnSearchChanged" />
+
+        <select class="filter-input" @bind="selectedStatus">
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+
+        <button class="btn-clear" @onclick="ClearFilters">Clear</button>
+    </div>
+
+    <!-- ✅ TABLE -->
     <div class="table-container">
         <table class="table table-dark">
             <thead>
                 <tr>
                     <th>Name</th>
-                    <th>Email</th>
-                    <th></th>
+                    <th>Age</th>
+                    <th>Gender</th>
+                    <th>Status</th>
+                    <th>Active</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
 
             <tbody>
-                @foreach (var p in patients)
+                @if (!filteredPatients.Any())
                 {
                     <tr>
-                        <td>@p.FullName</td>
-                        <td>@p.Email</td>
-                        <td>
-                            <button class="btn btn-danger btn-sm"
-                                    @onclick="() => Deactivate(p)">
-                                Deactivate
-                            </button>
+                        <td colspan="6" class="text-center text-white py-3">
+                            No patients found
                         </td>
                     </tr>
+                }
+                else
+                {
+                    @foreach (var p in filteredPatients)
+                    {
+                        <tr>
+                            <td>@p.FullName</td>
+                            <td>@GetAge(p.DateOfBirth)</td>
+                            <td>@p.Gender</td>
+
+                            <td>
+                                <span class="badge @(p.IsActive ? "bg-success" : "bg-danger")">
+                                    @(p.IsActive ? "Active" : "Inactive")
+                                </span>
+                            </td>
+
+                            <!-- ✅ TOGGLE -->
+                            <td>
+                                <div class="toggle-switch"
+                                     @onclick="() => ConfirmToggle(p)">
+                                    <div class="toggle-circle @(p.IsActive ? "active" : "")"></div>
+                                </div>
+                            </td>
+
+                            <!-- ✅ ACTION -->
+                            <td>
+                                <button class="action-btn"
+                                        @onclick="() => ConfirmToggle(p)">
+                                    @(p.IsActive ? "Deactivate" : "Activate")
+                                </button>
+                            </td>
+                        </tr>
+                    }
                 }
             </tbody>
         </table>
     </div>
 }
+@if (showConfirmModal)
+{
+    <div class="modal-bg">
+        <div class="modal-box">
 
+            <div class="modal-header">
+                <h5>Confirm Action</h5>
+                <button class="icon-btn" @onclick="CloseModal">✖</button>
+            </div>
+
+            <div class="modal-body">
+                <p>Are you sure you want to @(selectedPatient.IsActive ? "deactivate" : "activate") this patient?</p>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-secondary" @onclick="CloseModal">Cancel</button>
+                <button class="btn btn-danger" @onclick="ApplyToggle">Yes</button>
+            </div>
+
+        </div>
+    </div>
+}
+@if (!string.IsNullOrEmpty(successMessage))
+{
+    <div class="toast-success">
+        @successMessage
+    </div>
+}
 @code {
+    private int totalPatients;
+    private int activePatients;
+    private int inactivePatients;
     private List<PatientDto> patients = new();
+
+    private string searchTerm = "";
+    private string selectedStatus;
+
     private bool isLoading = true;
+
+    private bool showConfirmModal = false;
+    private PatientDto selectedPatient = new();
+    private string successMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        patients = await Http.GetFromJsonAsync<List<PatientDto>>(
-            "api/admin/patients/list") ?? new();
+        if (!await AuthService.IsAuthenticatedAsync())
+        {
+            Nav.NavigateTo("/login", true);
+            return;
+        }
 
-        isLoading = false;
+        await LoadPatients();
     }
 
-    private async Task Deactivate(PatientDto p)
+    private async Task LoadPatients()
     {
-        await Http.PutAsync($"api/admin/patients/deactivate/{p.PatientId}", null);
-        p.IsActive = false;
+        try
+        {
+            isLoading = true;
+
+            patients = await PatientService.GetAllAsync();
+
+            totalPatients = patients.Count;
+            activePatients = patients.Count(x => x.IsActive);
+            inactivePatients = patients.Count(x => !x.IsActive);
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+
+
+    // ✅ SEARCH HANDLER
+    private void OnSearchChanged(ChangeEventArgs e)
+    {
+        searchTerm = e.Value?.ToString() ?? "";
+        StateHasChanged();
+    }
+
+    // ✅ FILTER
+    private IEnumerable<PatientDto> filteredPatients =>
+        patients.Where(p =>
+            (string.IsNullOrWhiteSpace(searchTerm) ||
+             p.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+             p.PatientId.ToString().Contains(searchTerm))
+         &&
+            (string.IsNullOrEmpty(selectedStatus) ||
+             (selectedStatus == "active" && p.IsActive) ||
+             (selectedStatus == "inactive" && !p.IsActive))
+        );
+
+    private void ClearFilters()
+    {
+        searchTerm = "";
+        selectedStatus = "";
+    }
+
+    // ✅ CONFIRM
+    private void ConfirmToggle(PatientDto p)
+    {
+        selectedPatient = p;
+        showConfirmModal = true;
+    }
+
+    private void CloseModal()
+    {
+        showConfirmModal = false;
+    }
+
+    // ✅ APPLY TOGGLE
+    private async Task ApplyToggle()
+    {
+        selectedPatient.IsActive = !selectedPatient.IsActive;
+
+        await PatientService.DeactivateAsync(selectedPatient.PatientId);
+
+        showConfirmModal = false;
+
+        successMessage = $"Patient {(selectedPatient.IsActive ? "activated" : "deactivated")} successfully";
+
+        StateHasChanged();
+
+        await Task.Delay(2000);
+        successMessage = null;
+    }
+    private int GetAge(DateTime dob)
+    {
+        var today = DateTime.Today;
+
+        int age = today.Year - dob.Year;
+
+        if (dob.Date > today.AddYears(-age))
+        {
+            age--;
+        }
+
+        return age;
     }
 }

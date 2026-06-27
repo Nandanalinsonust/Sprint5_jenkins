@@ -60,4 +60,12 @@ namespace HealthAxis.Shared.Dtos
         [Required]
         public bool IsActive { get; set; }
     }
+    public class DoctorChartDto
+    {
+        public int DoctorId { get; set; }
+
+        public string FullName { get; set; } = string.Empty;
+
+        public int Count { get; set; }
+    }
 }

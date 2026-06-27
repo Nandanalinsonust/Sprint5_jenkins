@@ -1,356 +1,320 @@
 ﻿@page "/doctors"
+@attribute [Authorize]
+@layout AdminLayout
+
 @using HealthAxis.Shared.Enums
 @using HealthAxis.Shared.Dtos
-@namespace HealthAxis.Admin.Pages
 
-@attribute [Authorize]
-@layout MainLayout
-
-@inject HttpClient Http
+@inject IDoctorService DoctorService
+@inject IAuthService AuthService
+@inject NavigationManager Nav
 
 <h3 class="mb-4">Doctor Management</h3>
 
-<!-- ✅ STATS -->
-<div class="row mb-4">
-    <div class="col-md-4">
-        <div class="stat-card">
-            <p>Total Doctors</p>
-            <h3>@totalDoctors</h3>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="stat-card">
-            <p>Active Doctors</p>
-            <h3>@activeDoctors</h3>
-        </div>
-    </div>
-
-    <div class="col-md-4">
-        <div class="stat-card">
-            <p>Inactive Doctors</p>
-            <h3>@inactiveDoctors</h3>
-        </div>
-    </div>
-</div>
-
-<div class="d-flex gap-2 mb-3">
-
-    <!-- ✅ SEARCH -->
-    <input class="form-control"
-           placeholder="Search doctor..."
-           value="@searchTerm"
-           @oninput="OnSearchChanged" />
-    <select class="form-control"
-            @onchange="OnSpecChanged">
-
-        <option value="">All Specialisation</option>
-
-        @foreach (var s in specs)
-        {
-            <option value="@s">@s</option>
-        }
-
-    </select>
-
-
-    <!-- ✅ STATUS -->
-    <select class="form-control"
-            value="@statusFilter"
-            @onchange="OnStatusChanged">
-
-        <option value="">All</option>
-        <option value="true">Active</option>
-        <option value="false">Inactive</option>
-
-    </select>
-
-    <!-- ✅ CLEAR -->
-    <button class="btn btn-secondary" @onclick="ClearFilters">
-        Clear
-    </button>
-
-    <!-- ✅ ADD -->
-    <button class="btn btn-primary ms-auto" @onclick="OpenAddModal">
-        + Add Doctor
-    </button>
-
-</div>
-
-<!-- ✅ TABLE -->
-<div class="table-container">
-    <table class="table table-dark">
-        <thead>
-            <tr>
-                <th>Name</th>
-                <th>Specialisation</th>
-                <th>Experience</th>
-                <th>Fee</th>
-                <th>Status</th>
-                <th></th>
-            </tr>
-        </thead>
-
-        <tbody>
-            @foreach (var doc in pagedDoctors)
-            {
-                <tr>
-                    <td>@doc.FullName</td>
-                    <td>@doc.Specialisation</td>
-                    <td>@doc.YearsOfExperience yrs</td>
-                    <td>₹@doc.ConsultationFee</td>
-
-                    <td>
-                        <label class="switch">
-                            <input type="checkbox"
-                                   checked="@doc.IsActive"
-                                   @onchange="() => ToggleStatus(doc)" />
-                            <span class="slider"></span>
-                        </label>
-                    </td>
-
-                    <td>
-                        <button class="btn btn-sm btn-secondary"
-                                @onclick="() => OpenView(doc)">
-                            👁
-                        </button>
-                    </td>
-                </tr>
-            }
-        </tbody>
-    </table>
-</div>
-
-<!-- ✅ PAGINATION -->
-<div class="d-flex justify-content-end mt-3">
-
-    @if (pageNumber > 1)
-    {
-        <button class="btn btn-light btn-sm me-2" @onclick="PrevPage">⬅</button>
-    }
-
-    @if ((pageNumber * pageSize) < filteredDoctors.Count)
-    {
-        <button class="btn btn-light btn-sm" @onclick="NextPage">➡</button>
-    }
-
-</div>
-
-<!-- ✅ ADD MODAL -->
-@if (showAddModal)
+@if (isLoading)
 {
-    <div class="modal-backdrop">
-        <div class="modal-box">
+    <LoadingSpinner Visible="true" />
+}
+else
+{
+    <!-- ✅ STATS -->
+    <div class="row mb-4">
+        <div class="col-md-4"><div class="stat-card"><p>Total Doctors</p><h3>@totalDoctors</h3></div></div>
+        <div class="col-md-4"><div class="stat-card"><p>Active</p><h3>@activeDoctors</h3></div></div>
+        <div class="col-md-4"><div class="stat-card"><p>Inactive</p><h3>@inactiveDoctors</h3></div></div>
+    </div>
 
-            <div class="modal-header">
-                <h5>Add Doctor</h5>
-                <button class="close-btn" @onclick="CloseAdd">✖</button>
-            </div>
+    <!-- ✅ FILTER -->
+    <div class="filter-bar">
+        <input class="filter-input" placeholder="Search name / ID" @bind="searchTerm" @oninput="OnSearchChanged"/>
 
-            <input class="form-control mb-2" placeholder="Email" @bind="newDoctor.Email" />
-            <input class="form-control mb-2" placeholder="Name" @bind="newDoctor.FullName" />
+        <select class="filter-input" @bind="selectedSpec">
+            <option value="">Select Specialisation</option>
+            @foreach (var s in Enum.GetValues<DoctorSpecialisation>())
+            {
+                <option value="@s">@s</option>
+            }
+        </select>
 
-            <select class="form-control mb-2" @bind="newDoctor.Specialisation">
-                @foreach (var s in specs)
+        <select class="filter-input" @bind="selectedStatus">
+            <option value="">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+        </select>
+
+        <button class="btn-clear" @onclick="ClearFilters">Clear</button>
+
+        <button class="btn-add" @onclick="OpenAddModal">
+            + Add Doctor
+        </button>
+    </div>
+
+    <!-- ✅ TABLE -->
+    <div class="table-container">
+        <table class="table table-dark">
+            <thead>
+                <tr>
+                    <th>Doctor</th>
+                    <th>Specialisation</th>
+                    <th>Experience</th>
+                    <th>Status</th>
+                    <th>Active</th>
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @if (!filteredDoctors.Any())
                 {
-                    <option>@s</option>
+                    <tr>
+                        <td colspan="6" class="text-center text-white py-3">
+                            No doctors found
+                        </td>
+                    </tr>
                 }
-            </select>
+                else
+                {
+                    @foreach (var doc in filteredDoctors)
+                    {
+                        <tr>
+                            <td>
+                                <b>@doc.FullName</b><br />
+                                <small>ID: @doc.DoctorId</small>
+                            </td>
 
-            <input type="number" class="form-control mb-2"
-                   @bind="newDoctor.YearsOfExperience" placeholder="Experience" />
+                            <td>@doc.Specialisation</td>
+                            <td>@doc.YearsOfExperience yrs</td>
 
-            <input type="number" class="form-control mb-2"
-                   @bind="newDoctor.ConsultationFee" placeholder="Fee" />
+                            <td>
+                                <span class="badge @(doc.IsActive ? "bg-success" : "bg-danger")">
+                                    @(doc.IsActive ? "Active" : "Inactive")
+                                </span>
+                            </td>
 
-            <button class="btn btn-success me-2" @onclick="AddDoctor">Add</button>
-            <button class="btn btn-secondary" @onclick="CloseAdd">Cancel</button>
+                            <td>
+                                <div class="toggle-switch" @onclick="() => ToggleActive(doc)">
+                                    <div class="toggle-circle @(doc.IsActive ? "active" : "")"></div>
+                                </div>
+                            </td>
 
-        </div>
+                            <td>
+                                <button class="eye-btn" @onclick="() => OpenViewModal(doc)">👁</button>
+                            </td>
+                        </tr>
+                    }
+                }
+            </tbody>
+        </table>
     </div>
 }
 
-<!-- ✅ VIEW + EDIT MODAL -->
-@if (showViewModal && selectedDoctor != null)
+<!-- ✅ VIEW MODAL -->
+@if (showViewModal)
 {
-    <div class="modal-backdrop">
+    <div class="modal-bg">
         <div class="modal-box">
 
             <div class="modal-header">
                 <h5>Doctor Details</h5>
 
                 <div>
-                    <button class="btn btn-warning btn-sm me-2" @onclick="ToggleEdit">
-                        Edit
+                    <!-- ✅ EDIT BUTTON -->
+                    @if (!isEditing)
+                    {
+                        <button class="icon-btn" @onclick="EnableEdit">
+                            ✏ Edit
+                        </button>
+                    }
+
+                    <!-- ✅ CLOSE -->
+                    <button class="icon-btn" @onclick="CloseViewModal">
+                        ✖
                     </button>
-                    <button class="close-btn" @onclick="CloseView">✖</button>
                 </div>
             </div>
 
-            @if (!isEdit)
+            <div class="modal-body">
+
+                @if (!isEditing)
+                {
+                    <!-- ✅ VIEW MODE -->
+                    <p><b>Name:</b> @selectedDoctor.FullName</p>
+                    <p><b>Specialisation:</b> @selectedDoctor.Specialisation</p>
+                    <p><b>Experience:</b> @selectedDoctor.YearsOfExperience</p>
+                    <p><b>Fee:</b> ₹@selectedDoctor.ConsultationFee</p>
+                }
+                else
+                {
+                    <!-- ✅ EDIT MODE -->
+                    <div class="form-row">
+                        <label>Name</label>
+                        <input @bind="editDoctor.FullName" />
+                    </div>
+
+                    <div class="form-row">
+                        <label>Specialisation</label>
+                        <select @bind="editDoctor.Specialisation">
+                            @foreach (var s in Enum.GetValues<DoctorSpecialisation>())
+                            {
+                                <option value="@s">@s</option>
+                            }
+                        </select>
+                    </div>
+
+                    <div class="form-row">
+                        <label>Experience</label>
+                        <input @bind="editDoctor.YearsOfExperience" />
+                    </div>
+
+                    <div class="form-row">
+                        <label>Fee</label>
+                        <input @bind="editDoctor.ConsultationFee" />
+                    </div>
+                }
+            </div>
+
+            <!-- ✅ SAVE BUTTON (only in edit mode) -->
+            @if (isEditing)
             {
-                <p><b>Name:</b> @selectedDoctor.FullName</p>
-                <p><b>Specialisation:</b> @selectedDoctor.Specialisation</p>
-                <p><b>Experience:</b> @selectedDoctor.YearsOfExperience</p>
-                <p><b>Fee:</b> @selectedDoctor.ConsultationFee</p>
-            }
-            else
-            {
-                <input class="form-control mb-2" @bind="editDoctor.FullName" />
-
-                <select class="form-control mb-2" @bind="editDoctor.Specialisation">
-                    @foreach (var s in specs)
-                    {
-                        <option>@s</option>
-                    }
-                </select>
-
-                <input type="number" class="form-control mb-2"
-                       @bind="editDoctor.YearsOfExperience" />
-
-                <input type="number" class="form-control mb-2"
-                       @bind="editDoctor.ConsultationFee" />
-
-                <button class="btn btn-success me-2" @onclick="SaveEdit">Save</button>
-                <button class="btn btn-secondary" @onclick="ToggleEdit">Cancel</button>
+                <div class="modal-footer">
+                    <button class="btn btn-success" @onclick="SaveEdit">
+                        Save
+                    </button>
+                </div>
             }
 
         </div>
     </div>
 }
+
+<!-- ✅ ADD MODAL -->
+@if (showAddModal)
+{
+    <div class="modal-bg">
+        <div class="modal-box">
+
+            <div class="modal-header">
+                <h5>Add Doctor</h5>
+
+                <!-- ✅ FIXED CLOSE -->
+                <button class="icon-btn" @onclick="CloseAddModal">✖</button>
+            </div>
+
+            <div class="modal-body">
+
+                <div class="form-row">
+                    <label>Name</label>
+                    <input @bind="newDoctor.FullName" placeholder="Enter name" />
+                </div>
+
+                <div class="form-row">
+                    <label>Email</label>
+                    <input @bind="newDoctor.Email" placeholder="Enter email" />
+                </div>
+
+                <div class="form-row">
+                    <label>Specialisation</label>
+                    <select @bind="selectedSpecInput">
+                        <option value="">Select Specialisation</option>
+                        @foreach (var s in Enum.GetValues<DoctorSpecialisation>())
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <label>Experience</label>
+                    <input placeholder="Enter experience" @bind="experienceInput" />
+                </div>
+
+                <div class="form-row">
+                    <label>Fee</label>
+                    <input placeholder="Enter fee" @bind="feeInput" />
+                </div>
+
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn btn-primary" @onclick="AddDoctor">Add</button>
+            </div>
+
+        </div>
+    </div>
+}
+
 @code {
     private List<DoctorDto> doctors = new();
-    private List<DoctorDto> filteredDoctors = new();
-    private List<DoctorDto> pagedDoctors = new();
-
-    private string searchTerm = "";
-    private string selectedSpec = "";
-    private string statusFilter = "";
-
-    private int pageNumber = 1;
-    private int pageSize = 10;
 
     private int totalDoctors;
     private int activeDoctors;
     private int inactiveDoctors;
 
-    private bool showAddModal = false;
-    private bool showViewModal = false;
-    private bool isEdit = false;
+    private bool isLoading = true;
 
-    private DoctorDto? selectedDoctor;
+    private string searchTerm;
+    private string selectedStatus;
+    private DoctorSpecialisation? selectedSpec;
+
+    private bool showViewModal;
+    private bool showAddModal;
+    private bool isEditing = false;
+
+    private DoctorDto selectedDoctor = new();
+    private UpdateDoctorDto editDoctor = new();   // ✅ FIXED
     private CreateDoctorDto newDoctor = new();
-    private UpdateDoctorDto editDoctor = new();
 
-    private List<DoctorSpecialisation> specs = Enum.GetValues<DoctorSpecialisation>().ToList();
+    private string experienceInput = "";
+    private string feeInput = "";
+    private DoctorSpecialisation? selectedSpecInput;
 
     protected override async Task OnInitializedAsync()
     {
+        if (!await AuthService.IsAuthenticatedAsync())
+        {
+            Nav.NavigateTo("/login", true);
+            return;
+        }
+
         await LoadDoctors();
     }
 
     private async Task LoadDoctors()
     {
-        doctors = await Http.GetFromJsonAsync<List<DoctorDto>>(
-            "api/admin/doctors/list") ?? new();
+        doctors = await DoctorService.GetAllAsync();
 
         totalDoctors = doctors.Count;
-        activeDoctors = doctors.Count(d => d.IsActive);
-        inactiveDoctors = doctors.Count(d => !d.IsActive);
+        activeDoctors = doctors.Count(x => x.IsActive);
+        inactiveDoctors = doctors.Count(x => !x.IsActive);
 
-        ApplyFilters();
+        isLoading = false;
     }
 
-    private void OnFilterChanged(ChangeEventArgs e)
-    {
-        pageNumber = 1;
-        ApplyFilters();
-    }
+    private IEnumerable<DoctorDto> filteredDoctors =>
+    doctors.Where(d =>
+        string.IsNullOrWhiteSpace(searchTerm) ||
 
-    private void ApplyFilters()
-    {
-        filteredDoctors = doctors.Where(d =>
-            (string.IsNullOrWhiteSpace(searchTerm) ||
-                d.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) &&
-
-            (string.IsNullOrWhiteSpace(selectedSpec) ||
-                d.Specialisation.ToString() == selectedSpec) &&
-
-            (string.IsNullOrWhiteSpace(statusFilter) ||
-                d.IsActive.ToString().ToLower() == statusFilter)
-        ).ToList();
-
-        ApplyPagination();
-    }
-
-    private void ApplyPagination()
-    {
-        pagedDoctors = filteredDoctors
-            .Skip((pageNumber - 1) * pageSize)
-            .Take(pageSize)
-            .ToList();
-    }
-
-    private void NextPage()
-    {
-        pageNumber++;
-        ApplyPagination();
-    }
-
-    private void PrevPage()
-    {
-        pageNumber--;
-        ApplyPagination();
-    }
+        d.FullName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+        d.DoctorId.ToString().Contains(searchTerm)
+    )
+    .Where(d =>
+        !selectedSpec.HasValue || d.Specialisation == selectedSpec
+    )
+    .Where(d =>
+        string.IsNullOrEmpty(selectedStatus) ||
+        (selectedStatus == "active" && d.IsActive) ||
+        (selectedStatus == "inactive" && !d.IsActive)
+    );
 
     private void ClearFilters()
     {
         searchTerm = "";
-        selectedSpec = "";
-        statusFilter = "";
-        pageNumber = 1;
-
-        ApplyFilters();
+        selectedSpec = null;
+        selectedStatus = "";
     }
 
-    // ✅ Toggle Active / Inactive
-    private async Task ToggleStatus(DoctorDto doc)
-    {
-        if (doc.IsActive)
-        {
-            await Http.PutAsync($"api/admin/doctors/deactivate/{doc.DoctorId}", null);
-        }
-
-        doc.IsActive = !doc.IsActive;
-
-        CalculateStats();
-        ApplyFilters();
-    }
-
-    private void CalculateStats()
-    {
-        totalDoctors = doctors.Count;
-        activeDoctors = doctors.Count(d => d.IsActive);
-        inactiveDoctors = doctors.Count(d => !d.IsActive);
-    }
-
-    // ✅ ADD MODAL
-    private void OpenAddModal() => showAddModal = true;
-
-    private void CloseAdd() => showAddModal = false;
-
-    private async Task AddDoctor()
-    {
-        await Http.PostAsJsonAsync("api/admin/doctors", newDoctor);
-
-        showAddModal = false;
-        newDoctor = new();
-
-        await LoadDoctors();
-    }
-
-    // ✅ VIEW / EDIT
-    private void OpenView(DoctorDto doc)
+    // ✅ FIXED VIEW OPEN
+    private void OpenViewModal(DoctorDto doc)
     {
         selectedDoctor = doc;
 
@@ -365,52 +329,74 @@
         };
 
         showViewModal = true;
+        isEditing = false;
     }
 
-    private void CloseView()
+    // ✅ KEEP ONLY THIS (REMOVE OLD ONE)
+    private void CloseViewModal()
     {
         showViewModal = false;
-        isEdit = false;
+        isEditing = false;
     }
 
-    private void ToggleEdit() => isEdit = !isEdit;
+    private void EnableEdit()
+    {
+        isEditing = true;
+    }
 
     private async Task SaveEdit()
     {
-        await Http.PutAsJsonAsync(
-            $"api/admin/doctors/{editDoctor.DoctorId}",
-            editDoctor);
-
-        showViewModal = false;
-        isEdit = false;
+        await DoctorService.UpdateAsync(editDoctor.DoctorId, editDoctor);
 
         await LoadDoctors();
-    }
-    private void OnSpecChanged(ChangeEventArgs e)
-    {
-        selectedSpec = e.Value?.ToString() ?? "";
-        pageNumber = 1;
-        ApplyFilters();
+
+        showViewModal = false;
+        isEditing = false;
     }
 
-    private void OnStatusChanged(ChangeEventArgs e)
+    private void OpenAddModal()
     {
-        statusFilter = e.Value?.ToString() ?? "";
-        pageNumber = 1;
-        ApplyFilters();
+        newDoctor = new CreateDoctorDto();
+        experienceInput = "";
+        feeInput = "";
+        selectedSpecInput = null;
+
+        showAddModal = true;
+    }
+
+    private void CloseAddModal()
+    {
+        showAddModal = false;
+    }
+
+    private async Task AddDoctor()
+    {
+        newDoctor.Specialisation =
+            selectedSpecInput ?? DoctorSpecialisation.GeneralPractitioner;
+
+        newDoctor.YearsOfExperience =
+            int.TryParse(experienceInput, out var exp) ? exp : 0;
+
+        newDoctor.ConsultationFee =
+            int.TryParse(feeInput, out var fee) ? fee : 0;
+
+        await DoctorService.AddAsync(newDoctor);
+
+        await LoadDoctors();
+
+        showAddModal = false;
+    }
+
+    private async Task ToggleActive(DoctorDto doc)
+    {
+        doc.IsActive = !doc.IsActive;
+        StateHasChanged();
+        await DoctorService.DeactivateAsync(doc.DoctorId);
     }
     private void OnSearchChanged(ChangeEventArgs e)
     {
         searchTerm = e.Value?.ToString() ?? "";
-        pageNumber = 1;
-        ApplyFilters();
-    }
-    private void OnAddSpecChanged(ChangeEventArgs e)
-    {
-        if (!string.IsNullOrEmpty(e.Value?.ToString()))
-        {
-            newDoctor.Specialisation =
-                Enum.Parse<DoctorSpecialisation>(e.Value.ToString());
-        }
+
+        StateHasChanged();
     }
 }

@@ -4,10 +4,10 @@ namespace HealthAxis.Admin.Services.Interfaces
 {
     public interface IAdminService
     {
-        Task<DashboardCountDto?> GetCountsAsync();
+        Task<DashboardCountDto?> GetCountsAsync(string range);
 
-        Task<List<DoctorChartDto>> GetDoctorStatsAsync();
+        Task<List<DoctorChartDto>> GetDoctorByDepartment(string department);
 
-        Task<List<DepartmentChartDto>> GetDepartmentStatsAsync();
+        Task<List<DepartmentChartDto>> GetDepartmentStatsAsync(string range);
     }
 }
