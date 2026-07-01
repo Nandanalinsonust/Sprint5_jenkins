@@ -1,0 +1,50 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: linear-gradient(135deg, #f7ebd3 0%, #fdf8ef 50%, #efe0bc 100%);
+  padding: 3rem 0;
+}
+
+.card {
+  border: 0;
+  border-radius: 24px;
+  background: rgba(255, 252, 245, 0.95);
+  box-shadow: 0 16px 40px rgba(111, 75, 33, 0.14);
+}
+
+h3 {
+  color: #8b6a3d;
+  font-weight: 700;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, #b68c41, #d8b76a);
+  border: none;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.8rem 1rem;
+}
+
+.btn-primary:hover {
+  background: linear-gradient(135deg, #a57b34, #c89b4f);
+  color: #fff;
+}
+
+.form-control, .form-select {
+  border: 1px solid #e1cda0;
+  border-radius: 10px;
+  background: #fcf8ef;
+}
+
+.form-label {
+  color: #6f5330;
+}
+
+a {
+  color: #9b6f2f;
+  text-decoration: none;
+}
+
+a:hover {
+  color: #7a4f1b;
+}

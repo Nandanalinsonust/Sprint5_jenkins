@@ -1,0 +1,54 @@
+<div class="container py-4">
+  <div class="row g-4">
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h4 class="text-primary">Today's Schedule</h4>
+          <p class="mb-0">{{ appointments.length }} appointments</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h4 class="text-primary">Pending</h4>
+          <p class="mb-0">{{ appointments.filter(a => a.status === 'Pending').length }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <h4 class="text-primary">Completed</h4>
+          <p class="mb-0">{{ appointments.filter(a => a.status === 'Completed').length }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card shadow-sm mt-4">
+    <div class="card-body">
+      <h4 class="text-primary">Appointments</h4>
+      <div class="table-responsive">
+        <table class="table table-bordered">
+          <thead>
+            <tr>
+              <th>Patient</th>
+              <th>Date</th>
+              <th>Time</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of appointments">
+              <td>{{ item.patientId }}</td>
+              <td>{{ item.scheduledDate | date }}</td>
+              <td>{{ item.timeSlot }}</td>
+              <td><span class="badge bg-info text-dark">{{ item.status }}</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

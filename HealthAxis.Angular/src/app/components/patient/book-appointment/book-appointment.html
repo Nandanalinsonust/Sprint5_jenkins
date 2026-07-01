@@ -1,0 +1,40 @@
+<div class="container py-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h3 class="text-primary">Book an appointment</h3>
+      <div class="row g-3 mb-3">
+        <div class="col-md-4">
+          <label class="form-label">Specialisation</label>
+          <select class="form-select" [(ngModel)]="selectedSpecialisation" (change)="onSpecialisationChange()">
+            <option value="">Select specialisation</option>
+            <option *ngFor="let spec of specialisations" [value]="spec">{{ spec }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Doctor</label>
+          <select class="form-select" [(ngModel)]="selectedDoctorId">
+            <option value="0">Select doctor</option>
+            <option *ngFor="let doctor of doctors" [value]="doctor.doctorId">{{ doctor.fullName }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label">Date</label>
+          <input type="date" class="form-control" [(ngModel)]="selectedDate" />
+        </div>
+      </div>
+      <button class="btn btn-primary mb-4" (click)="loadAvailability()">Load available slots</button>
+
+      <div class="d-flex flex-wrap gap-2">
+        <button type="button" class="slot-btn" [class.booked]="isSlotBooked(slot)" [class.selected]="selectedSlot === slot" [disabled]="isSlotBooked(slot)" *ngFor="let slot of slots" (click)="selectedSlot = slot">
+          <span>{{ slot }}</span>
+          <small *ngIf="isSlotBooked(slot)">Booked</small>
+        </button>
+      </div>
+
+      <div class="mt-4">
+        <button class="btn btn-primary" (click)="book()">Confirm booking</button>
+      </div>
+      <div class="text-danger mt-3">{{ message }}</div>
+    </div>
+  </div>
+</div>

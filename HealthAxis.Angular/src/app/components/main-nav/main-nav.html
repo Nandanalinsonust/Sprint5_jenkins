@@ -1,0 +1,37 @@
+<nav class="navbar navbar-expand navbar-dark bg-dark">
+  <a routerLink="" class="navbar-brand ms-3">HealthAxis</a>
+  <ul class="navbar-nav">
+    @if(isLoggedIn() && isPatient()){
+    <li class="nav-item">
+      <a routerLink="/patient/dashboard" class="nav-link">Dashboard</a>
+    </li>
+    <li class="nav-item">
+      <a routerLink="/patient/doctors" class="nav-link">Doctors</a>
+    </li>
+    <li class="nav-item">
+      <a routerLink="/patient/appointments" class="nav-link">Appointments</a>
+    </li>
+    }
+    @if(isLoggedIn() && isDoctor()){
+    <li class="nav-item">
+      <a routerLink="/doctor/dashboard" class="nav-link">Dashboard</a>
+    </li>
+    <li class="nav-item">
+      <a routerLink="/doctor/records" class="nav-link">Records</a>
+    </li>
+    }
+    @if(!isLoggedIn()){
+    <li class="nav-item">
+      <a routerLink="/login" class="nav-link">Login</a>
+    </li>
+    <li class="nav-item">
+      <a routerLink="/register" class="nav-link">Register</a>
+    </li>
+    }
+    @if(isLoggedIn()){
+    <li class="nav-item">
+      <button (click)="handleLogout()" class="btn btn-link nav-link">Logout</button>
+    </li>
+    }
+  </ul>
+</nav>

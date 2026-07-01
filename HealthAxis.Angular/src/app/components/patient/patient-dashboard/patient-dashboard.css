@@ -1,0 +1,9 @@
+.card {
+  border: 0;
+  border-radius: 20px;
+  background: linear-gradient(145deg, #fffdf8 0%, #f7ebd5 100%);
+}
+
+h4, h5 {
+  color: #8b6a3d;
+}

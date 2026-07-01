@@ -1,10 +1,13 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
+import { RouterOutlet } from '@angular/router';
+import { MainNav } from './components/main-nav/main-nav';
 
 @Component({
   selector: 'app-root',
+  imports: [RouterOutlet, MainNav],
   templateUrl: './app.html',
-  styleUrls: ['./app.css']
+  styleUrl: './app.css'
 })
-export class AppComponent {
-  title = 'HealthAxisApp';
+export class App {
+  protected readonly title = signal('HealthAxis Angular');
 }

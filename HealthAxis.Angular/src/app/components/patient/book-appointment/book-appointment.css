@@ -1,0 +1,17 @@
+.slot-btn {
+  min-width: 160px;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid #d6b86f;
+  background: #f7ecd1;
+  color: #4a3620;
+  cursor: pointer;
+}
+.slot-btn.booked {
+  background: #d9d5cf;
+  color: #888;
+  border-color: #c6bda8;
+}
+.slot-btn:not(.booked):hover {
+  background: #e2d0a5;
+}
