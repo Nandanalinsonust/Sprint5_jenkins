@@ -100,8 +100,19 @@ namespace HealthAxis.Api.Services.Impl
         public async Task<(bool Success, string Message)> ChangePassword(string email, string oldPassword, string newPassword)
         {
             var user = await userManager.FindByEmailAsync(email);
+            if (user == null)
+                return (false, "User not found");
 
-            var result = await userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+            IdentityResult result;
+            if (user.IsFirstLogin)
+            {
+                var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                result = await userManager.ResetPasswordAsync(user, token, newPassword);
+            }
+            else
+            {
+                result = await userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+            }
 
             if (!result.Succeeded)
                 return (false, "Password change failed");

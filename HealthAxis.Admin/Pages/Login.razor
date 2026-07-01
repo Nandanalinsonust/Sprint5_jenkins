@@ -4,8 +4,10 @@
 @namespace HealthAxis.Admin.Pages
 @layout LoginLayout
 
+@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Nav
 @inject IAuthService AuthService
+@inject IJSRuntime JS
 
 @* <LoadingSpinner IsVisible="isLoading" Message="Signing in..." /> *@
 
@@ -58,6 +60,22 @@
 
     private string? error;
     private bool isLoading = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        var uri = new Uri(Nav.Uri);
+        var query = QueryHelpers.ParseQuery(uri.Query);
+
+        if (query.TryGetValue("accessToken", out var token) && !string.IsNullOrWhiteSpace(token))
+        {
+            await JS.InvokeVoidAsync("localStorage.setItem", "accessToken", token.ToString());
+            await JS.InvokeVoidAsync("localStorage.setItem", "token", token.ToString());
+            Nav.NavigateTo("/dashboard", true);
+        }
+    }
 
     private async Task HandleLogin()
     {

@@ -3,6 +3,9 @@ using Microsoft.JSInterop;
 using System.Net;
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
+using System.Text.Json;
+using System.Text.Json.Serialization;
+
 
 namespace HealthAxis.Admin.Services
 {
@@ -13,7 +16,11 @@ namespace HealthAxis.Admin.Services
         private readonly NavigationManager _nav;
 
         private const string TokenKey = "accessToken";
-
+        private static readonly JsonSerializerOptions _jsonOptions = new()
+        {
+            PropertyNameCaseInsensitive = true,
+            Converters = { new JsonStringEnumConverter(JsonNamingPolicy.CamelCase) }
+        };
         protected ApiService(HttpClient http, IJSRuntime js, NavigationManager nav)
         {
             _http = http;
@@ -46,7 +53,7 @@ namespace HealthAxis.Admin.Services
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<T>() ?? default!;
+            return await response.Content.ReadFromJsonAsync<T>(_jsonOptions) ?? default!;
         }
         protected async Task<TResponse?> PostAsync<TRequest, TResponse>(string url, TRequest data)
         {
@@ -75,7 +82,7 @@ namespace HealthAxis.Admin.Services
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<TResponse>();
+            return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions);
         }
         protected async Task<TResponse?> PutAsync<TRequest, TResponse>(string url, TRequest data)
         {
@@ -104,7 +111,7 @@ namespace HealthAxis.Admin.Services
 
             response.EnsureSuccessStatusCode();
 
-            return await response.Content.ReadFromJsonAsync<TResponse>();
+            return await response.Content.ReadFromJsonAsync<TResponse>(_jsonOptions);
         }
 
         protected async Task<bool> PutAsync(string url)

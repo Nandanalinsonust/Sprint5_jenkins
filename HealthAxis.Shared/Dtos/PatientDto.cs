@@ -45,5 +45,7 @@ namespace HealthAxis.Shared.Dtos
 
         [RegularExpression(@"^$|^INS\d{4}$")]
         public string? InsuranceID { get; set; }
+
+        public string? UserId { get; set; }
     }
 }

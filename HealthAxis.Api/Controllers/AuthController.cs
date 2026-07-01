@@ -52,6 +52,7 @@ namespace HealthAxis.Api.Controllers
             });
         }
         [HttpPost("change-password")]
+        [AllowAnonymous]
         public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
         {
             var result = await authService.ChangePassword(

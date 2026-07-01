@@ -18,6 +18,21 @@ namespace HealthAxis.Api.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> CreatePatient(CreatePatientDto dto)
         {
+            if (User.Identity?.IsAuthenticated == true)
+            {
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null)
+                    return Unauthorized();
+
+                var existing = await patientService.GetByUserIdAsync(userId);
+                if (existing != null)
+                    return BadRequest("Patient profile already exists.");
+
+                dto.UserId = userId;
+                var patient = await patientService.AddAsync(dto);
+                return Ok(patient);
+            }
+
             var patient = await patientService.AddAsync(dto);
 
             var result = await authService.CreatePatientUser(dto.Email);
@@ -25,6 +40,23 @@ namespace HealthAxis.Api.Controllers
             if (!result.Success)
                 return BadRequest(result.Message);
 
+            return Ok(patient);
+        }
+
+        [HttpPost("complete-profile")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> CompleteProfile(CreatePatientDto dto)
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            var existing = await patientService.GetByUserIdAsync(userId);
+            if (existing != null)
+                return BadRequest("Profile already completed.");
+
+            dto.UserId = userId;
+            var patient = await patientService.AddAsync(dto);
             return Ok(patient);
         }
 
@@ -62,7 +94,28 @@ namespace HealthAxis.Api.Controllers
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
             var patient = await patientService.GetByUserIdAsync(userId);
+            if (patient == null)
+                return NotFound();
             return Ok(patient);
+        }
+
+        [HttpPut("{id}")]
+        [Authorize(Roles = "Patient")]
+        public async Task<IActionResult> UpdatePatient(int id, PatientDto dto)
+        {
+            if (id != dto.PatientId)
+                return BadRequest("Patient ID mismatch.");
+
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null)
+                return Unauthorized();
+
+            var patient = await patientService.GetByUserIdAsync(userId);
+            if (patient == null || patient.PatientId != id)
+                return Unauthorized();
+
+            var updated = await patientService.UpdateAsync(id, dto);
+            return Ok(updated);
         }
 
         [HttpGet("appointments")]

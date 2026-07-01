@@ -66,6 +66,7 @@ namespace HealthAxis.Admin.Services.Implementations
         public async Task LogoutAsync()
         {
             await _js.InvokeVoidAsync("localStorage.removeItem", TokenStorageKey);
+            await _js.InvokeVoidAsync("localStorage.removeItem", "token");
 
             _authProvider.NotifyUserLoggedOut();
         }

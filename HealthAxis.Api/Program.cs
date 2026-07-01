@@ -22,6 +22,8 @@ builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+
+        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
@@ -108,7 +110,7 @@ builder.Services.AddCors(p =>
 {
     p.AddPolicy("CorsPolicy", cfg =>
     {
-        cfg.WithOrigins("https://localhost:7110")
+        cfg.WithOrigins("https://localhost:7110","http://localhost:4200")
         .AllowAnyHeader().AllowAnyMethod();
     });
 });
