@@ -73,8 +73,8 @@ namespace HealthAxis.Api.ServiceTest
 
             result.Patients.Should().HaveCount(2);
             result.Doctors.Should().HaveCount(2);
-            result.Patients.Select(patient => patient.Name).Should().Contain("Rishi Patient");
-            result.Doctors.Select(doctor => doctor.Name).Should().Contain("Rishi Doctor");
+            result.Patients.Select(patient => patient.Name).Should().Contain("Nandana Patient");
+            result.Doctors.Select(doctor => doctor.Name).Should().Contain("Nandana Doctor");
         }
 
         [Fact]
@@ -144,8 +144,8 @@ namespace HealthAxis.Api.ServiceTest
         }
 
         [Theory]
-        [InlineData("Rishi Patient")]
-        [InlineData("Rishi Doctor")]
+        [InlineData("Nandana Patient")]
+        [InlineData("Nandana Doctor")]
         [InlineData("09:00 AM")]
         [InlineData("not available")]
         public async Task GetAllAppointmentsPagedAsync_ShouldFilterBySearchTerm(string searchTerm)
@@ -1007,7 +1007,7 @@ namespace HealthAxis.Api.ServiceTest
             {
                 PageNumber = 1,
                 PageSize = 1,
-                SearchTerm = "Rishi Doctor",
+                SearchTerm = "Nandana Doctor",
                 Status = AppointmentStatus.Pending,
                 ScheduledDate = DateTime.Today.AddDays(1),
                 UpcomingOnly = true
