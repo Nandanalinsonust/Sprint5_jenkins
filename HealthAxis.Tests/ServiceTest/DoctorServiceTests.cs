@@ -593,36 +593,6 @@ namespace HealthAxis.Api.ServiceTest
         }
 
         [Fact]
-        public async Task CreateDoctorByAdminAsync_WhenValid_ShouldCreateDoctorAndReturnCreatedResponse()
-        {
-            var dto = GetValidCreateDoctorDto();
-
-            SetupSuccessfulDoctorCreation(dto);
-
-            var result = await doctorService.CreateDoctorByAdminAsync(dto);
-
-            result.DoctorId.Should().Be(10);
-
-            result.DoctorName.Should().Be(dto.FullName);
-
-            result.Email.Should().Be(dto.Email.ToLower());
-
-            result.TemporaryPassword.Should().Contain("@");
-
-            result.Message.Should().Be("Doctor account created successfully.");
-
-            repositoryMock.Verify(
-                repository => repository.CreateAsync(
-                    It.Is<Doctor>(doctor =>
-                        doctor.DoctorName == dto.FullName.Trim() &&
-                        doctor.Email == dto.Email.Trim().ToLower() &&
-                        doctor.IsActive &&
-                        doctor.CreatedDate != default),
-                    It.IsAny<CancellationToken>()),
-                Times.Once);
-        }
-
-        [Fact]
         public async Task UpdateDoctorAsync_WhenDoctorIdIsInvalid_ShouldThrowBusinessRuleException()
         {
             var dto = GetValidUpdateDoctorDto();

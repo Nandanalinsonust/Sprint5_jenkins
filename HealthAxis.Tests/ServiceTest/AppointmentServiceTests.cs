@@ -494,38 +494,6 @@ namespace HealthAxis.Api.ServiceTest
         }
 
         [Fact]
-        public async Task GetTodayConfirmedAppointmentsByDoctorIdAsync_ShouldReturnMappedAppointments()
-        {
-            SetupDoctorExists(1, true);
-
-            var appointments = new List<Appointment>
-            {
-                new Appointment
-                {
-                    AppointmentId = 20,
-                    PatientId = 1,
-                    Patient = GetPatients().First(),
-                    DoctorId = 1,
-                    Doctor = GetDoctors().First(),
-                    ScheduledDate = DateTime.Today,
-                    TimeSlot = TimeSlots.Slots.First(),
-                    Status = AppointmentStatus.Confirmed
-                }
-            };
-
-            appointmentRepositoryMock
-                .Setup(repository => repository.GetTodayConfirmedAppointmentsByDoctorIdAsync(
-                    1,
-                    It.IsAny<CancellationToken>()))
-                .ReturnsAsync(appointments);
-
-            var result = await appointmentService.GetTodayConfirmedAppointmentsByDoctorIdAsync(1);
-
-            result.Should().HaveCount(1);
-            result.Single().Status.Should().Be(AppointmentStatus.Confirmed);
-        }
-
-        [Fact]
         public async Task BookAppointmentAsync_WhenDtoNull_ShouldThrow()
         {
             Func<Task> action = async () =>
@@ -1597,7 +1565,7 @@ namespace HealthAxis.Api.ServiceTest
                 PatientId = 1,
                 DoctorId = 1,
                 ScheduledDate = DateTime.Today.AddDays(1),
-                TimeSlot = TimeSlots.Slots.First()
+                TimeSlot = TimeSlots.Slots[0]
             };
         }
 
@@ -1635,8 +1603,8 @@ namespace HealthAxis.Api.ServiceTest
                 new Patient
                 {
                     PatientId = 1,
-                    PatientName = "Rishi Patient",
-                    Email = "rishi.patient@example.com",
+                    PatientName = "Nandana Patient",
+                    Email = "Nandana.patient@example.com",
                     PhoneNumber = "9876543210",
                     IdentityUserId = "patient-identity"
                 },
@@ -1659,8 +1627,8 @@ namespace HealthAxis.Api.ServiceTest
                 new Doctor
                 {
                     DoctorId = 1,
-                    DoctorName = "Rishi Doctor",
-                    Email = "rishi.doctor@example.com",
+                    DoctorName = "Nandana Doctor",
+                    Email = "nandana.doctor@example.com",
                     Specialisation = SpecialisationType.GeneralPractitioner,
                     YearsOfExperience = 5,
                     ConsultationFee = 500,

@@ -714,7 +714,7 @@ namespace HealthAxis.Api.ServiceTest
 
             dto.Diagnosis = diagnosis;
             dto.Prescription = prescription;
-            dto.Notes = notes;
+            dto.Notes = notes!;
 
             var appointment = GetConfirmedAppointmentForToday();
 

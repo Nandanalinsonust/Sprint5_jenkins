@@ -823,7 +823,7 @@ namespace HealthAxis.Api.ServiceTest
 
                 PhoneNumber = patient.PhoneNumber,
 
-                InsuranceId = patient.InsuranceID,
+                InsuranceId = patient.InsuranceID!,
 
                 CreatedDate = patient.CreatedDate.ToString("yyyy-MM-dd")
             };

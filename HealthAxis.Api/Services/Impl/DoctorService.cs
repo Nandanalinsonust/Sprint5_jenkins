@@ -7,6 +7,7 @@ using HealthAxis.Shared.Dtos.Doctors;
 using HealthAxis.Shared.Dtos.Pagination;
 using HealthAxis.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
+using System.Text.RegularExpressions;
 
 namespace HealthAxis.Api.Services
 {
@@ -17,6 +18,10 @@ namespace HealthAxis.Api.Services
         UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager) : IDoctorService
     {
+        private static readonly Regex DoctorNameRegex = new(
+            @"^[A-Za-z]+(?: [A-Za-z]+)*$",
+            RegexOptions.Compiled | RegexOptions.CultureInvariant,
+            TimeSpan.FromMilliseconds(250));
         private const string DoctorEntityName = "Doctor";
         private const string DoctorRoleName = "Doctor";
         private const string DoctorDetailsRequiredMessage = "Doctor details are required.";
@@ -340,9 +345,7 @@ namespace HealthAxis.Api.Services
 
             string trimmedFullName = fullName.Trim();
 
-            if (!System.Text.RegularExpressions.Regex.IsMatch(
-                    trimmedFullName,
-                    @"^[A-Za-z]+(?: [A-Za-z]+)*$"))
+            if (!DoctorNameRegex.IsMatch(trimmedFullName))
             {
                 throw new BusinessRuleException(
                     "Doctor name can contain only letters and single spaces between words.");
