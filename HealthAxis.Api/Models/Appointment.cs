@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HealthAxis.Shared.Enums;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HealthAxis.Api.Models
@@ -7,19 +8,34 @@ namespace HealthAxis.Api.Models
     {
         [Key]
         public int AppointmentId { get; set; }
-        [ForeignKey("PatientId")]
+
+        [Required]
         public int PatientId { get; set; }
-        public required Patient Patient { get; set; }
-        [ForeignKey("DoctorId")]
+
+        [ForeignKey(nameof(PatientId))]
+        public Patient Patient { get; set; } = null!;
+
+        [Required]
         public int DoctorId { get; set; }
-        public required Doctor Doctor { get; set; }
+
+        [ForeignKey(nameof(DoctorId))]
+        public Doctor Doctor { get; set; } = null!;
+
         [Required]
         public DateTime ScheduledDate { get; set; }
+
         [Required]
-        public required string TimeSlot { get; set; }
-        [RegularExpression("(Pending|Confirmed|Cancelled|Completed)")]
-        public required string Status { get; set; }
-        [MaxLength(100)]
+        [MaxLength(50)]
+        public string TimeSlot { get; set; } = null!;
+
+        [Required]
+        public AppointmentStatus Status { get; set; }
+
+        [MaxLength(200)]
         public string? CancellationReason { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        public HealthRecord? HealthRecord { get; set; }
     }
 }

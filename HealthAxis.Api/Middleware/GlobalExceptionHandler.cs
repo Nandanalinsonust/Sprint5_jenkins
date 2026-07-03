@@ -1,6 +1,9 @@
 ﻿using HealthAxis.Api.Exceptions;
-using HealthAxis.Shared.Dtos;
+using HealthAxis.Api.Services;
 using Microsoft.AspNetCore.Diagnostics;
+using HealthAxis.Shared.Dtos.Pagination;
+using HealthAxis.Shared.Dtos.Auth;
+
 
 namespace HealthAxis.Api.Middleware
 {
@@ -13,27 +16,51 @@ namespace HealthAxis.Api.Middleware
             _logger = logger;
         }
 
-        public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+        public async ValueTask<bool> TryHandleAsync(
+            HttpContext httpContext,
+            Exception exception,
+            CancellationToken cancellationToken)
         {
-            _logger.LogError(exception, "Error occurred: {Message}", exception.Message);
+            _logger.LogError(
+                exception,
+                "An unexpected error occurred: {Message}",
+                exception.Message);
 
             var (statusCode, message) = exception switch
             {
-                NotFoundException => (StatusCodes.Status404NotFound, exception.Message),
-                InvalidException => (StatusCodes.Status400BadRequest, exception.Message),
-                UnauthorizedException => (StatusCodes.Status401Unauthorized, exception.Message),
-                _ => (StatusCodes.Status500InternalServerError, "An unexpected error occurred")
+                EntityNotFoundException ex =>
+                    (StatusCodes.Status404NotFound, ex.Message),
+
+                ConflictException ex =>
+                    (StatusCodes.Status409Conflict, ex.Message),
+
+                AppointmentRuleException ex =>
+                    (StatusCodes.Status400BadRequest, ex.Message),
+
+                HealthRecordRuleException ex =>
+                    (StatusCodes.Status400BadRequest, ex.Message),
+                ForbiddenAccessException ex =>
+                    (StatusCodes.Status403Forbidden, ex.Message),
+                BusinessRuleException ex =>
+                    (StatusCodes.Status400BadRequest, ex.Message),
+
+                HealthcareAppException ex =>
+                    (StatusCodes.Status400BadRequest, ex.Message),
+
+                _ =>
+                    (StatusCodes.Status500InternalServerError, "Something went wrong. Please try again later.")
             };
+
+            httpContext.Response.StatusCode = statusCode;
+            httpContext.Response.ContentType = "application/json";
 
             var response = new ErrorResponse
             {
                 StatusCode = statusCode,
                 Message = message,
-                Timestamp = DateTime.UtcNow,
+                TimeStamp = DateTime.UtcNow,
                 Path = httpContext.Request.Path
             };
-
-            httpContext.Response.StatusCode = statusCode;
 
             await httpContext.Response.WriteAsJsonAsync(response, cancellationToken);
 

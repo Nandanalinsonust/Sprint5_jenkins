@@ -1,5 +1,9 @@
-﻿using HealthAxis.Api.Models;
-using HealthAxis.Shared.Dtos;
+﻿using AutoMapper;
+using HealthAxis.Shared.Dtos.Auth;
+using HealthAxis.Api.Models;
+using HealthAxis.Api.Repository.Interface;
+using HealthAxis.Shared.Dtos.Patients;
+using HealthAxis.Api.Services.Interface;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -9,208 +13,192 @@ using System.Text;
 namespace HealthAxis.Api.Services.Impl
 {
     public class AuthService(
-    UserManager<ApplicationUser> userManager,
-    IConfiguration config,
-    IHttpContextAccessor httpContextAccessor)
-    : IAuthService
+        UserManager<IdentityUser> userManager,
+        IPatientRepository patientRepository,
+        IDoctorRepository doctorRepository,
+        IConfiguration config) : IAuthService
     {
-        public async Task<(bool Success, string Message, AuthResponse? Data, int ExpiresIn)> Login(LoginDto request)
-        {
-            var user = await userManager.FindByEmailAsync(request.Email);
-
-            if (user is null)
-                return (false, "Invalid credentials", null, 0);
-
-            if (!user.IsActive)
-                return (false, "User inactive", null, 0);
-
-            var isPasswordValid =
-                await userManager.CheckPasswordAsync(user, request.Password);
-
-            if (!isPasswordValid)
-                return (false, "Invalid credentials", null, 0);
-
-            var roles = await userManager.GetRolesAsync(user);
-
-            var token = await GenerateToken(user);
-
-            var expiry =
-                int.Parse(config["Jwt:AccessTokenExpirationMinutes"]!);
-
-            var response = new AuthResponse
-            {
-                Token = token,
-                IsFirstLogin = user.IsFirstLogin,
-                Role = roles.FirstOrDefault() ?? ""
-            };
-
-            return (
-                true,
-                "Login successful",
-                response,
-                expiry
-            );
-        }
-
-        public async Task<string> ForgotPassword(string email)
-        {
-            var user = await userManager.FindByEmailAsync(email);
-
-            var token = await userManager.GeneratePasswordResetTokenAsync(user);
-
-            await userManager.ResetPasswordAsync(user, token, "Doctor@123");
-
-            return "Password reset successful";
-        }
-
-        public async Task<(bool Success, string Message, string UserId)> Register(RegisterDto request)
+        public async Task<(bool Success, string Message, int PatientId)> RegisterPatientAsync(PatientRegisterDto request)
         {
             if (request.Password != request.ConfirmPassword)
-                return (false, "Password Do Not Match", "");
+            {
+                return (false, "Password and Confirm Password do not match.", 0);
+            }
 
-            var user = new ApplicationUser
+            if (request.DateOfBirth.Date > DateTime.Today)
+            {
+                return (false, "Date of birth cannot be a future date.", 0);
+            }
+
+            var existingUser = await userManager.FindByEmailAsync(request.Email);
+
+            if (existingUser != null)
+            {
+                return (false, "Email is already registered.", 0);
+            }
+
+            var identityUser = new IdentityUser
             {
                 UserName = request.Email,
                 Email = request.Email,
-                IsFirstLogin = true
+                EmailConfirmed = true
             };
 
-            var result = await userManager.CreateAsync(user, request.Password);
+            var createUserResult = await userManager.CreateAsync(identityUser, request.Password);
 
-            if (!result.Succeeded)
+            if (!createUserResult.Succeeded)
             {
-                return (
-                    false,
-                    string.Join(", ", result.Errors.Select(e => e.Description)),
-                    ""
-                );
+                var errors = string.Join(",", createUserResult.Errors.Select(e => e.Description));
+                return (false, errors, 0);
             }
 
-            await userManager.AddToRoleAsync(user, "Patient");
+            var roleResult = await userManager.AddToRoleAsync(identityUser, "Patient");
 
-
-            return (true, "User Registered Successfully", user.Id);
-        }
-
-        public async Task<(bool Success, string Message)> CreateDoctorUser(string email)
-        {
-            var user = new ApplicationUser
+            if (!roleResult.Succeeded)
             {
-                UserName = email,
-                Email = email,
-                IsFirstLogin = true
+                await userManager.DeleteAsync(identityUser);
+
+                var errors = string.Join(",", roleResult.Errors.Select(e => e.Description));
+                return (false, errors, 0);
+            }
+
+            var patient = new Patient
+            {
+                PatientName = request.FullName,
+                DateOfBirth = request.DateOfBirth.Date,
+                Gender = request.Gender,
+                Email = request.Email,
+                PhoneNumber = request.PhoneNumber,
+                InsuranceID = request.InsuranceId,
+                IdentityUserId = identityUser.Id,
+                CreatedDate = DateTime.Now
             };
 
-            var result = await userManager.CreateAsync(user, "Doctor@123");
+            var savedPatient = await patientRepository.CreateAsync(patient);
 
-            if (!result.Succeeded)
-                return (false, "Doctor creation failed");
-
-            await userManager.AddToRoleAsync(user, "Doctor");
-
-            return (true, "Doctor user created");
+            return (true, "Patient registered successfully.", savedPatient.PatientId);
         }
 
-        public async Task<(bool Success, string Message)> ChangePassword(
-    ClaimsPrincipal principal,
-    string currentPassword,
-    string newPassword)
+        public async Task<(bool Success, string Message, string Token, int ExpiresIn, bool MustChangePassword)> Login(LoginDto request)
         {
-            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            var user = await userManager.FindByEmailAsync(request.Email);
 
-            if (string.IsNullOrEmpty(userId))
-                return (false, "User not found");
+            if (user == null)
+            {
+                return (false, "Invalid Credentials", string.Empty, 0, false);
+            }
+
+            var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
+
+            if (!isPasswordValid)
+            {
+                return (false, "Invalid Credentials", string.Empty, 0, false);
+            }
+
+            var token = await GenerateToken(user);
+
+            var expiry = int.Parse(config.GetSection("Jwt")["AccessTokenExpirationMinutes"]!);
+
+            var roles = await userManager.GetRolesAsync(user);
+
+            bool mustChangePassword = false;
+
+            if (roles.Contains("Doctor"))
+            {
+                var doctor = await doctorRepository.GetByIdentityUserIdAsync(user.Id);
+
+                mustChangePassword = doctor?.MustChangePassword ?? false;
+            }
+
+            return (true, "Login Successful", token, expiry, mustChangePassword);
+        }
+
+        public async Task<(bool Success, string Message)> ChangePasswordAsync(string userId, ChangePasswordDto request)
+        {
+            if (string.Equals(request.CurrentPassword, request.NewPassword, StringComparison.Ordinal))
+            {
+                return (false, "New password cannot be the same as current password.");
+            }
+
+            if (request.NewPassword != request.ConfirmNewPassword)
+            {
+                return (false, "New Password and Confirm New Password do not match.");
+            }
 
             var user = await userManager.FindByIdAsync(userId);
 
             if (user == null)
-                return (false, "User not found");
-
-            IdentityResult result;
-
-            if (user.IsFirstLogin)
             {
-                var token = await userManager.GeneratePasswordResetTokenAsync(user);
+                return (false, "User not found.");
+            }
 
-                result = await userManager.ResetPasswordAsync(
-                    user,
-                    token,
-                    newPassword);
-            }
-            else
-            {
-                result = await userManager.ChangePasswordAsync(
-                    user,
-                    currentPassword,
-                    newPassword);
-            }
+            var result = await userManager.ChangePasswordAsync(
+                user,
+                request.CurrentPassword,
+                request.NewPassword);
 
             if (!result.Succeeded)
             {
-                return (
-                    false,
-                    string.Join(", ", result.Errors.Select(e => e.Description))
-                );
+                var errors = string.Join(",", result.Errors.Select(e => e.Description));
+                return (false, errors);
             }
-
-            user.IsFirstLogin = false;
-
-            await userManager.UpdateAsync(user);
-
-            return (true, "Password changed successfully");
-        }
-
-        private async Task<string> GenerateToken(ApplicationUser user)
-        {
-            var jwtSettings = config.GetSection("Jwt");
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["Key"]!));
-            var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var roles = await userManager.GetRolesAsync(user);
 
-            // ✅ CLEAN CLAIMS (NO MIXED TYPES)
+            if (roles.Contains("Doctor"))
+            {
+                var doctor = await doctorRepository.GetByIdentityUserIdAsync(user.Id);
+
+                if (doctor is not null && doctor.MustChangePassword)
+                {
+                    doctor.MustChangePassword = false;
+
+                    await doctorRepository.UpdateAsync(doctor.DoctorId, doctor);
+                }
+            }
+
+            return (true, "Password changed successfully.");
+        }
+
+        private async Task<string> GenerateToken(IdentityUser user)
+        {
+            var jwtSettings = config.GetSection("Jwt");
+
+            var key = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwtSettings["Key"]!)
+            );
+
+            var credentials = new SigningCredentials(
+                key,
+                SecurityAlgorithms.HmacSha256
+            );
+
+            var roles = await userManager.GetRolesAsync(user);
+
             var claims = new List<Claim>
-    {
-        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-        new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
-        new Claim(ClaimTypes.NameIdentifier, user.Id) // ✅ IMPORTANT
-    };
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? string.Empty),
+                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id)
+            };
 
             foreach (var role in roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role)); // ✅ IMPORTANT
+                claims.Add(new Claim(ClaimTypes.Role, role));
             }
+
+            var expirationMinutes = int.Parse(jwtSettings["AccessTokenExpirationMinutes"]!);
 
             var token = new JwtSecurityToken(
                 issuer: jwtSettings["Issuer"],
                 audience: jwtSettings["Audience"],
                 claims: claims,
-                expires: DateTime.UtcNow.AddMinutes(
-                    int.Parse(jwtSettings["AccessTokenExpirationMinutes"]!)
-                ),
+                expires: DateTime.UtcNow.AddMinutes(expirationMinutes),
                 signingCredentials: credentials
             );
 
             return new JwtSecurityTokenHandler().WriteToken(token);
-        }
-
-        public async Task<(bool Success, string Message)> CreatePatientUser(string email)
-        {
-            var user = new ApplicationUser
-            {
-                UserName = email,
-                Email = email
-            };
-
-            var result = await userManager.CreateAsync(user, "Patient@123");
-
-            if (!result.Succeeded)
-                return (false, "User creation failed");
-
-            await userManager.AddToRoleAsync(user, "Patient");
-
-            return (true, "Success");
         }
     }
 }

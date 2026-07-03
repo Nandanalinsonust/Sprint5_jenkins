@@ -1,98 +1,25 @@
 ﻿@page "/"
 @page "/login"
-@attribute [AllowAnonymous]
-@namespace HealthAxis.Admin.Pages
-@using Microsoft.AspNetCore.WebUtilities
-@layout LoginLayout
 
-@inject NavigationManager Nav
-@inject IAuthService AuthService
-@inject IJSRuntime JS
+@inject NavigationManager Navigation
 
-@* <LoadingSpinner IsVisible="isLoading" Message="Signing in..." /> *@
+<PageTitle>Redirecting | HealthAxis</PageTitle>
 
-<div class="login-page">
-
-    <div class="login-card">
-
-        <!-- LEFT IMAGE -->
-        <div class="login-left">
-            <img src="images/Admin.png" alt="Admin Image" />
-        </div>
-
-        <!-- RIGHT FORM -->
-        <div class="login-right">
-
-            <h3 class="login-title">Login as Admin</h3>
-
-            <EditForm Model="@LoginDto" OnValidSubmit="HandleLogin">
-
-                <InputText class="form-control mb-3"
-                           @bind-Value="LoginDto.Email"
-                           placeholder="Enter email" />
-
-                <InputText type="password"
-                           class="form-control mb-3"
-                           @bind-Value="LoginDto.Password"
-                           placeholder="Enter password" />
-
-                @if (!string.IsNullOrEmpty(error))
-                {
-                    <div class="alert alert-danger text-center py-2">
-                        @error
-                    </div>
-                }
-
-                <button class="btn btn-primary w-100 mt-2">
-                    LOGIN
-                </button>
-
-            </EditForm>
-
-        </div>
-
+<div style="min-height:100vh; display:grid; place-items:center; font-family:Arial;">
+    <div style="text-align:center;">
+        <h3>Redirecting to HealthAxis Login...</h3>
+        <p>Please continue from the Angular HealthAxis login page.</p>
     </div>
-
 </div>
 
 @code {
-    private LoginDto LoginDto = new();
-
-    private string? error;
-    private bool isLoading = false;
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
+    protected override void OnAfterRender(bool firstRender)
     {
         if (!firstRender)
+        {
             return;
-
-        var uri = new Uri(Nav.Uri);
-        var query = QueryHelpers.ParseQuery(uri.Query);
-
-        if (query.TryGetValue("accessToken", out var token) && !string.IsNullOrWhiteSpace(token))
-        {
-            await JS.InvokeVoidAsync("localStorage.setItem", "accessToken", token.ToString());
-            await JS.InvokeVoidAsync("localStorage.setItem", "token", token.ToString());
-            Nav.NavigateTo("/dashboard", true);
         }
-    }
 
-    private async Task HandleLogin()
-    {
-        error = "";
-        isLoading = true;
-
-        var result = await AuthService.LoginAsync(LoginDto);
-
-        isLoading = false;
-
-        if (result.Success)
-        {
-            Nav.NavigateTo("/dashboard");
-        }
-        else
-        {
-            error = result.Message;
-        }
+        Navigation.NavigateTo("http://localhost:4200", true);
     }
 }

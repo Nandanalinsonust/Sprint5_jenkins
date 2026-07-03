@@ -1,17 +1,17 @@
-﻿using HealthAxis.Shared.Dtos;
+﻿using HealthAxis.Shared.Dtos.Auth;
 
 namespace HealthAxis.Admin.Services.Interfaces
 {
     public interface IAuthService
     {
-        Task<(bool Success, string Message)> LoginAsync(LoginDto dto);
+        Task<AuthResponseDto> LoginAsync(LoginDto loginDto);
 
         Task LogoutAsync();
 
         Task<bool> IsAuthenticatedAsync();
 
-        Task<string?> GetCurrentUserRoleAsync();
-
         Task<string?> GetCurrentUserEmailAsync();
+
+        Task<string?> GetCurrentUserRoleAsync();
     }
 }

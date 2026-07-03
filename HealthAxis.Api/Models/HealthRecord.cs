@@ -1,5 +1,4 @@
-﻿using HealthAxis.Api.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HealthAxis.Api.Models
@@ -8,18 +7,38 @@ namespace HealthAxis.Api.Models
     {
         [Key]
         public int HealthRecordId { get; set; }
-        [ForeignKey("PatientId")]
+
+        [Required]
         public int PatientId { get; set; }
-        public required Patient Patient { get; set; }
-        [ForeignKey("DoctorId")]
-        public int DoctorId { get; set; }
-        public required Doctor Doctor { get; set; }
-        [ForeignKey("AppointmentId")]
-        public required int AppointmentId { get; set; }
-        public required Appointment Appointment { get; set; }
+
+        [ForeignKey(nameof(PatientId))]
+        public Patient Patient { get; set; } = null!;
+
+        public int? DoctorId { get; set; }
+
+        [ForeignKey(nameof(DoctorId))]
+        public Doctor? Doctor { get; set; }
+
+        [Required]
+        public int AppointmentId { get; set; }
+
+        [ForeignKey(nameof(AppointmentId))]
+        public Appointment Appointment { get; set; } = null!;
+
+        [Required]
         public DateTime VisitDate { get; set; }
-        public required string Diagnosis { get; set; }
-        public required string Prescription { get; set; }
+
+        [Required]
+        [MaxLength(500)]
+        public string Diagnosis { get; set; } = null!;
+
+        [Required]
+        [MaxLength(500)]
+        public string Prescription { get; set; } = null!;
+
+        [MaxLength(1000)]
         public string? Notes { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
     }
 }

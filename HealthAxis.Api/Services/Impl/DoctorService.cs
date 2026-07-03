@@ -1,114 +1,398 @@
 ﻿using AutoMapper;
+using HealthAxis.Api.Exceptions;
 using HealthAxis.Api.Models;
-using HealthAxis.Api.Repositories;
-using HealthAxis.Shared.Dtos;
+using HealthAxis.Api.Repository.Interface;
+using HealthAxis.Shared.Constants;
+using HealthAxis.Shared.Dtos.Doctors;
+using HealthAxis.Shared.Dtos.Pagination;
 using HealthAxis.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 
-namespace HealthAxis.Api.Services.Impl
+namespace HealthAxis.Api.Services
 {
-    public class DoctorService(IDoctorRepository repository, IMapper mapper) : IDoctorService
+    public class DoctorService(
+        IDoctorRepository repository,
+        IAppointmentRepository appointmentRepository,
+        IMapper mapper,
+        UserManager<IdentityUser> userManager,
+        RoleManager<IdentityRole> roleManager) : IDoctorService
     {
-        private readonly UserManager<ApplicationUser> userManager;
-        public async Task<DoctorDto> AddAsync(CreateDoctorDto dto)
-        {
-            var doctor = mapper.Map<Doctor>(dto);
-            doctor.IsActive = true;
+        private const string DoctorEntityName = "Doctor";
+        private const string DoctorRoleName = "Doctor";
+        private const string DoctorDetailsRequiredMessage = "Doctor details are required.";
 
-            var saved = await repository.CreateAsync(doctor);
-            return mapper.Map<DoctorDto>(saved);
+        public async Task<List<DoctorDto>> GetAllDoctorsAsync()
+        {
+            var doctors = await repository.GetAllAsync();
+
+            return mapper.Map<List<DoctorDto>>(doctors);
         }
 
-
-        public async Task<List<DoctorDto>> GetAllAsync()
+        public async Task<PagedResponse<DoctorDto>> GetAllDoctorsPagedAsync(DoctorPaginationQueryDto query)
         {
-            return mapper.Map<List<DoctorDto>>(await repository.GetAllAsync());
+            query ??= new DoctorPaginationQueryDto();
+
+            int pageNumber = query.PageNumber <= 0 ? 1 : query.PageNumber;
+
+            int pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
+
+            pageSize = pageSize > 100 ? 100 : pageSize;
+
+            var doctors = await repository.GetAllAsync();
+
+            var filteredDoctors = doctors.AsEnumerable();
+
+            if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+            {
+                string searchTerm = query.SearchTerm.Trim();
+
+                filteredDoctors = filteredDoctors.Where(d =>
+                    d.DoctorName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    d.Email.Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (query.Specialisation is not null)
+            {
+                filteredDoctors = filteredDoctors.Where(d =>
+                    d.Specialisation == query.Specialisation.Value);
+            }
+
+            if (query.IsActive is not null)
+            {
+                filteredDoctors = filteredDoctors.Where(d =>
+                    d.IsActive == query.IsActive.Value);
+            }
+
+            int totalRecords = filteredDoctors.Count();
+
+            var pagedDoctors = filteredDoctors
+                .OrderBy(d => d.DoctorId)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
+
+            var mappedDoctors = mapper.Map<List<DoctorDto>>(pagedDoctors);
+
+            return new PagedResponse<DoctorDto>
+            {
+                Items = mappedDoctors,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
         }
 
-        public async Task<DoctorDto> GetByIdAsync(int id)
+        public async Task<List<DoctorDto>> GetAllActiveDoctorsAsync()
         {
-            return mapper.Map<DoctorDto>(await repository.GetByIdAsync(id));
+            var doctors = await repository.GetAllActiveAsync();
+
+            return mapper.Map<List<DoctorDto>>(doctors);
         }
 
-        public async Task<DoctorDto> UpdateAsync(int id, UpdateDoctorDto dto)
+        public async Task<DoctorDto> GetDoctorByIdAsync(int doctorId)
         {
-            var doctor = mapper.Map<Doctor>(dto);
-            doctor.DoctorId = id;
+            ValidateDoctorId(doctorId);
 
-            var updated = await repository.UpdateAsync(id, doctor);
-            return mapper.Map<DoctorDto>(updated);
-        }
-
-        public async Task<List<DoctorDto>> GetByNameAsync(string name)
-        {
-            var data = await repository.GetByNameAsync(name);
-            return mapper.Map<List<DoctorDto>>(data);
-        }
-
-
-        public async Task<List<DoctorDto>> GetBySpecialisationAsync(DoctorSpecialisation specialization)
-        {
-            var data = await repository.GetBySpecialisationAsync(specialization.ToString());
-            return mapper.Map<List<DoctorDto>>(data);
-        }
-
-
-        public async Task<object> GetAvailabilityAsync(int doctorId, DateTime date)
-        {
-            return await repository.GetAvailabilityAsync(doctorId, date);
-        }
-
-        public async Task<bool> DeactivateAsync(int id)
-        {
-            return await repository.DeactivateAsync(id);
-        }
-        public async Task AssignUserAsync(int doctorId, string userId)
-        {
             var doctor = await repository.GetByIdAsync(doctorId);
-            doctor.UserId = userId;
-            await repository.UpdateAsync(doctorId, doctor);
-        }
-        public async Task<DoctorDto> GetByUserIdAsync(string userId)
-        {
-            var doctor = await repository.GetByUserIdAsync(userId);
+
+            if (doctor is null)
+            {
+                throw new EntityNotFoundException(DoctorEntityName, doctorId);
+            }
+
             return mapper.Map<DoctorDto>(doctor);
         }
-        public async Task<List<DoctorDto>> GetAllAsync(int page, int pageSize)
+
+        public async Task<List<DoctorDto>> GetDoctorsBySpecialisationAsync(SpecialisationType specialisation)
         {
-            var data = await repository.GetAllAsync();
+            var doctors = await repository.GetBySpecialisationAsync(specialisation);
 
-            return mapper.Map<List<DoctorDto>>(
-                data.Skip((page - 1) * pageSize).Take(pageSize).ToList()
-            );
+            return mapper.Map<List<DoctorDto>>(doctors);
         }
-        public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto dto)
-{
-    var user = await userManager.FindByIdAsync(userId);
 
-    if (user == null)
-        return false;
+        public async Task<List<DoctorDto>> GetActiveDoctorsBySpecialisationAsync(SpecialisationType specialisation)
+        {
+            var doctors = await repository.GetActiveBySpecialisationAsync(specialisation);
 
-    var check = await userManager.CheckPasswordAsync(user, dto.CurrentPassword);
+            return mapper.Map<List<DoctorDto>>(doctors);
+        }
 
-    if (!check)
-        return false;
+        public async Task<DoctorCreatedResponseDto> CreateDoctorByAdminAsync(CreateDoctorDto dto)
+        {
+            ValidateCreateDoctorDto(dto);
 
-    var result = await userManager.ChangePasswordAsync(
-        user,
-        dto.CurrentPassword,
-        dto.NewPassword
-    );
+            string normalizedEmail = dto.Email.Trim().ToLower();
 
-    if (!result.Succeeded)
-        return false;
+            bool doctorEmailExists = await repository.ExistsByEmailAsync(normalizedEmail);
 
-    var doctor = await repository.GetByUserIdAsync(userId);
-    doctor.IsFirstLogin = false;
+            if (doctorEmailExists)
+            {
+                throw new ConflictException("A doctor with this email already exists.");
+            }
 
-    await repository.UpdateAsync(doctor.DoctorId, doctor);
+            var existingIdentityUser = await userManager.FindByEmailAsync(normalizedEmail);
 
-    return true;
-}
+            if (existingIdentityUser is not null)
+            {
+                throw new ConflictException("A login account with this email already exists.");
+            }
 
+            string temporaryPassword = GenerateTemporaryPassword(dto.FullName);
+
+            var identityUser = new IdentityUser
+            {
+                UserName = normalizedEmail,
+                Email = normalizedEmail,
+                EmailConfirmed = true
+            };
+
+            var createUserResult = await userManager.CreateAsync(identityUser, temporaryPassword);
+
+            if (!createUserResult.Succeeded)
+            {
+                var errors = string.Join(",", createUserResult.Errors.Select(e => e.Description));
+                throw new BusinessRuleException(errors);
+            }
+
+            if (!await roleManager.RoleExistsAsync(DoctorRoleName))
+            {
+                await roleManager.CreateAsync(new IdentityRole(DoctorRoleName));
+            }
+
+            var roleResult = await userManager.AddToRoleAsync(identityUser, DoctorRoleName);
+
+            if (!roleResult.Succeeded)
+            {
+                await userManager.DeleteAsync(identityUser);
+
+                var errors = string.Join(",", roleResult.Errors.Select(e => e.Description));
+                throw new BusinessRuleException(errors);
+            }
+
+            var doctor = mapper.Map<Doctor>(dto);
+
+            doctor.DoctorName = dto.FullName.Trim();
+            doctor.Email = normalizedEmail;
+            doctor.YearsOfExperience = CalculateYearsOfExperience(dto.PracticeStartDate);
+            doctor.IsActive = true;
+            doctor.MustChangePassword = true;
+            doctor.IdentityUserId = identityUser.Id;
+            doctor.CreatedDate = DateTime.Now;
+
+            var savedDoctor = await repository.CreateAsync(doctor);
+
+            return new DoctorCreatedResponseDto
+            {
+                DoctorId = savedDoctor.DoctorId,
+                DoctorName = savedDoctor.DoctorName,
+                Email = savedDoctor.Email,
+                TemporaryPassword = temporaryPassword,
+                Message = "Doctor account created successfully."
+            };
+        }
+
+        public async Task<DoctorDto> UpdateDoctorAsync(int doctorId, UpdateDoctorDto dto)
+        {
+            ValidateDoctorId(doctorId);
+
+            ValidateUpdateDoctorDto(dto);
+
+            var existingDoctor = await repository.GetByIdAsync(doctorId);
+
+            if (existingDoctor is null)
+            {
+                throw new EntityNotFoundException(DoctorEntityName, doctorId);
+            }
+
+            var doctor = mapper.Map<Doctor>(dto);
+
+            doctor.DoctorId = doctorId;
+            doctor.Email = existingDoctor.Email;
+            doctor.IdentityUserId = existingDoctor.IdentityUserId;
+            doctor.YearsOfExperience = CalculateYearsOfExperience(dto.PracticeStartDate);
+            doctor.CreatedDate = existingDoctor.CreatedDate;
+            doctor.MustChangePassword = existingDoctor.MustChangePassword;
+
+            var updatedDoctor = await repository.UpdateAsync(doctorId, doctor);
+
+            if (updatedDoctor is null)
+            {
+                throw new EntityNotFoundException(DoctorEntityName, doctorId);
+            }
+
+            return mapper.Map<DoctorDto>(updatedDoctor);
+        }
+
+        public async Task<DoctorDto> DeleteDoctorAsync(int doctorId)
+        {
+            ValidateDoctorId(doctorId);
+
+            var deletedDoctor = await repository.DeleteAsync(doctorId);
+
+            if (deletedDoctor is null)
+            {
+                throw new EntityNotFoundException(DoctorEntityName, doctorId);
+            }
+
+            return mapper.Map<DoctorDto>(deletedDoctor);
+        }
+
+        public async Task<DoctorDto> GetMyProfileAsync(string identityUserId)
+        {
+            if (string.IsNullOrWhiteSpace(identityUserId))
+            {
+                throw new BusinessRuleException("Invalid logged-in user.");
+            }
+
+            var doctor = await repository.GetByIdentityUserIdAsync(identityUserId);
+
+            if (doctor is null)
+            {
+                throw new EntityNotFoundException("Doctor profile for logged-in user", 0);
+            }
+
+            return mapper.Map<DoctorDto>(doctor);
+        }
+
+        public async Task<List<SlotAvailabilityDto>> GetDoctorAvailabilityAsync(int doctorId, DateTime? date)
+        {
+            ValidateDoctorId(doctorId);
+
+            var doctor = await repository.GetByIdAsync(doctorId);
+
+            if (doctor is null)
+            {
+                throw new EntityNotFoundException(DoctorEntityName, doctorId);
+            }
+
+            if (!doctor.IsActive)
+            {
+                throw new BusinessRuleException("Doctor is inactive and not available for appointments.");
+            }
+
+            var bookedSlots = new List<string>();
+
+            if (date is not null)
+            {
+                bookedSlots = await appointmentRepository.GetBookedTimeSlotsByDoctorAndDateAsync(
+                    doctorId,
+                    date.Value);
+            }
+
+            var bookedSlotSet = bookedSlots.ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            return TimeSlots.Slots
+                .Select(slot => new SlotAvailabilityDto
+                {
+                    TimeSlot = slot,
+                    IsBooked = bookedSlotSet.Contains(slot)
+                })
+                .ToList();
+        }
+
+        private static void ValidateDoctorId(int doctorId)
+        {
+            if (doctorId <= 0)
+            {
+                throw new BusinessRuleException("Please provide a valid doctor reference.");
+            }
+        }
+
+        private static void ValidateCreateDoctorDto(CreateDoctorDto dto)
+        {
+            if (dto is null)
+            {
+                throw new BusinessRuleException(DoctorDetailsRequiredMessage);
+            }
+
+            ValidateDoctorCommonFields(
+                dto.FullName,
+                dto.Email,
+                dto.PracticeStartDate,
+                dto.ConsultationFee);
+        }
+
+        private static void ValidateUpdateDoctorDto(UpdateDoctorDto dto)
+        {
+            if (dto is null)
+            {
+                throw new BusinessRuleException(DoctorDetailsRequiredMessage);
+            }
+
+            ValidateDoctorCommonFields(
+                dto.FullName,
+                null,
+                dto.PracticeStartDate,
+                dto.ConsultationFee);
+        }
+
+        private static void ValidateDoctorCommonFields(
+            string fullName,
+            string? email,
+            DateTime practiceStartDate,
+            decimal consultationFee)
+        {
+            if (string.IsNullOrWhiteSpace(fullName))
+            {
+                throw new BusinessRuleException("Doctor full name is required.");
+            }
+
+            string trimmedFullName = fullName.Trim();
+
+            if (!System.Text.RegularExpressions.Regex.IsMatch(
+                    trimmedFullName,
+                    @"^[A-Za-z]+(?: [A-Za-z]+)*$"))
+            {
+                throw new BusinessRuleException(
+                    "Doctor name can contain only letters and single spaces between words.");
+            }
+
+            if (email is not null && string.IsNullOrWhiteSpace(email))
+            {
+                throw new BusinessRuleException("Doctor email is required.");
+            }
+
+            if (practiceStartDate.Date > DateTime.Today)
+            {
+                throw new BusinessRuleException("Practice start date cannot be in the future.");
+            }
+
+            if (consultationFee < 1 || consultationFee > 100000)
+            {
+                throw new BusinessRuleException("Consultation fee must be between 1 and 100,000.");
+            }
+        }
+
+        private static int CalculateYearsOfExperience(DateTime practiceStartDate)
+        {
+            int years = DateTime.Today.Year - practiceStartDate.Year;
+
+            if (practiceStartDate.Date > DateTime.Today.AddYears(-years))
+            {
+                years--;
+            }
+
+            return years;
+        }
+
+        private static string GenerateTemporaryPassword(string doctorName)
+        {
+            string cleanedName = new string(
+                doctorName
+                    .Where(char.IsLetter)
+                    .Take(5)
+                    .ToArray());
+
+            if (string.IsNullOrWhiteSpace(cleanedName))
+            {
+                cleanedName = DoctorEntityName;
+            }
+
+            string formattedName =
+                char.ToUpper(cleanedName[0]) + cleanedName.Substring(1).ToLower();
+
+            return $"{formattedName}@{DateTime.Today.Year}";
+        }
     }
 }

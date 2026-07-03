@@ -1,41 +1,17 @@
-﻿@inherits LayoutComponentBase
+﻿@layout AdminLayout
+@inherits LayoutComponentBase
 
-<div class="admin-shell">
 
-    @if (showSidebar)
-    {
-        <Sidebar IsOpen="@isSidebarOpen" />
-    }
+<div class="hc-admin-shell">
+    <AdminSidebar />
 
-    <div class="admin-main @(showSidebar && isSidebarOpen ? "" : "full")">
+    <main class="hc-admin-main">
+        <AdminTopbar />
 
-        <!-- ✅ Navbar passes toggle -->
-        <Navbar OnToggleSidebar="ToggleSidebar" />
-
-        <div class="admin-content">
+        <section class="hc-admin-content">
             @Body
-        </div>
+        </section>
+    </main>
 
-    </div>
-
+    <ToastContainer />
 </div>
-
-@code {
-    private bool showSidebar = false;   // ✅ initially hidden
-    private bool isSidebarOpen = true;
-
-    private void ToggleSidebar()
-    {
-        // ✅ first click → LOAD sidebar
-        if (!showSidebar)
-        {
-            showSidebar = true;
-            isSidebarOpen = true;
-        }
-        else
-        {
-            // ✅ later clicks → just open/close
-            isSidebarOpen = !isSidebarOpen;
-        }
-    }
-}

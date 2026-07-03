@@ -1,171 +1,172 @@
 using HealthAxis.Api.Data;
-using HealthAxis.Api.Mappings;
-using HealthAxis.Api.Models;
-using HealthAxis.Api.Repositories;
-using HealthAxis.Api.Repositories.Impl;
+using HealthAxis.Api.Mapping;
+using HealthAxis.Api.Middleware;
+using HealthAxis.Api.Repository.Impl;
+using HealthAxis.Api.Repository.Interface;
 using HealthAxis.Api.Services;
 using HealthAxis.Api.Services.Impl;
+using HealthAxis.Api.Services.Interface;
+using HealthCareApp.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
-using System.Text.Json;
-using System.Security.Claims;
-using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ✅ VERY IMPORTANT LINE (ADD THIS)
-JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
+// Add services to the container.
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
-        options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-        options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        options.JsonSerializerOptions.PropertyNamingPolicy =
+            System.Text.Json.JsonNamingPolicy.CamelCase;
     });
 
-builder.Services.AddOpenApi();
+// Register HealthAxisDbContext with SQL Server.
+builder.Services.AddDbContext<HealthAxisDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DbCon")));
 
-builder.Services.AddDbContext<AppDbContext>(options =>
-{
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DbCon"));
-});
-
-builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
+// Register ASP.NET Core Identity.
+builder.Services.AddIdentity<IdentityUser, IdentityRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
 
     options.Password.RequireDigit = true;
+    options.Password.RequireLowercase = true;
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = true;
     options.Password.RequiredLength = 8;
-
-}).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
-
-builder.Services.ConfigureApplicationCookie(options =>
-{
-    options.Events.OnRedirectToLogin = context =>
-    {
-        context.Response.StatusCode = 401;
-        return Task.CompletedTask;
-    };
-
-    options.Events.OnRedirectToAccessDenied = context =>
-    {
-        context.Response.StatusCode = 403;
-        return Task.CompletedTask;
-    };
-});
-
-builder.Services.AddAuthentication(options =>
-{
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 })
-.AddJwtBearer(options =>
-{
-    var jwt = builder.Configuration.GetSection("Jwt");
+.AddEntityFrameworkStores<HealthAxisDbContext>()
+.AddDefaultTokenProviders();
 
-    options.TokenValidationParameters = new TokenValidationParameters
+// Register JWT Authentication.
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        ValidateIssuer = true,
-        ValidIssuer = jwt["Issuer"],
+        var jwt = builder.Configuration.GetSection("Jwt");
 
-        ValidateAudience = true,
-        ValidAudience = jwt["Audience"],
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidIssuer = jwt["Issuer"],
 
-        ValidateLifetime = true,
+            ValidateAudience = true,
+            ValidAudience = jwt["Audience"],
 
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(
-            Encoding.UTF8.GetBytes(jwt["Key"]!)
-        ),
+            ValidateLifetime = true,
 
-        ClockSkew = TimeSpan.Zero,
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey = new SymmetricSecurityKey(
+                Encoding.UTF8.GetBytes(jwt["Key"]!)
+            ),
 
- 
-    };
-});
-
-builder.Services.AddAuthorization();
-
-builder.Services.AddEndpointsApiExplorer();
+            ClockSkew = TimeSpan.Zero
+        };
+    });
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.SwaggerDoc(
-        "v1",
-        new OpenApiInfo
-        {
-            Title = "HealthAxis API",
-            Version = "v1",
-            Description = "Healthcare Appointment Management API"
-        });
-
-    options.AddSecurityDefinition(
-        "bearer",
-        new OpenApiSecurityScheme
-        {
-            Name = "Authorization",
-            In = ParameterLocation.Header,
-            Type = SecuritySchemeType.Http,
-            Scheme = "bearer",
-            BearerFormat = "JWT",
-            Description = "Enter JWT token.\n\nExample: Bearer eyJhbGciOiJIUzI1NiIs..."
-        });
-
-    options.AddSecurityRequirement(document =>
-        new OpenApiSecurityRequirement
-        {
-            [new OpenApiSecuritySchemeReference(
-                "bearer",
-                document)] = []
-        });
-});
-
-builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
-builder.Services.AddScoped<IDoctorService, DoctorService>();
-builder.Services.AddScoped<IPatientService, PatientService>();
-builder.Services.AddScoped<IPatientRepository, PatientRepository>();
-builder.Services.AddScoped<IAppointmentService, AppointmentService>();
-builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
-builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
-builder.Services.AddScoped<IHealthRecordRepository, HealthRecordRepository>();
-builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<IAuthService, AuthService>();
-
-builder.Services.AddCors(p =>
-{
-    p.AddPolicy("CorsPolicy", cfg =>
+    options.SwaggerDoc("v1", new OpenApiInfo
     {
-        cfg.WithOrigins("https://localhost:7110", "http://localhost:4200")
-           .AllowAnyHeader()
-           .AllowAnyMethod();
+        Title = "HealthApp API",
+        Version = "v1"
+    });
+
+    options.AddSecurityDefinition("bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        Description = "Enter JWT token only. Do not type Bearer."
+    });
+
+    options.AddSecurityRequirement(document => new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecuritySchemeReference("bearer", document)] = []
     });
 });
 
 
+builder.Services.AddAuthorization();
+
+// Register DbContext for generic repository constructor.
+builder.Services.AddScoped<DbContext, HealthAxisDbContext>();
+
+// Register AuthService.
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Register AutoMapper.
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<MappingProfile>();
 });
 
+// Register generic repository.
+builder.Services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
+
+// Register entity-specific repositories.
+builder.Services.AddScoped<IPatientRepository, PatientRepository>();
+builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
+builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
+builder.Services.AddScoped<IHealthRecordRepository, HealthRecordRepository>();
+
+builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Register services.
+builder.Services.AddScoped<IPatientService, PatientService>();
+builder.Services.AddScoped<IDoctorService, DoctorService>();
+builder.Services.AddScoped<IAppointmentService, AppointmentService>();
+builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
+
+// Register Global Exception Handler.
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
+builder.Services.AddProblemDetails();
+
+// Swagger/OpenAPI.
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+const string ClientCorsPolicy = "ClientCorsPolicy";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(ClientCorsPolicy, policy =>
+    {
+        policy.WithOrigins(
+                "https://localhost:7075",
+                "http://localhost:4200",
+                "https://localhost:4200"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
+
 var app = builder.Build();
+
+// Seed roles and default admin.
+using (var scope = app.Services.CreateScope())
+{
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    await RoleSeeder.SeedRoleAsync(roleManager);
+}
 
 using (var scope = app.Services.CreateScope())
 {
-    var services = scope.ServiceProvider;
-
-    var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
-    var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
-
-    await RoleSeeder.SeedRolesAsync(roleManager);
-    await AdminSeeder.SeedAdminAsync(userManager);
+    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+    await AdminSeeder.SeedAdminAsync(userManager, roleManager, builder.Configuration);
 }
 
+// Seed roles and default admin.
+
+// Global exception handler middleware.
+app.UseExceptionHandler();
+
+// Configure HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -173,11 +174,14 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseCors("CorsPolicy");
 
-app.UseAuthentication();   
+
+app.UseCors(ClientCorsPolicy);
+
+app.UseAuthentication();
+
 app.UseAuthorization();
 
 app.MapControllers();
 
-await app.RunAsync();
+app.Run();

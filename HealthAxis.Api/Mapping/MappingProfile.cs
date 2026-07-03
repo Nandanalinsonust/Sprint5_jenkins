@@ -1,0 +1,125 @@
+﻿using AutoMapper;
+using HealthAxis.Api.Models;
+using HealthAxis.Shared.Dtos.Auth;
+using HealthAxis.Shared.Dtos.HealthRecords;
+using HealthAxis.Shared.Dtos.Doctors;
+using HealthAxis.Shared.Dtos.Patients;
+using HealthAxis.Shared.Dtos.Appointments;
+
+
+namespace HealthAxis.Api.Mapping
+{
+    public class MappingProfile : Profile
+    {
+        private const string DateFormat = "yyyy-MM-dd";
+        public MappingProfile()
+        {
+
+            // Patient mappings
+            CreateMap<Patient, PatientDto>()
+                .ForMember(
+                    dest => dest.FullName,
+                    opt => opt.MapFrom(src => src.PatientName)
+                )
+                .ForMember(
+                    dest => dest.InsuranceId,
+                    opt => opt.MapFrom(src => src.InsuranceID)
+                )
+                .ForMember(
+                    dest => dest.DateOfBirth,
+                    opt => opt.MapFrom(src => src.DateOfBirth.ToString(DateFormat))
+                )
+                .ForMember(
+                    dest => dest.CreatedDate,
+                    opt => opt.MapFrom(src => src.DateOfBirth.ToString(DateFormat))
+                );
+
+            CreateMap<CreatePatientDto, Patient>()
+                .ForMember(
+                    dest => dest.PatientName,
+                    opt => opt.MapFrom(src => src.FullName)
+                )
+                .ForMember(
+                    dest => dest.InsuranceID,
+                    opt => opt.MapFrom(src => src.InsuranceId)
+                );
+
+            CreateMap<UpdatePatientDto, Patient>()
+                .ForMember(
+                    dest => dest.PatientName,
+                    opt => opt.MapFrom(src => src.FullName)
+                )
+                .ForMember(
+                    dest => dest.InsuranceID,
+                    opt => opt.MapFrom(src => src.InsuranceId)
+                );
+
+            CreateMap<PatientRegisterDto, Patient>()
+                .ForMember(
+                    dest => dest.PatientName,
+                    opt => opt.MapFrom(src => src.FullName)
+                )
+                .ForMember(
+                    dest => dest.InsuranceID,
+                    opt => opt.MapFrom(src => src.InsuranceId)
+                );
+
+            // Doctor mappings
+            CreateMap<Doctor, DoctorDto>()
+                .ForMember(
+                    dest => dest.FullName,
+                    opt => opt.MapFrom(src => src.DoctorName)
+                );
+
+            CreateMap<CreateDoctorDto, Doctor>()
+                .ForMember(
+                    dest => dest.DoctorName,
+                    opt => opt.MapFrom(src => src.FullName)
+                );
+
+            CreateMap<UpdateDoctorDto, Doctor>()
+                .ForMember(
+                    dest => dest.DoctorName,
+                    opt => opt.MapFrom(src => src.FullName)
+                );
+
+            // Appointment mappings
+            CreateMap<Appointment, AppointmentDto>()
+                .ForMember(
+                    dest => dest.PatientName,
+                    opt => opt.MapFrom(src => src.Patient != null ? src.Patient.PatientName : null)
+                )
+                .ForMember(
+                    dest => dest.DoctorName,
+                    opt => opt.MapFrom(src => src.Doctor != null ? src.Doctor.DoctorName : null)
+                )
+                .ForMember(
+                    dest => dest.ScheduledDate,
+                    opt => opt.MapFrom(src => src.ScheduledDate.ToString(DateFormat))
+                );
+
+            CreateMap<BookAppointmentDto, Appointment>();
+
+            CreateMap<UpdateAppointmentDto, Appointment>();
+
+            // HealthRecord mappings
+            CreateMap<HealthRecord, HealthRecordDto>()
+                .ForMember(
+                    dest => dest.PatientName,
+                    opt => opt.MapFrom(src => src.Patient != null ? src.Patient.PatientName : null)
+                )
+                .ForMember(
+                    dest => dest.DoctorName,
+                    opt => opt.MapFrom(src => src.Doctor != null ? src.Doctor.DoctorName : null)
+                )
+                .ForMember(
+                    dest => dest.VisitDate,
+                    opt => opt.MapFrom(src => src.VisitDate.ToString(DateFormat))
+                );
+
+            CreateMap<AddHealthRecordDto, HealthRecord>();
+
+            CreateMap<UpdateHealthRecordDto, HealthRecord>();
+        }
+    }
+}

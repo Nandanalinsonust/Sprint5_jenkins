@@ -1,4 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using HealthAxis.Shared.Enums;
+using Microsoft.AspNetCore.Identity;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace HealthAxis.Api.Models
 {
@@ -6,25 +9,38 @@ namespace HealthAxis.Api.Models
     {
         [Key]
         public int PatientId { get; set; }
+
         [Required]
-        [RegularExpression(@"[A-Z][A-za-z\s]+", ErrorMessage = "Name should contain only Alphabets")]
+        [RegularExpression(@"^[A-Z][a-zA-Z\s]*$", ErrorMessage = "Name should start with a capital letter and contain only alphabets")]
         [MinLength(2)]
-        public required string FullName { get; set; }
+        [MaxLength(100)]
+        public required string PatientName { get; set; }
+
         [Required]
         public DateTime DateOfBirth { get; set; }
-        [Required]
-        [RegularExpression("(Male|Female|Transgender|Other)", ErrorMessage = "Gender should be Male , Female , Transgender or other")]
-        public required string Gender { get; set; }
-        [Required]
-        [EmailAddress(ErrorMessage = "Email is invalid")]
-        public required string Email { get; set; }
-        [Required]
-        [Phone(ErrorMessage = "Phone Number is invalid")]
-        public required string PhoneNumber { get; set; }
-        [RegularExpression(@"^$|^INS\d{4}$", ErrorMessage = "Format must be INSXXXX (4 digits)")]
-        public string? InsuranceID { get; set; }
-        public bool IsActive { get; set; }
-        public string UserId { get; set; } = string.Empty;
 
+        [Required]
+        public GenderType Gender { get; set; }
+
+        [Required]
+        [EmailAddress]
+        public required string Email { get; set; }
+
+        [Required]
+        [Phone]
+        public required string PhoneNumber { get; set; }
+
+        public string? InsuranceID { get; set; }
+
+        public string? IdentityUserId { get; set; }
+
+        [ForeignKey(nameof(IdentityUserId))]
+        public IdentityUser? IdentityUser { get; set; }
+
+        public DateTime CreatedDate { get; set; } = DateTime.Now;
+
+        public ICollection<Appointment> Appointments { get; set; } = new List<Appointment>();
+
+        public ICollection<HealthRecord> HealthRecords { get; set; } = new List<HealthRecord>();
     }
 }

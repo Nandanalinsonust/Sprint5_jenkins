@@ -5,18 +5,19 @@ using System.Text.Json;
 
 namespace HealthAxis.Admin.Auth
 {
+
     public class CustomAuthenticationStateProvider : AuthenticationStateProvider
     {
-        private const string TokenStorageKey = "accessToken";
+        private const string TokenStorageKey = "token";
         private const string AuthenticationType = "jwt";
 
-        private readonly IJSRuntime _js;
+        private readonly IJSRuntime _jsRuntime;
 
         private ClaimsPrincipal _currentUser = CreateAnonymousUser();
 
-        public CustomAuthenticationStateProvider(IJSRuntime js)
+        public CustomAuthenticationStateProvider(IJSRuntime jsRuntime)
         {
-            _js = js;
+            _jsRuntime = jsRuntime;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -26,7 +27,7 @@ namespace HealthAxis.Admin.Auth
                 return new AuthenticationState(_currentUser);
             }
 
-            var token = await _js.InvokeAsync<string?>(
+            var token = await _jsRuntime.InvokeAsync<string?>(
                 "localStorage.getItem",
                 TokenStorageKey);
 
@@ -132,7 +133,6 @@ namespace HealthAxis.Admin.Auth
 
             return Convert.FromBase64String(base64);
         }
-
         private static string AddBase64Padding(string base64)
         {
             int remainder = base64.Length % 4;

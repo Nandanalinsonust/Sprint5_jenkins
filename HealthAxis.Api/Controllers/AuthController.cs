@@ -1,85 +1,93 @@
-﻿using HealthAxis.Shared.Dtos;
-using HealthAxis.Api.Services;
+﻿using HealthAxis.Api.Models;
+using HealthAxis.Shared.Dtos.Auth;
+using HealthAxis.Api.Services.Interface;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using HealthAxis.Shared.Dtos.Patients;
+using HealthAxis.Shared.Dtos.Auth;
+
 
 namespace HealthAxis.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AuthController(IAuthService authService) : ControllerBase
+    public class AuthController(IAuthService service) : ControllerBase
     {
-        [HttpPost("register")]
+        [HttpPost("register-patient")]
         [AllowAnonymous]
-        public async Task<IActionResult> Register([FromBody] RegisterDto request)
+        public async Task<IActionResult> RegisterPatient(PatientRegisterDto request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
-
-            var result = await authService.Register(request);
-
-            if (!result.Success)
+            var (success, message, patientId) = await service.RegisterPatientAsync(request);
+            if (!success)
             {
-                return BadRequest(new { message = result.Message });
+                return BadRequest(new
+                {
+                    Message = message
+                });
             }
 
             return Ok(new
             {
-                message = result.Message,
-                userId = result.UserId
+                Message = message,
+                PatientId = patientId
             });
+
         }
 
         [HttpPost("login")]
         [AllowAnonymous]
-        public async Task<IActionResult> Login([FromBody] LoginDto request)
+        public async Task<IActionResult> Login(LoginDto request)
         {
-            if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+            var (success, message, token, expiresIn, mustChangePassword) = await service.Login(request);
 
-            var result = await authService.Login(request);
-
-            if (!result.Success)
+            if (!success)
             {
-                return Unauthorized(new { message = result.Message });
+                return Unauthorized(new
+                {
+                    Message = message
+                });
+            }
+
+            AuthResponseDto response = new AuthResponseDto
+            {
+                AccessToken = token,
+                Message = message,
+                ExpiresIn = expiresIn,
+                MustChangePassword = mustChangePassword
+            };
+
+            return Ok(response);
+        }
+
+        [HttpPost("change-password")]
+        [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme)]
+        public async Task<IActionResult> ChangePassword(ChangePasswordDto request)
+        {
+            var userId = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userId))
+            {
+                return Unauthorized(new
+                {
+                    Message = "Invalid user token."
+                });
+            }
+
+            var (success, message) = await service.ChangePasswordAsync(userId, request);
+
+            if (!success)
+            {
+                return BadRequest(new
+                {
+                    Message = message
+                });
             }
 
             return Ok(new
             {
-                message = result.Message,
-                data = result.Data,
-                expiresIn = result.ExpiresIn
+                Message = message
             });
-        }
-        [HttpPost("change-password")]
-[Authorize]
-public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
-{
-    if (!ModelState.IsValid)
-        return BadRequest(ModelState);
-
-    var result = await authService.ChangePassword(
-        User,
-        dto.CurrentPassword,
-        dto.NewPassword);
-
-    if (!result.Success)
-        return BadRequest(new
-        {
-            message = result.Message
-        });
-
-    return Ok(new
-    {
-        message = result.Message
-    });
-}
-        [HttpPost("forgot-password")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)
-        {
-            var result = await authService.ForgotPassword(dto.Email);
-            return Ok(result);
         }
     }
 }
