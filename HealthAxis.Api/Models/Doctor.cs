@@ -11,6 +11,9 @@ namespace HealthAxis.Api.Models
         [RegularExpression(@"^[A-Z][A-Za-z\s]+$")]
         public required string FullName { get; set; }
         [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
+        [Required]
         [RegularExpression("(Endocrinologist|Oncologist|Gynecologist|OrthopedicSurgeon|Psychiatrist|Pediatrician|Neurologist|Dermatologist|Cardiologist|GeneralPractitioner)", ErrorMessage = "Invalid Specialisation")]
         public required string Specialisation { get; set; }
         [Required]
@@ -23,6 +26,8 @@ namespace HealthAxis.Api.Models
         [Required]
         public bool IsActive { get; set; }
         public string UserId { get; set; } = string.Empty;
+
+        public bool IsFirstLogin { get; set; } = true;
     }
 }
 

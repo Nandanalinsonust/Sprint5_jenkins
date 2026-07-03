@@ -20,6 +20,6 @@ namespace HealthAxis.Api.Models
         [RegularExpression("(Pending|Confirmed|Cancelled|Completed)")]
         public required string Status { get; set; }
         [MaxLength(100)]
-        public required string CancellationReason { get; set; }
+        public string? CancellationReason { get; set; }
     }
 }

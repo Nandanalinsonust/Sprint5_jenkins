@@ -1,4 +1,5 @@
 ﻿using HealthAxis.Api.Services;
+using HealthAxis.Shared.Dtos;
 using HealthAxis.Shared.Enums;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -61,5 +62,48 @@ namespace HealthAxis.Api.Controllers
 
             return Ok(doctor);
         }
+
+        [HttpPut("{id}")]
+[Authorize(Roles = "Doctor")]
+public async Task<IActionResult> Update(
+    int id,
+    UpdateDoctorDto dto)
+{
+    var userId =
+        User.FindFirstValue(
+            ClaimTypes.NameIdentifier);
+
+    var currentDoctor =
+        await doctorService
+            .GetByUserIdAsync(userId);
+
+    if (currentDoctor.DoctorId != id)
+        return Unauthorized();
+
+    return Ok(
+        await doctorService.UpdateAsync(
+            id,
+            dto
+        )
+    );
+}
+[HttpPut("change-password")]
+[Authorize(Roles = "Doctor")]
+public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    var doctor = await doctorService.GetByUserIdAsync(userId);
+
+    if (doctor == null)
+        return NotFound();
+
+    var result = await doctorService.ChangePasswordAsync(userId, dto);
+
+    if (!result)
+        return BadRequest("Current password is incorrect");
+
+    return Ok(new { message = "Password updated successfully" });
+}
     }
 }

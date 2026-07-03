@@ -9,10 +9,10 @@ namespace HealthAxis.Api.Models
         [Key]
         public int HealthRecordId { get; set; }
         [ForeignKey("PatientId")]
-        public int? PatientId { get; set; }
+        public int PatientId { get; set; }
         public required Patient Patient { get; set; }
         [ForeignKey("DoctorId")]
-        public int? DoctorId { get; set; }
+        public int DoctorId { get; set; }
         public required Doctor Doctor { get; set; }
         [ForeignKey("AppointmentId")]
         public required int AppointmentId { get; set; }

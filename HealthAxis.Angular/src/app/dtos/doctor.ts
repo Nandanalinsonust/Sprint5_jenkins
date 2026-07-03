@@ -1,8 +1,33 @@
+import { Specialisation } from '../enums/specialisation';
+
 export interface Doctor {
+
   doctorId: number;
+
   fullName: string;
-  specialisation: string;
+
+  email: string;
+
+  specialisation: Specialisation;
+
   yearsOfExperience: number;
+
   consultationFee: number;
-  isActive?: boolean;
+
+  isActive: boolean;
+}
+
+export interface UpdateDoctorRequest {
+
+  doctorId: number;
+
+  fullName: string;
+
+  specialisation: Specialisation;
+
+  yearsOfExperience: number;
+
+  consultationFee: number;
+
+  isActive: boolean;
 }

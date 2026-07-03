@@ -7,12 +7,23 @@ namespace HealthAxis.Api.Services.Impl
 {
     public class PatientService(IPatientRepository repository, IMapper mapper) : IPatientService
     {
-        public async Task<PatientDto> AddAsync(CreatePatientDto entity)
-        {
-            var patient = mapper.Map<Patient>(entity);
-            var saved = await repository.CreateAsync(patient);
-            return mapper.Map<PatientDto>(saved);
-        }
+        public async Task<PatientDto> AddAsync(
+    CreatePatientDto entity)
+{
+    var patient =
+        mapper.Map<Patient>(entity);
+
+    patient.IsActive = true;
+
+    var saved =
+        await repository.CreateAsync(
+            patient
+        );
+
+    return mapper.Map<PatientDto>(
+        saved
+    );
+}
 
         public async Task<List<PatientDto>> GetAllAsync()
         {

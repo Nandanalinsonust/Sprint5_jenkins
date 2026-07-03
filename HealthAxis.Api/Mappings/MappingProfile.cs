@@ -25,14 +25,27 @@ namespace HealthAxis.Api.Mappings
             CreateMap<CreatePatientDto, Patient>();
 
             CreateMap<Appointment, AppointmentDto>()
-                .ForMember(dest => dest.Status,
-                    opt => opt.MapFrom(src => Enum.Parse<AppointmentStatus>(src.Status)));
+    .ForMember(
+        dest => dest.Status,
+        opt => opt.MapFrom(
+            src => Enum.Parse<AppointmentStatus>(src.Status)
+        ))
+    .ForMember(
+        dest => dest.PatientName,
+        opt => opt.MapFrom(src => src.Patient.FullName)
+        )
+    .ForMember(
+        dest => dest.DoctorName,
+        opt => opt.MapFrom(src => src.Doctor.FullName)
+        );
 
             CreateMap<CreateAppointmentDto, Appointment>();
 
             CreateMap<UpdateAppointmentDto, Appointment>();
 
             CreateMap<HealthRecord, HealthRecordDto>().ReverseMap();
+
+            CreateMap<CreateHealthRecordDto, HealthRecord>();
         }
     }
 }

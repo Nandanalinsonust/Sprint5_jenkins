@@ -3,11 +3,13 @@ using HealthAxis.Api.Models;
 using HealthAxis.Api.Repositories;
 using HealthAxis.Shared.Dtos;
 using HealthAxis.Shared.Enums;
+using Microsoft.AspNetCore.Identity;
 
 namespace HealthAxis.Api.Services.Impl
 {
     public class DoctorService(IDoctorRepository repository, IMapper mapper) : IDoctorService
     {
+        private readonly UserManager<ApplicationUser> userManager;
         public async Task<DoctorDto> AddAsync(CreateDoctorDto dto)
         {
             var doctor = mapper.Map<Doctor>(dto);
@@ -79,6 +81,34 @@ namespace HealthAxis.Api.Services.Impl
                 data.Skip((page - 1) * pageSize).Take(pageSize).ToList()
             );
         }
+        public async Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto dto)
+{
+    var user = await userManager.FindByIdAsync(userId);
+
+    if (user == null)
+        return false;
+
+    var check = await userManager.CheckPasswordAsync(user, dto.CurrentPassword);
+
+    if (!check)
+        return false;
+
+    var result = await userManager.ChangePasswordAsync(
+        user,
+        dto.CurrentPassword,
+        dto.NewPassword
+    );
+
+    if (!result.Succeeded)
+        return false;
+
+    var doctor = await repository.GetByUserIdAsync(userId);
+    doctor.IsFirstLogin = false;
+
+    await repository.UpdateAsync(doctor.DoctorId, doctor);
+
+    return true;
+}
 
     }
 }

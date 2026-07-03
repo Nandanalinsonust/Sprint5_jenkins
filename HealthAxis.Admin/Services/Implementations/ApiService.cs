@@ -140,9 +140,12 @@ namespace HealthAxis.Admin.Services
             return response.IsSuccessStatusCode;
         }
         private void RedirectToLogin()
-        {
-            _js.InvokeVoidAsync("localStorage.removeItem", TokenKey);
-            _nav.NavigateTo("/login", true);
-        }
+{
+    _js.InvokeVoidAsync("localStorage.removeItem", TokenKey);
+
+    _nav.NavigateTo(
+        "https://localhost:4200/login",
+        true);
+}
     }
 }

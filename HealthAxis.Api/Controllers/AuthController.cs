@@ -52,19 +52,28 @@ namespace HealthAxis.Api.Controllers
             });
         }
         [HttpPost("change-password")]
-        [AllowAnonymous]
-        public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+[Authorize]
+public async Task<IActionResult> ChangePassword(ChangePasswordDto dto)
+{
+    if (!ModelState.IsValid)
+        return BadRequest(ModelState);
+
+    var result = await authService.ChangePassword(
+        User,
+        dto.CurrentPassword,
+        dto.NewPassword);
+
+    if (!result.Success)
+        return BadRequest(new
         {
-            var result = await authService.ChangePassword(
-                dto.Email,
-                dto.OldPassword,
-                dto.NewPassword);
+            message = result.Message
+        });
 
-            if (!result.Success)
-                return BadRequest(result.Message);
-
-            return Ok(result.Message);
-        }
+    return Ok(new
+    {
+        message = result.Message
+    });
+}
         [HttpPost("forgot-password")]
         [AllowAnonymous]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordDto dto)

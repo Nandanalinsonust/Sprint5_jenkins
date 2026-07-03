@@ -9,6 +9,8 @@ namespace HealthAxis.Shared.Dtos
 
         public string FullName { get; set; } = string.Empty;
 
+        public string Email { get; set; }
+
         public DoctorSpecialisation Specialisation { get; set; }
 
         public int YearsOfExperience { get; set; }
@@ -20,14 +22,16 @@ namespace HealthAxis.Shared.Dtos
 
     public class CreateDoctorDto
     {
-        [Required]
-        [EmailAddress]
-        public string Email { get; set; } = string.Empty;
+        
 
         [Required]
         [MinLength(2)]
         [RegularExpression(@"^[A-Z][A-Za-z\s]+$")]
         public string FullName { get; set; } = string.Empty;
+
+        [Required]
+        [EmailAddress]
+        public string Email { get; set; } = string.Empty;
 
         [Required]
         public DoctorSpecialisation Specialisation { get; set; }

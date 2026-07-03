@@ -26,28 +26,28 @@ namespace HealthAxis.Shared.Dtos
         [Compare("Password")]
         public string ConfirmPassword { get; set; } = string.Empty;
 
-        [Required]
-        public string Role { get; set; } = "Patient";
     }
 
     public class AuthResponse
     {
-        public string Token { get; set; } = string.Empty;
-
+        public string Token { get; set; }
+        public bool IsFirstLogin { get; set; }
+        public string Role { get; set; }
     }
 
     public class ChangePasswordDto
-    {
-        [Required]
-        public string Email { get; set; } = string.Empty;
+{
+    [Required]
+    public string CurrentPassword { get; set; } = string.Empty;
 
-        [Required]
-        public string OldPassword { get; set; } = string.Empty;
+    [Required]
+    [MinLength(8)]
+    public string NewPassword { get; set; } = string.Empty;
 
-        [Required]
-        [MinLength(8)]
-        public string NewPassword { get; set; } = string.Empty;
-    }
+    [Required]
+    [Compare(nameof(NewPassword))]
+    public string ConfirmPassword { get; set; } = string.Empty;
+}
 
     public class ForgotPasswordDto
     {

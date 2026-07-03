@@ -1,0 +1,109 @@
+<div class="container py-4">
+
+  <div class="row g-4">
+
+    <div class="col-md-4">
+
+      <div class="card shadow-sm">
+
+        <div class="card-body">
+
+          <h4>
+            My Profile
+          </h4>
+
+          <p>
+            <strong>Name:</strong>
+            {{ profile?.fullName }}
+          </p>
+
+          <p>
+            <strong>Email:</strong>
+            {{ profile?.email }}
+          </p>
+
+          <a
+            routerLink="/patient/profile"
+            class="btn btn-primary">
+
+            Edit Profile
+
+          </a>
+
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="col-md-8">
+
+      <div class="row g-3">
+
+        <div class="col-md-4">
+
+          <div class="card shadow-sm">
+
+            <div class="card-body text-center">
+
+              <h3>
+                {{ appointments.length }}
+              </h3>
+
+              <p>
+                Total Appointments
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+          <div class="card shadow-sm">
+
+            <div class="card-body text-center">
+
+              <h3>
+                {{ upcomingAppointments }}
+              </h3>
+
+              <p>
+                Upcoming
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <div class="col-md-4">
+
+          <div class="card shadow-sm">
+
+            <div class="card-body text-center">
+
+              <h3>
+                {{ completedAppointments }}
+              </h3>
+
+              <p>
+                Completed
+              </p>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

@@ -1,4 +1,5 @@
 ﻿using HealthAxis.Shared.Dtos;
+using System.Security.Claims;
 
 namespace HealthAxis.Api.Services
 {
@@ -8,7 +9,10 @@ namespace HealthAxis.Api.Services
         Task<(bool Success, string Message, AuthResponse? Data, int ExpiresIn)> Login(LoginDto request);
         Task<(bool Success, string Message)> CreateDoctorUser(string email);
 
-        Task<(bool Success, string Message)> ChangePassword(string email,string oldPassword,string newPassword);
+        Task<(bool Success, string Message)> ChangePassword(
+    ClaimsPrincipal principal,
+    string currentPassword,
+    string newPassword);
         Task<string> ForgotPassword(string email);
         Task<(bool Success, string Message)> CreatePatientUser(string email);
     }

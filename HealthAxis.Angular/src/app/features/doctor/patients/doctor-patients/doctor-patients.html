@@ -1,0 +1,52 @@
+<div class="container py-4">
+
+  <div class="card shadow-sm">
+
+    <div class="card-body">
+
+      <h3>
+        My Patients
+      </h3>
+
+      <table class="table">
+
+        <thead>
+
+          <tr>
+
+            <th>
+              Patient Id
+            </th>
+
+            <th>
+              Patient Name
+            </th>
+
+          </tr>
+
+        </thead>
+
+        <tbody>
+
+          <tr
+            *ngFor="let patient of uniquePatients">
+
+            <td>
+             {{ patient.patientId }}
+          </td>
+
+            <td>
+             {{ patient.patientName || 'Unknown' }}
+            </td>
+
+        </tr>
+
+        </tbody>
+
+    </table>
+
+    </div>
+
+  </div>
+
+</div>

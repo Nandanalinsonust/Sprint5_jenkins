@@ -28,15 +28,25 @@ namespace HealthAxis.Api.Controllers
         }
 
         [HttpGet("me")]
-        [Authorize(Roles = "Patient")]
-        public async Task<IActionResult> GetMyRecords()
+[Authorize(Roles = "Patient")]
+public async Task<IActionResult> GetMyRecords()
+{
+    var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+    var patient = await patientService.GetByUserIdAsync(userId);
+
+    if (patient == null)
+    {
+        return BadRequest(new
         {
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            message = "Please complete your profile first."
+        });
+    }
 
-            var patient = await patientService.GetByUserIdAsync(userId);
+    var records = await service.GetByPatientIdAsync(patient.PatientId);
 
-            return Ok(await service.GetByPatientIdAsync(patient.PatientId));
-        }
+    return Ok(records);
+}
 
         [HttpGet("doctor")]
         [Authorize(Roles = "Doctor")]

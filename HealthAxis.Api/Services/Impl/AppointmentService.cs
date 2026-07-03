@@ -40,6 +40,12 @@ namespace HealthAxis.Api.Services.Impl
                 a.TimeSlot == dto.TimeSlot &&
                 a.ScheduledDate.Date == dto.ScheduledDate.Date))
                 throw new InvalidException("Doctor conflict");
+            if (patientAppointments.Any(a =>
+                a.DoctorId == dto.DoctorId &&
+                a.ScheduledDate.Date == dto.ScheduledDate.Date))
+            {
+                throw new InvalidException("Cannot book same doctor twice in a day");
+            }
 
             var appointment = mapper.Map<Appointment>(dto);
             appointment.Status = "Pending";

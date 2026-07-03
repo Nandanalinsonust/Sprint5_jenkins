@@ -1,0 +1,59 @@
+<div class="container py-4">
+
+  <div class="card shadow-sm">
+
+    <div class="card-body">
+
+      <h3>
+        Book Appointment
+      </h3>
+
+      <input
+        type="date"
+        class="form-control mb-3"
+        [(ngModel)]="selectedDate">
+
+      <button
+        class="btn btn-primary"
+        (click)="loadAvailability()">
+
+        Load Slots
+
+      </button>
+
+      <div class="mt-4">
+
+        <button
+          *ngFor="let slot of slots"
+          class="btn btn-outline-primary me-2 mb-2"
+          [disabled]="bookedSlots.includes(slot)"
+          (click)="selectedSlot = slot">
+
+          {{ slot }}
+
+        </button>
+
+      </div>
+
+      <button
+        class="btn btn-success mt-3"
+        [disabled]="!selectedSlot"
+        (click)="book()">
+
+        Confirm Booking
+
+      </button>
+
+      <div
+        class="text-success mt-3"
+        *ngIf="message">
+
+        {{ message }}
+
+      </div>
+
+    </div>
+
+  </div>
+
+</div>

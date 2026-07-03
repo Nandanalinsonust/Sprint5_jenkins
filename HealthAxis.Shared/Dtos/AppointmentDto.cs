@@ -3,30 +3,31 @@ using HealthAxis.Shared.Enums;
 
 namespace HealthAxis.Shared.Dtos
 {
-    // ✅ MAIN DTO (READ)
+    // READ DTO
     public class AppointmentDto
     {
         public int AppointmentId { get; set; }
 
         public int PatientId { get; set; }
 
+        public string PatientName { get; set; } = string.Empty;
+
         public int DoctorId { get; set; }
+
+        public string DoctorName { get; set; } = string.Empty;
 
         public DateTime ScheduledDate { get; set; }
 
         public string TimeSlot { get; set; } = string.Empty;
 
-        public AppointmentStatus Status { get; set; }   // ✅ ENUM
+        public AppointmentStatus Status { get; set; }
 
         public string? CancellationReason { get; set; }
     }
 
-    // ✅ CREATE DTO
+    // CREATE DTO
     public class CreateAppointmentDto
     {
-        // ❌ Removed AppointmentId (IMPORTANT FIX)
-
-        [Required]
         public int PatientId { get; set; }
 
         [Required]
@@ -36,12 +37,14 @@ namespace HealthAxis.Shared.Dtos
         public DateTime ScheduledDate { get; set; }
 
         [Required]
-        [RegularExpression(@"^\d{2}:\d{2}(-\d{2}:\d{2})?$",
-            ErrorMessage = "Invalid time slot format (HH:mm or HH:mm-HH:mm)")]
+        [RegularExpression(
+            @"^\d{2}:\d{2}(-\d{2}:\d{2})?$",
+            ErrorMessage = "Invalid time slot format (HH:mm or HH:mm-HH:mm)"
+        )]
         public string TimeSlot { get; set; } = string.Empty;
     }
 
-    // ✅ UPDATE DTO
+    // UPDATE DTO
     public class UpdateAppointmentDto
     {
         [Required]
@@ -57,17 +60,17 @@ namespace HealthAxis.Shared.Dtos
         public string TimeSlot { get; set; } = string.Empty;
     }
 
-    // ✅ UPDATE STATUS DTO
+    // STATUS UPDATE DTO
     public class UpdateAppointmentStatusDto
     {
         [Required]
-        public AppointmentStatus Status { get; set; }   // ✅ ENUM
+        public AppointmentStatus Status { get; set; }
 
         [MaxLength(100)]
         public string? CancellationReason { get; set; }
     }
 
-    // ✅ REPORT DTO
+    // REPORT DTO
     public class AppointmentSummaryDto
     {
         public DateTime Date { get; set; }

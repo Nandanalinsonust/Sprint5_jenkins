@@ -1,30 +1,72 @@
+import { Injectable, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Injectable } from '@angular/core';
-import { LoginRequest } from '../dtos/login-request';
-import { RegisterRequest } from '../dtos/register-request';
-import { API_BASE_URL } from '../config/config';
-import { AuthResponse } from '../dtos/auth-response';
 import { Observable } from 'rxjs';
 
+import { API_BASE_URL } from '../config/config';
+import { LoginRequest } from '../dtos/login-request';
+import { RegisterRequest } from '../dtos/register-request';
+import { AuthResponse } from '../dtos/auth-response';
+import { ChangePasswordRequest } from '../dtos/change-password-request';
+
 @Injectable({
-  providedIn: 'root',
+  providedIn: 'root'
 })
 export class AuthService {
-  constructor(private http: HttpClient) {}
 
-  login(loginRequest: LoginRequest): Observable<AuthResponse> {
-    return this.http.post<AuthResponse>(`${API_BASE_URL}/auth/login`, loginRequest);
+  private http = inject(HttpClient);
+
+  // ================= AUTH =================
+
+  login(request: LoginRequest): Observable<AuthResponse> {
+    return this.http.post<AuthResponse>(
+      `${API_BASE_URL}/auth/login`,
+      request
+    );
   }
 
-  register(registerRequest: RegisterRequest): Observable<any> {
-    return this.http.post(`${API_BASE_URL}/auth/register`, registerRequest);
+  register(request: RegisterRequest): Observable<any> {
+    return this.http.post(
+      `${API_BASE_URL}/auth/register`,
+      request
+    );
   }
 
-  changePassword(payload: { email: string; oldPassword: string; newPassword: string }): Observable<any> {
-    return this.http.post(`${API_BASE_URL}/auth/change-password`, payload);
+  changePassword(request: ChangePasswordRequest): Observable<any> {
+    return this.http.post(
+      `${API_BASE_URL}/auth/change-password`,
+      request
+    );
   }
 
-  setPendingFirstLoginEmail(email: string) {
+  // ================= TOKEN =================
+
+  setSession(response: any): void {
+
+    const token =
+      response?.data?.token ||
+      response?.token;
+
+    if (token) {
+      localStorage.setItem('token', token);
+    }
+  }
+
+  getToken(): string {
+    return localStorage.getItem('token') || '';
+  }
+
+  isLoggedIn(): boolean {
+    return this.getToken() !== '';
+  }
+
+  logout(): void {
+    localStorage.removeItem('token');
+    localStorage.removeItem('pendingFirstLoginEmail');
+  }
+
+  // ================= FIRST LOGIN =================
+
+  setPendingFirstLoginEmail(email: string): void {
     localStorage.setItem('pendingFirstLoginEmail', email);
   }
 
@@ -32,60 +74,71 @@ export class AuthService {
     return localStorage.getItem('pendingFirstLoginEmail') || '';
   }
 
-  clearPendingFirstLoginEmail() {
+  clearPendingFirstLoginEmail(): void {
     localStorage.removeItem('pendingFirstLoginEmail');
   }
 
-  setSession(authResponse: AuthResponse) {
-    localStorage.setItem('token', authResponse.data.token);
-  }
+  // ================= USER INFO =================
 
-  getToken() {
-    return localStorage.getItem('token');
-  }
-
-  isLoggedIn() {
-    return localStorage.getItem('token') != null;
-  }
-
-  getUserRolesFromToken(token: string) {
-    const payload = this.parseJwt(token);
-    if (!payload) return [];
-    const roleClaims = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || payload.role || payload.roles;
-    return Array.isArray(roleClaims) ? roleClaims : roleClaims ? [roleClaims] : [];
-  }
-
-  logout() {
-    localStorage.removeItem('token');
-    localStorage.removeItem('accessToken');
-  }
-
-  private parseJwt(token: string): any | null {
+  private parseJwt(token: string): any {
     try {
       if (!token) return null;
-      const parts = token.split('.');
-      if (parts.length !== 3) return null;
-      const base64Url = parts[1];
-      const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+
+      const base64 = token.split('.')[1]
+        .replace(/-/g, '+')
+        .replace(/_/g, '/');
+
       return JSON.parse(atob(base64));
-    } catch (e) {
+    } catch {
       return null;
     }
   }
 
-  getUserRoles() {
-    const token = this.getToken();
-    if (!token) return [];
-    const payload = this.parseJwt(token);
-    if (!payload) return [];
-    const roleClaims = payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'] || payload.role || payload.roles;
-    return Array.isArray(roleClaims) ? roleClaims : roleClaims ? [roleClaims] : [];
+  getUserRoles(): string[] {
+
+    const payload = this.parseJwt(this.getToken());
+
+    const roles =
+      payload?.role ||
+      payload?.roles ||
+      payload?.['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+    if (!roles) return [];
+
+    return Array.isArray(roles) ? roles : [roles];
   }
 
-  getCurrentUserEmail() {
-    const token = this.getToken();
-    if (!token) return '';
-    const payload = this.parseJwt(token);
-    return payload?.email || payload?.['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress'] || '';
+  getRole(): string {
+    return this.getUserRoles()[0] || '';
+  }
+
+  isDoctor(): boolean {
+    return this.getUserRoles().includes('Doctor');
+  }
+
+  isPatient(): boolean {
+    return this.getUserRoles().includes('Patient');
+  }
+
+  isAdmin(): boolean {
+    return this.getUserRoles().includes('Admin');
+  }
+
+  // ================= ERROR =================
+
+  getErrorMessage(error: any): string {
+
+    if (error?.error?.message) return error.error.message;
+
+    if (typeof error?.error === 'string') return error.error;
+
+    switch (error?.status) {
+      case 400: return 'Bad request.';
+      case 401: return 'Invalid credentials.';
+      case 403: return 'Access denied.';
+      case 404: return 'Not found.';
+      case 500: return 'Server error.';
+      default: return 'Something went wrong.';
+    }
   }
 }

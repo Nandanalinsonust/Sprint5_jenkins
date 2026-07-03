@@ -1,0 +1,67 @@
+/* ===== Base ===== */
+.container {
+  font-family: Arial, sans-serif;
+}
+
+/* ===== Card Styling ===== */
+.card {
+  border: none;
+  border-radius: 16px;
+  background: #fffaf3;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Title ===== */
+h3 {
+  color: #5a4632;
+  font-weight: 700;
+  margin-bottom: 20px;
+}
+
+/* ===== Table Styling ===== */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  background-color: #fffdf9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+/* Header */
+.table thead {
+  background-color: #f0e3d2;
+}
+
+.table th {
+  color: #5a4632;
+  font-weight: 700;
+  padding: 12px;
+  border-bottom: 2px solid #e6d5bf;
+}
+
+/* Rows */
+.table td {
+  padding: 12px;
+  color: #6b5b4d;
+  border-bottom: 1px solid #f0e3d2;
+}
+
+/* Hover effect */
+.table tbody tr:hover {
+  background-color: #f7f0e6;
+  transition: 0.2s ease;
+}
+
+/* ===== Card Padding ===== */
+.card-body {
+  padding: 25px;
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 768px) {
+  .table th,
+  .table td {
+    font-size: 14px;
+    padding: 10px;
+  }
+}

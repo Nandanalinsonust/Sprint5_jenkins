@@ -2,9 +2,9 @@
 @page "/login"
 @attribute [AllowAnonymous]
 @namespace HealthAxis.Admin.Pages
+@using Microsoft.AspNetCore.WebUtilities
 @layout LoginLayout
 
-@using Microsoft.AspNetCore.WebUtilities
 @inject NavigationManager Nav
 @inject IAuthService AuthService
 @inject IJSRuntime JS

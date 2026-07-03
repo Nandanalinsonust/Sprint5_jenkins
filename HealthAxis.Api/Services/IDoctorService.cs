@@ -15,5 +15,6 @@ namespace HealthAxis.Api.Services
         Task<bool> DeactivateAsync(int id);
         Task AssignUserAsync(int doctorId, string userId);
         Task<DoctorDto> GetByUserIdAsync(string userId);
+        Task<bool> ChangePasswordAsync(string userId, ChangePasswordDto dto);
     }
 }

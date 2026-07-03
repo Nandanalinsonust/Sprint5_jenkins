@@ -1,0 +1,99 @@
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+
+  <div class="container-fluid">
+
+    <a
+      routerLink="/"
+      class="navbar-brand">
+
+      HealthAxis
+
+    </a>
+
+    <div class="navbar-nav ms-auto">
+
+      @if (!isLoggedIn()) {
+
+        <a
+          routerLink="/login"
+          class="nav-link">
+
+          Login
+
+        </a>
+
+        <a
+          routerLink="/register"
+          class="nav-link">
+
+          Register
+
+        </a>
+
+      }
+
+      @if (isLoggedIn() && isPatient()) {
+
+        <a
+          routerLink="/patient/dashboard"
+          class="nav-link">
+
+          Dashboard
+
+        </a>
+
+        <a
+          routerLink="/patient/doctors"
+          class="nav-link">
+
+          Doctors
+
+        </a>
+
+        <a
+          routerLink="/patient/appointments"
+          class="nav-link">
+
+          Appointments
+
+        </a>
+
+      }
+
+      @if (isLoggedIn() && isDoctor()) {
+
+        <a
+          routerLink="/doctor/dashboard"
+          class="nav-link">
+
+          Dashboard
+
+        </a>
+
+        <a
+          routerLink="/doctor/records"
+          class="nav-link">
+
+          Records
+
+        </a>
+
+      }
+
+      @if (isLoggedIn()) {
+
+        <button
+          class="btn btn-link nav-link"
+          (click)="logout()">
+
+          Logout
+
+        </button>
+
+      }
+
+    </div>
+
+  </div>
+
+</nav>

@@ -18,15 +18,19 @@ namespace HealthAxis.Api.Repositories.Impl
         public async Task<List<Appointment>> GetByDoctorIdAsync(int doctorId)
         {
             return await context.Appointments
-                .Where(a => a.DoctorId == doctorId)
-                .ToListAsync();
+            .Include(a => a.Patient)
+            .Include(a => a.Doctor)
+            .Where(a => a.DoctorId == doctorId)
+            .ToListAsync();
         }
 
         public async Task<List<Appointment>> GetByPatientIdAsync(int patientId)
         {
             return await context.Appointments
-                .Where(a => a.PatientId == patientId)
-                .ToListAsync();
+            .Include(a => a.Patient)
+            .Include(a => a.Doctor)
+            .Where(a => a.PatientId == patientId)
+            .ToListAsync();
         }
 
         public async Task<Appointment?> UpdateStatusAsync(int id, string status)
@@ -57,10 +61,17 @@ namespace HealthAxis.Api.Repositories.Impl
                 {
                     Date = g.Key,
 
-                    Confirmed = g.Count(x => x.Status == AppointmentStatus.Confirmed.ToString()),
-                    Cancelled = g.Count(x => x.Status == AppointmentStatus.Cancelled.ToString()),
-                    Completed = g.Count(x => x.Status == AppointmentStatus.Completed.ToString())
+                    Pending = g.Count(x =>
+                        x.Status == AppointmentStatus.Pending.ToString()),
 
+                    Confirmed = g.Count(x =>
+                        x.Status == AppointmentStatus.Confirmed.ToString()),
+
+                    Cancelled = g.Count(x =>
+                        x.Status == AppointmentStatus.Cancelled.ToString()),
+
+                    Completed = g.Count(x =>
+                        x.Status == AppointmentStatus.Completed.ToString())
                 })
                 .ToListAsync();
         }

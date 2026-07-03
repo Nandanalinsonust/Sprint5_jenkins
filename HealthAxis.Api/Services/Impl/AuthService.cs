@@ -8,7 +8,11 @@ using System.Text;
 
 namespace HealthAxis.Api.Services.Impl
 {
-    public class AuthService(UserManager<ApplicationUser> userManager, IConfiguration config) : IAuthService
+    public class AuthService(
+    UserManager<ApplicationUser> userManager,
+    IConfiguration config,
+    IHttpContextAccessor httpContextAccessor)
+    : IAuthService
     {
         public async Task<(bool Success, string Message, AuthResponse? Data, int ExpiresIn)> Login(LoginDto request)
         {
@@ -20,26 +24,32 @@ namespace HealthAxis.Api.Services.Impl
             if (!user.IsActive)
                 return (false, "User inactive", null, 0);
 
-            var isPasswordValid = await userManager.CheckPasswordAsync(user, request.Password);
+            var isPasswordValid =
+                await userManager.CheckPasswordAsync(user, request.Password);
 
             if (!isPasswordValid)
                 return (false, "Invalid credentials", null, 0);
 
             var roles = await userManager.GetRolesAsync(user);
 
-            if (user.IsFirstLogin && roles.Contains("Doctor"))
-                return (false, "FirstLogin", null, 0);
-
             var token = await GenerateToken(user);
 
-            var expiry = int.Parse(config["Jwt:AccessTokenExpirationMinutes"]!);
+            var expiry =
+                int.Parse(config["Jwt:AccessTokenExpirationMinutes"]!);
 
             var response = new AuthResponse
             {
-                Token = token
+                Token = token,
+                IsFirstLogin = user.IsFirstLogin,
+                Role = roles.FirstOrDefault() ?? ""
             };
 
-            return (true, "User Logged in Successfully", response, expiry);
+            return (
+                true,
+                "Login successful",
+                response,
+                expiry
+            );
         }
 
         public async Task<string> ForgotPassword(string email)
@@ -58,9 +68,6 @@ namespace HealthAxis.Api.Services.Impl
             if (request.Password != request.ConfirmPassword)
                 return (false, "Password Do Not Match", "");
 
-            if (request.Role == "Doctor")
-                return (false, "Doctors must be created by Admin", "");
-
             var user = new ApplicationUser
             {
                 UserName = request.Email,
@@ -71,9 +78,16 @@ namespace HealthAxis.Api.Services.Impl
             var result = await userManager.CreateAsync(user, request.Password);
 
             if (!result.Succeeded)
-                return (false, "Error creating user", "");
+            {
+                return (
+                    false,
+                    string.Join(", ", result.Errors.Select(e => e.Description)),
+                    ""
+                );
+            }
 
-            await userManager.AddToRoleAsync(user, request.Role);
+            await userManager.AddToRoleAsync(user, "Patient");
+
 
             return (true, "User Registered Successfully", user.Id);
         }
@@ -97,27 +111,50 @@ namespace HealthAxis.Api.Services.Impl
             return (true, "Doctor user created");
         }
 
-        public async Task<(bool Success, string Message)> ChangePassword(string email, string oldPassword, string newPassword)
+        public async Task<(bool Success, string Message)> ChangePassword(
+    ClaimsPrincipal principal,
+    string currentPassword,
+    string newPassword)
         {
-            var user = await userManager.FindByEmailAsync(email);
+            var userId = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if (string.IsNullOrEmpty(userId))
+                return (false, "User not found");
+
+            var user = await userManager.FindByIdAsync(userId);
+
             if (user == null)
                 return (false, "User not found");
 
             IdentityResult result;
+
             if (user.IsFirstLogin)
             {
                 var token = await userManager.GeneratePasswordResetTokenAsync(user);
-                result = await userManager.ResetPasswordAsync(user, token, newPassword);
+
+                result = await userManager.ResetPasswordAsync(
+                    user,
+                    token,
+                    newPassword);
             }
             else
             {
-                result = await userManager.ChangePasswordAsync(user, oldPassword, newPassword);
+                result = await userManager.ChangePasswordAsync(
+                    user,
+                    currentPassword,
+                    newPassword);
             }
 
             if (!result.Succeeded)
-                return (false, "Password change failed");
+            {
+                return (
+                    false,
+                    string.Join(", ", result.Errors.Select(e => e.Description))
+                );
+            }
 
             user.IsFirstLogin = false;
+
             await userManager.UpdateAsync(user);
 
             return (true, "Password changed successfully");
@@ -132,16 +169,17 @@ namespace HealthAxis.Api.Services.Impl
 
             var roles = await userManager.GetRolesAsync(user);
 
+            // ✅ CLEAN CLAIMS (NO MIXED TYPES)
             var claims = new List<Claim>
-            {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-                new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
-                new Claim(ClaimTypes.NameIdentifier, user.Id)
-            };
+    {
+        new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+        new Claim(JwtRegisteredClaimNames.Email, user.Email ?? ""),
+        new Claim(ClaimTypes.NameIdentifier, user.Id) // ✅ IMPORTANT
+    };
 
             foreach (var role in roles)
             {
-                claims.Add(new Claim(ClaimTypes.Role, role));
+                claims.Add(new Claim(ClaimTypes.Role, role)); // ✅ IMPORTANT
             }
 
             var token = new JwtSecurityToken(
@@ -156,6 +194,7 @@ namespace HealthAxis.Api.Services.Impl
 
             return new JwtSecurityTokenHandler().WriteToken(token);
         }
+
         public async Task<(bool Success, string Message)> CreatePatientUser(string email)
         {
             var user = new ApplicationUser

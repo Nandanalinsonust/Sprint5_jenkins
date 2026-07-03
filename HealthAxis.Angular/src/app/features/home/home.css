@@ -1,0 +1,100 @@
+/* ===== Base Page ===== */
+body {
+  margin: 0;
+  font-family: Arial, sans-serif;
+  background-color: #f7f3ee; /* light beige background */
+  color: #3e3a36;
+}
+
+/* ===== Hero Section ===== */
+.hero {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #f7f3ee, #efe6da);
+  padding: 40px 20px;
+  text-align: center;
+}
+
+.container {
+  max-width: 700px;
+  background: #fffaf3;
+  padding: 50px 30px;
+  border-radius: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+}
+
+/* ===== Heading ===== */
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 15px;
+  color: #5a4632;
+}
+
+/* ===== Paragraph ===== */
+p {
+  font-size: 1.1rem;
+  margin-bottom: 30px;
+  color: #6b5b4d;
+  line-height: 1.6;
+}
+
+/* ===== Buttons ===== */
+.actions {
+  display: flex;
+  gap: 15px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* Primary Button (Beige Theme) */
+.btn {
+  padding: 12px 22px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  display: inline-block;
+}
+
+/* Filled Button */
+.btn-primary {
+  background-color: #c8a97e;  /* beige-brown */
+  color: #fff;
+  border: 2px solid #c8a97e;
+}
+
+.btn-primary:hover {
+  background-color: #b89267;
+  border-color: #b89267;
+  transform: translateY(-2px);
+}
+
+/* Outline Button */
+.btn-outline-primary {
+  background-color: transparent;
+  color: #a67c52;
+  border: 2px solid #c8a97e;
+}
+
+.btn-outline-primary:hover {
+  background-color: #f0e3d2;
+  color: #6b4f36;
+  transform: translateY(-2px);
+}
+
+/* ===== Responsive ===== */
+@media (max-width: 600px) {
+  h1 {
+    font-size: 2rem;
+  }
+
+  .container {
+    padding: 30px 20px;
+  }
+
+  .actions {
+    flex-direction: column;
+  }
+}

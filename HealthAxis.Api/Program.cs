@@ -1,5 +1,4 @@
 using HealthAxis.Api.Data;
-using HealthAxis.Api.Filters;
 using HealthAxis.Api.Mappings;
 using HealthAxis.Api.Models;
 using HealthAxis.Api.Repositories;
@@ -13,24 +12,28 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
 using System.Text;
 using System.Text.Json;
+using System.Security.Claims;
+using System.IdentityModel.Tokens.Jwt;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// ✅ VERY IMPORTANT LINE (ADD THIS)
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 builder.Services.AddControllers()
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-
         options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
     });
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+
 builder.Services.AddOpenApi();
+
 builder.Services.AddDbContext<AppDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DbCon"));
 });
+
 builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 {
     options.User.RequireUniqueEmail = true;
@@ -42,28 +45,55 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 
 }).AddEntityFrameworkStores<AppDbContext>().AddDefaultTokenProviders();
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme).AddJwtBearer(options =>
+builder.Services.ConfigureApplicationCookie(options =>
+{
+    options.Events.OnRedirectToLogin = context =>
     {
-        var jwt = builder.Configuration.GetSection("Jwt");
+        context.Response.StatusCode = 401;
+        return Task.CompletedTask;
+    };
 
-        options.TokenValidationParameters = new TokenValidationParameters
-        {
-            ValidateIssuer = true,
-            ValidIssuer = jwt["Issuer"],
+    options.Events.OnRedirectToAccessDenied = context =>
+    {
+        context.Response.StatusCode = 403;
+        return Task.CompletedTask;
+    };
+});
 
-            ValidateAudience = true,
-            ValidAudience = jwt["Audience"],
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    var jwt = builder.Configuration.GetSection("Jwt");
 
-            ValidateLifetime = true,
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidIssuer = jwt["Issuer"],
 
-            ValidateIssuerSigningKey = true,
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!)),
-            ClockSkew = TimeSpan.Zero
-        };
-    });
+        ValidateAudience = true,
+        ValidAudience = jwt["Audience"],
+
+        ValidateLifetime = true,
+
+        ValidateIssuerSigningKey = true,
+        IssuerSigningKey = new SymmetricSecurityKey(
+            Encoding.UTF8.GetBytes(jwt["Key"]!)
+        ),
+
+        ClockSkew = TimeSpan.Zero,
+
+ 
+    };
+});
 
 builder.Services.AddAuthorization();
+
 builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc(
@@ -96,7 +126,6 @@ builder.Services.AddSwaggerGen(options =>
         });
 });
 
-
 builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IPatientService, PatientService>();
@@ -105,19 +134,20 @@ builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
 builder.Services.AddScoped<IHealthRecordRepository, HealthRecordRepository>();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
 builder.Services.AddCors(p =>
 {
     p.AddPolicy("CorsPolicy", cfg =>
     {
-        cfg.WithOrigins("https://localhost:7110","http://localhost:4200")
-        .AllowAnyHeader().AllowAnyMethod();
+        cfg.WithOrigins("https://localhost:7110", "http://localhost:4200")
+           .AllowAnyHeader()
+           .AllowAnyMethod();
     });
 });
-builder.Services.AddControllers(options =>
-{
-    options.Filters.Add<FirstLoginFilter>();
-});
+
+
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<MappingProfile>();
@@ -133,9 +163,9 @@ using (var scope = app.Services.CreateScope())
     var userManager = services.GetRequiredService<UserManager<ApplicationUser>>();
 
     await RoleSeeder.SeedRolesAsync(roleManager);
-
     await AdminSeeder.SeedAdminAsync(userManager);
 }
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -144,11 +174,10 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseCors("CorsPolicy");
-app.UseAuthentication();
+
+app.UseAuthentication();   
 app.UseAuthorization();
 
 app.MapControllers();
-
-
 
 await app.RunAsync();
