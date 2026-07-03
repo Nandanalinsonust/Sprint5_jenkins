@@ -1,0 +1,267 @@
+.al-hero-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  padding: 28px;
+
+  border-radius: 28px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #faf6ef,
+      #f2e9dc
+    );
+
+  border: 1px solid #e8dcc8;
+
+  box-shadow:
+    0 15px 40px rgba(120, 95, 70, 0.10);
+}
+
+.al-kicker {
+  color: #9a7b4f;
+  font-size: 11px;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  font-weight: 900;
+}
+
+.al-hero-card h2 {
+  margin-top: 10px;
+  font-size: 36px;
+  color: #443322;
+  font-weight: 900;
+}
+
+.al-hero-card p {
+  margin-top: 10px;
+  color: #776455;
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.al-hero-badge {
+  text-align: center;
+
+  min-width: 130px;
+
+  padding: 18px;
+
+  border-radius: 22px;
+
+  background: #fffdf8;
+
+  border: 1px solid #eadfcf;
+}
+
+.al-hero-badge strong {
+  display: block;
+  font-size: 30px;
+  color: #7e6141;
+}
+
+.al-hero-badge span {
+  color: #85705a;
+  font-size: 12px;
+}
+.al-filter-card {
+  padding: 22px;
+
+  border-radius: 24px;
+
+  background: #fffdf8;
+
+  border: 1px solid #eadfcf;
+
+  box-shadow:
+    0 10px 30px rgba(80, 60, 40, 0.06);
+}
+
+.al-search-field input,
+.al-filter-grid input,
+.al-filter-grid select {
+  background: #f8f2e9;
+
+  border: 1px solid #decfb9;
+
+  color: #4d3d2f;
+
+  border-radius: 14px;
+}
+
+.al-search-field input:focus,
+.al-filter-grid input:focus,
+.al-filter-grid select:focus {
+  border-color: #b89063;
+
+  box-shadow:
+    0 0 0 4px rgba(184,144,99,.15);
+}
+.al-appt-card {
+
+  overflow: hidden;
+
+  border-radius: 24px;
+
+  background: #fffdf9;
+
+  border: 1px solid #eadfcf;
+
+  box-shadow:
+    0 12px 32px rgba(70,50,30,.06);
+
+  transition: .25s ease;
+}
+
+.al-appt-card:hover {
+  transform: translateY(-5px);
+}
+
+.al-card-top {
+  height: 6px;
+}
+
+.al-appt-card.pending .al-card-top {
+  background: #d4a017;
+}
+
+.al-appt-card.confirmed .al-card-top {
+  background: #8f9779;
+}
+
+.al-appt-card.completed .al-card-top {
+  background: #b08968;
+}
+
+.al-appt-card.cancelled .al-card-top {
+  background: #b85c5c;
+}
+
+.al-appt-main {
+  padding: 24px;
+}
+.al-appt-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+
+  margin-bottom: 20px;
+}
+
+.al-appt-tag {
+  display: inline-block;
+
+  padding: 5px 12px;
+
+  border-radius: 999px;
+
+  background: #efe4d6;
+
+  color: #8b6b45;
+
+  font-size: 11px;
+
+  font-weight: 900;
+
+  text-transform: uppercase;
+}
+
+.al-appt-header h3 {
+  margin: 12px 0 4px;
+
+  color: #433224;
+
+  font-size: 24px;
+
+  font-weight: 900;
+}
+
+.al-appt-header p {
+  color: #7d6a57;
+}
+.pd-status {
+  padding: 8px 14px;
+
+  border-radius: 999px;
+
+  font-size: 12px;
+
+  font-weight: 800;
+}
+
+.pd-status.pending {
+  background: #fbefc8;
+  color: #9e6c00;
+}
+
+.pd-status.confirmed {
+  background: #e5eddc;
+  color: #516042;
+}
+
+.pd-status.completed {
+  background: #eedfce;
+  color: #8b6848;
+}
+
+.pd-status.cancelled {
+  background: #f3d9d9;
+  color: #a63f3f;
+}
+.al-appt-info-grid {
+  display: grid;
+
+  grid-template-columns: repeat(3,1fr);
+
+  gap: 14px;
+}
+
+.al-info-tile {
+  padding: 16px;
+
+  border-radius: 16px;
+
+  background: #f7f2ea;
+
+  border: 1px solid #eadfcf;
+}
+
+.al-info-tile span {
+  font-size: 11px;
+  color: #86725d;
+  text-transform: uppercase;
+  font-weight: 800;
+}
+
+.al-info-tile strong {
+  display: block;
+  margin-top: 8px;
+  color: #49362a;
+}
+.al-page-btn,
+.al-cancel-btn,
+.al-confirm-cancel-btn {
+
+  border: none;
+
+  color: white;
+
+  font-weight: 800;
+
+  border-radius: 14px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #b08968,
+      #8d6e54
+    );
+}
+
+.al-page-btn:hover,
+.al-cancel-btn:hover,
+.al-confirm-cancel-btn:hover {
+  opacity: .9;
+}

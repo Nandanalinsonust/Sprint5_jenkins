@@ -1,166 +1,55 @@
 import { Routes } from '@angular/router';
 
-import { HomeComponent } from './features/home/home';
-
-import { LoginComponent } from './features/auth/login/login';
-import { RegisterComponent } from './features/auth/register/register';
-
-import { PatientLayoutComponent } from './layouts/patient-layout/patient-layout';
-import { DoctorLayoutComponent } from './layouts/doctor-layout/doctor-layout';
-
-import { authGuard } from './guards/auth-guard';
-import { roleGuard } from './guards/role-guard';
-
-import { PatientDashboardComponent } from './features/patient/dashboard/patient-dashboard/patient-dashboard';
-import { PatientProfileComponent } from './features/patient/profile/patient-profile/patient-profile';
-import { CompleteProfileComponent } from './features/patient/complete-profile/complete-profile/complete-profile';
-import { PatientDoctorsComponent } from './features/patient/doctors/patient-doctors/patient-doctors';
-import { PatientAppointmentsComponent } from './features/patient/appointments/patient-appointments/patient-appointments';
-import { BookAppointmentComponent } from './features/patient/book-appointment/book-appointment/book-appointment';
-import { HealthRecordsComponent } from './features/patient/health-records/health-record/health-records';
-
-import { DoctorDashboardComponent } from './features/doctor/dashboard/doctor-dashboard/doctor-dashboard';
-import { DoctorScheduleComponent } from './features/doctor/schedule/doctor-schedule/doctor-schedule';
-import { DoctorPatientsComponent } from './features/doctor/patients/doctor-patients/doctor-patients';
-import { DoctorRecordsComponent } from './features/doctor/records/doctor-records/doctor-records';
-import { DoctorProfileComponent } from './features/doctor/profile/doctor-profile/doctor-profile';
-import { firstLoginGuard } from './guards/first-login-guard';
-import { ChangePasswordComponent } from './features/doctor/change-password/change-password';
-
+import { authGuard } from './core/guards/auth.guard';
+import { roleGuard } from './core/guards/role.guard';
 
 export const routes: Routes = [
-
-  // ======================
-  // PUBLIC
-  // ======================
   {
     path: '',
-    component: HomeComponent
+    loadComponent: () =>
+      import('./pages/home/home')
+        .then(m => m.Home)
   },
   {
-    path: 'login',
-    component: LoginComponent
-  },
-  {
-    path: 'register',
-    component: RegisterComponent
-  },
-
-  // ======================
-  // PATIENT FIRST LOGIN ROUTE
-  // ======================
-  {
-    path: 'patient/complete-profile',
-    component: CompleteProfileComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { role: 'Patient' }
-  },
-
-  // ======================
-  // DOCTOR FIRST LOGIN ROUTE
-  // ======================
-  {
-    path: 'doctor/change-password',
-    component: ChangePasswordComponent,
-    canActivate: [authGuard, roleGuard],
-    data: { role: 'Doctor' }
-  },
-
-  // ======================
-  // PATIENT AREA
-  // ======================
-  {
-    path: 'patient',
-    component: PatientLayoutComponent,
+    path: 'patient/dashboard',
     canActivate: [
       authGuard,
-      roleGuard,
-      firstLoginGuard
+      roleGuard
     ],
     data: {
-      role: 'Patient'
+      roles: ['Patient']
     },
-    children: [
-      {
-        path: 'dashboard',
-        component: PatientDashboardComponent
-      },
-      {
-        path: 'profile',
-        component: PatientProfileComponent
-      },
-      {
-        path: 'doctors',
-        component: PatientDoctorsComponent
-      },
-      {
-        path: 'appointments',
-        component: PatientAppointmentsComponent
-      },
-      {
-        path: 'book-appointment',
-        component: BookAppointmentComponent
-      },
-      {
-        path: 'health-records',
-        component: HealthRecordsComponent
-      },
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      }
-    ]
+    loadComponent: () =>
+      import('./pages/patient/patient-dashboard/patient-dashboard')
+        .then(m => m.PatientDashboard)
   },
-
-  // ======================
-  // DOCTOR AREA
-  // ======================
   {
-    path: 'doctor',
-    component: DoctorLayoutComponent,
+    path: 'doctor/dashboard',
     canActivate: [
       authGuard,
-      roleGuard,
-      firstLoginGuard
+      roleGuard
     ],
     data: {
-      role: 'Doctor'
+      roles: ['Doctor']
     },
-    children: [
-      {
-        path: 'dashboard',
-        component: DoctorDashboardComponent
-      },
-      {
-        path: 'schedule',
-        component: DoctorScheduleComponent
-      },
-      {
-        path: 'patients',
-        component: DoctorPatientsComponent
-      },
-      {
-        path: 'records',
-        component: DoctorRecordsComponent
-      },
-      {
-        path: 'profile',
-        component: DoctorProfileComponent
-      },
-      {
-        path: '',
-        redirectTo: 'dashboard',
-        pathMatch: 'full'
-      }
-    ]
+    loadComponent: () =>
+      import('./pages/doctor/doctor-dashboard/doctor-dashboard')
+        .then(m => m.DoctorDashboard)
   },
-
-  // ======================
-  // FALLBACK
-  // ======================
+  {
+    path: 'access-denied',
+    loadComponent: () =>
+      import('./pages/errros/access-denied/access-denied')
+        .then(m => m.AccessDenied)
+  },
+  {
+    path: 'route-unavailable',
+    loadComponent: () =>
+      import('./pages/errros/route-unavailable/route-unavailable')
+        .then(m => m.RouteUnavailable)
+  },
   {
     path: '**',
-    redirectTo: ''
+    redirectTo: 'route-unavailable'
   }
 ];
