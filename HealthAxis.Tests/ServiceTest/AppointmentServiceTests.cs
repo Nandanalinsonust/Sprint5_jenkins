@@ -1569,17 +1569,6 @@ namespace HealthAxis.Api.ServiceTest
             };
         }
 
-        private static UpdateAppointmentDto GetValidUpdateAppointmentDto()
-        {
-            return new UpdateAppointmentDto
-            {
-                PatientId = 1,
-                DoctorId = 1,
-                ScheduledDate = DateTime.Today.AddDays(2),
-                TimeSlot = TimeSlots.Slots[1]
-            };
-        }
-
         private static AppointmentDto MapToAppointmentDto(Appointment appointment)
         {
             return new AppointmentDto
