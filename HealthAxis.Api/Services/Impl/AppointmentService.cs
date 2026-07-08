@@ -307,6 +307,7 @@ namespace HealthAxis.Api.Services.Impl
             if (patientHasAppointmentWithDoctor)
             {
                 throw new ConflictException("Patient already has an active appointment with this doctor on the selected date.");
+
             }
 
             var appointment = mapper.Map<Appointment>(dto);
