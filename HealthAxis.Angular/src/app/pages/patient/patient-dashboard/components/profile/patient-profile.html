@@ -1,35 +1,6 @@
 <section class="pp-profile-shell">
 
-  <div class="pp-hero-card">
-    <div>
-      <span class="pp-kicker">Patient Account Center</span>
-
-      <h2>My Profile</h2>
-
-      <p>
-        View and manage your personal HealthAxis profile, contact information,
-        insurance details, and account security.
-      </p>
-    </div>
-
-    @if (!isEditMode && !isPasswordMode && !isLoading) {
-      <div class="pp-hero-actions">
-        <button
-          type="button"
-          class="pp-primary-action"
-          (click)="enableEdit()">
-          Edit Profile
-        </button>
-
-        <button
-          type="button"
-          class="pp-secondary-action"
-          (click)="enablePasswordChange()">
-          Change Password
-        </button>
-      </div>
-    }
-  </div>
+ 
 
   @if (isLoading) {
     <div class="pp-form-message">
@@ -55,7 +26,7 @@
           </div>
 
           <div>
-            <span>Patient Identity</span>
+            <span>Account Overview</span>
 
             <h3>{{ patient.patientName }}</h3>
 
@@ -66,54 +37,67 @@
         <section class="pp-info-grid">
 
           <article class="pp-info-tile">
-            <span>Full Name</span>
-            <strong>{{ patient.patientName }}</strong>
-          </article>
+  <span>👤 Full Name</span>
+  <strong>{{ patient.patientName }}</strong>
+</article>
 
-          <article class="pp-info-tile">
-            <span>Date of Birth</span>
-            <strong>{{ patient.dateOfBirth }}</strong>
-          </article>
+<article class="pp-info-tile">
+  <span>🎂 Date of Birth</span>
+  <strong>{{ patient.dateOfBirth }}</strong>
+</article>
 
-          <article class="pp-info-tile">
-            <span>Gender</span>
-            <strong>{{ patient.gender }}</strong>
-          </article>
+<article class="pp-info-tile">
+  <span>⚧ Gender</span>
+  <strong>{{ patient.gender }}</strong>
+</article>
 
-          <article class="pp-info-tile">
-            <span>Email</span>
-            <strong>{{ patient.email }}</strong>
-          </article>
+<article class="pp-info-tile">
+  <span>✉ Email</span>
+  <strong>{{ patient.email }}</strong>
+</article>
 
-          <article class="pp-info-tile">
-            <span>Phone Number</span>
-            <strong>{{ patient.phoneNumber }}</strong>
-          </article>
+<article class="pp-info-tile">
+  <span>📱 Phone Number</span>
+  <strong>{{ patient.phoneNumber }}</strong>
+</article>
 
-          <article class="pp-info-tile">
-            <span>Insurance ID</span>
-            <strong>{{ patient.insuranceId || 'Not Provided' }}</strong>
-          </article>
+<article class="pp-info-tile">
+  <span>🛡 Insurance ID</span>
+  <strong>{{ patient.insuranceId || 'Not Provided' }}</strong>
+</article>
 
         </section>
 
       </div>
 
     }
+     <div class="pp-hero-card">
+ 
+
+    @if (!isEditMode && !isPasswordMode && !isLoading) {
+      <div class="pp-hero-actions">
+        <button
+          type="button"
+          class="pp-primary-action"
+          (click)="enableEdit()">
+          Edit Profile
+        </button>
+
+        <button
+          type="button"
+          class="pp-secondary-action"
+          (click)="enablePasswordChange()">
+          Change Password
+        </button>
+      </div>
+    }
+  </div>
 
     @if (isEditMode) {
 
       <form class="pp-form-card" (ngSubmit)="saveProfile()">
 
-        <div class="pp-form-heading">
-          <span>Edit Profile</span>
-
-          <h3>Update Personal Details</h3>
-
-          <p>
-            Keep your patient information accurate for appointment booking and care records.
-          </p>
-        </div>
+        
 
         <div class="pp-form-grid">
 

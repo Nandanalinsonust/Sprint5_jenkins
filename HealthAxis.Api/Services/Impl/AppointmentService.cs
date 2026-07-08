@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
-using HealthAxis.Shared.Constants;
-using HealthAxis.Shared.Dtos.Auth;
-using HealthAxis.Shared.Enums;
+using HealthAxis.Api.Contracts;
 using HealthAxis.Api.Exceptions;
 using HealthAxis.Api.Models;
 using HealthAxis.Api.Repository.Interface;
-using HealthAxis.Shared.Dtos.Pagination;
+using HealthAxis.Shared.Constants;
 using HealthAxis.Shared.Dtos.Appointments;
+using HealthAxis.Shared.Dtos.Auth;
+using HealthAxis.Shared.Dtos.Pagination;
+using HealthAxis.Shared.Enums;
+using MassTransit;
 
 namespace HealthAxis.Api.Services.Impl
 {
@@ -15,8 +17,9 @@ namespace HealthAxis.Api.Services.Impl
         IPatientRepository patientRepository,
         IDoctorRepository doctorRepository,
         IHealthRecordRepository healthRecordRepository,
-        IMapper mapper) : IAppointmentService
+        IMapper mapper, IBus bus) : IAppointmentService
     {
+        private readonly IBus _bus = bus;
 
         private const string AppointmentEntityName = "Appointment";
         private const string AppointmentDetailsRequiredMessage = "Appointment details are required.";
@@ -318,6 +321,23 @@ namespace HealthAxis.Api.Services.Impl
             appointment.CreatedDate = DateTime.Now;
 
             var savedAppointment = await appointmentRepository.CreateAsync(appointment);
+
+            var patient = await patientRepository.GetByIdAsync(dto.PatientId);
+
+            if (patient is null)
+            {
+                throw new EntityNotFoundException("Patient", dto.PatientId);
+            }
+
+            await _bus.Publish(
+                new AppointmentBookedEvent
+                {
+                    AppointmentId = savedAppointment.AppointmentId,
+                    PatientName = patient.PatientName,
+                    DoctorId = savedAppointment.DoctorId,
+                    ScheduledDate = savedAppointment.ScheduledDate,
+                    TimeSlot = savedAppointment.TimeSlot
+                });
 
             return mapper.Map<AppointmentDto>(savedAppointment);
         }

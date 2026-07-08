@@ -1,6 +1,5 @@
 ﻿@page "/admin/doctors/add"
 @layout AdminLayout
-@implements IDisposable
 
 @using HealthAxis.Admin.Layout
 @using Microsoft.AspNetCore.Components.Forms
@@ -100,14 +99,13 @@
                     </div>
 
                     <div class="hc-form-group">
-                        <label class="hc-form-label">Practice Start Date</label>
+                        <label class="hc-form-label">Years of Experience</label>
 
-                        <InputDate class="hc-form-control"
-                                   max="@TodayDateInputValue"
+                        <InputNumber class="hc-form-control"
                                    disabled="@(isSaving || createdDoctor is not null)"
-                                   @bind-Value="doctor.PracticeStartDate" />
+                                   @bind-Value="doctor.YearsOfExperience" />
 
-                        <ValidationMessage For="@(() => doctor.PracticeStartDate)" />
+                        <ValidationMessage For="@(() => doctor.YearsOfExperience)" />
                     </div>
 
                     <div class="hc-form-group">
@@ -214,9 +212,8 @@
 @code {
     private CreateDoctorDto doctor = new()
     {
-        Specialisation = SpecialisationType.GeneralPractitioner,
+        Specialisation = SpecialisationType.GeneralPractitioner,YearsOfExperience = 1
 
-        PracticeStartDate = DateTime.Today.AddYears(-1)
     };
 
     private EditContext? editContext;
@@ -229,13 +226,7 @@
 
     private string? errorMessage;
 
-    private static string TodayDateInputValue
-    {
-        get
-        {
-            return DateTime.Today.ToString("yyyy-MM-dd");
-        }
-    }
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -257,56 +248,10 @@
 
     private void InitializeEditContext()
     {
-        if (editContext is not null)
-        {
-            editContext.OnValidationRequested -= HandleValidationRequested;
-
-            editContext.OnFieldChanged -= HandleFieldChanged;
-        }
-
         editContext = new EditContext(doctor);
 
         validationMessageStore = new ValidationMessageStore(editContext);
-
-        editContext.OnValidationRequested += HandleValidationRequested;
-
-        editContext.OnFieldChanged += HandleFieldChanged;
     }
-
-    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs args)
-    {
-        ValidatePracticeStartDateField();
-    }
-
-    private void HandleFieldChanged(object? sender, FieldChangedEventArgs args)
-    {
-        if (args.FieldIdentifier.FieldName == nameof(doctor.PracticeStartDate))
-        {
-            ValidatePracticeStartDateField();
-        }
-    }
-
-    private void ValidatePracticeStartDateField()
-    {
-        if (editContext is null || validationMessageStore is null)
-        {
-            return;
-        }
-
-        var fieldIdentifier = FieldIdentifier.Create(() => doctor.PracticeStartDate);
-
-        validationMessageStore.Clear(fieldIdentifier);
-
-        if (doctor.PracticeStartDate.Date > DateTime.Today)
-        {
-            validationMessageStore.Add(
-                fieldIdentifier,
-                "Practice start date cannot be in the future.");
-        }
-
-        editContext.NotifyValidationStateChanged();
-    }
-
     private async Task SaveDoctor()
     {
         if (isSaving)
@@ -319,13 +264,6 @@
             isSaving = true;
 
             errorMessage = null;
-
-            ValidatePracticeStartDateField();
-
-            if (editContext is not null && editContext.GetValidationMessages().Any())
-            {
-                return;
-            }
 
             createdDoctor = await DoctorService.CreateDoctorAsync(doctor);
 
@@ -417,7 +355,6 @@
         {
             Specialisation = SpecialisationType.GeneralPractitioner,
 
-            PracticeStartDate = DateTime.Today.AddYears(-1)
         };
 
         createdDoctor = null;
@@ -434,15 +371,5 @@
     private void BackToDoctors()
     {
         Navigation.NavigateTo("/admin/doctors");
-    }
-
-    public void Dispose()
-    {
-        if (editContext is not null)
-        {
-            editContext.OnValidationRequested -= HandleValidationRequested;
-
-            editContext.OnFieldChanged -= HandleFieldChanged;
-        }
     }
 }

@@ -1,6 +1,5 @@
 ﻿@page "/admin/doctors/edit/{doctorId:int}"
 @layout AdminLayout
-@implements IDisposable
 
 @using Microsoft.AspNetCore.Components.Forms
 @using HealthAxis.Shared.Dtos.Doctors
@@ -109,13 +108,12 @@ else
                         </div>
 
                         <div class="hc-form-group">
-                            <label class="hc-form-label">Practice Start Date</label>
+                            <label class="hc-form-label">Years Of Experience</label>
 
-                            <InputDate class="hc-form-control"
-                                       max="@TodayDateInputValue"
-                                       @bind-Value="doctor.PracticeStartDate" />
+                            <InputNumber class="hc-form-control"
+                                       @bind-Value="doctor.YearsOfExperience" />
 
-                            <ValidationMessage For="@(() => doctor.PracticeStartDate)" />
+                            <ValidationMessage For="@(() => doctor.YearsOfExperience)" />
                         </div>
 
                         <div class="hc-form-group">
@@ -166,9 +164,8 @@ else
 
     private UpdateDoctorDto doctor = new()
     {
-        Specialisation = SpecialisationType.GeneralPractitioner,
+        Specialisation = SpecialisationType.GeneralPractitioner,YearsOfExperience = 1
 
-        PracticeStartDate = DateTime.Today.AddYears(-1)
     };
 
     private EditContext? editContext;
@@ -182,14 +179,6 @@ else
     private string? errorMessage;
 
     private string? existingEmail;
-
-    private string TodayDateInputValue
-    {
-        get
-        {
-            return DateTime.Today.ToString("yyyy-MM-dd");
-        }
-    }
 
     protected override async Task OnInitializedAsync()
     {
@@ -233,7 +222,7 @@ else
 
                 Specialisation = existingDoctor.Specialisation,
 
-                PracticeStartDate = CalculatePracticeStartDate(existingDoctor.YearsOfExperience),
+                YearsOfExperience = existingDoctor.YearsOfExperience,
 
                 ConsultationFee = existingDoctor.ConsultationFee,
 
@@ -262,54 +251,10 @@ else
 
     private void InitializeEditContext()
     {
-        if (editContext is not null)
-        {
-            editContext.OnValidationRequested -= HandleValidationRequested;
-
-            editContext.OnFieldChanged -= HandleFieldChanged;
-        }
 
         editContext = new EditContext(doctor);
 
         validationMessageStore = new ValidationMessageStore(editContext);
-
-        editContext.OnValidationRequested += HandleValidationRequested;
-
-        editContext.OnFieldChanged += HandleFieldChanged;
-    }
-
-    private void HandleValidationRequested(object? sender, ValidationRequestedEventArgs args)
-    {
-        ValidatePracticeStartDateField();
-    }
-
-    private void HandleFieldChanged(object? sender, FieldChangedEventArgs args)
-    {
-        if (args.FieldIdentifier.FieldName == nameof(doctor.PracticeStartDate))
-        {
-            ValidatePracticeStartDateField();
-        }
-    }
-
-    private void ValidatePracticeStartDateField()
-    {
-        if (editContext is null || validationMessageStore is null)
-        {
-            return;
-        }
-
-        var fieldIdentifier = FieldIdentifier.Create(() => doctor.PracticeStartDate);
-
-        validationMessageStore.Clear(fieldIdentifier);
-
-        if (doctor.PracticeStartDate.Date > DateTime.Today)
-        {
-            validationMessageStore.Add(
-                fieldIdentifier,
-                "Practice start date cannot be in the future.");
-        }
-
-        editContext.NotifyValidationStateChanged();
     }
 
     private async Task UpdateDoctor()
@@ -325,7 +270,6 @@ else
 
             errorMessage = null;
 
-            ValidatePracticeStartDateField();
 
             if (editContext is not null && editContext.GetValidationMessages().Any())
             {
@@ -391,25 +335,5 @@ else
     private void BackToDoctors()
     {
         Navigation.NavigateTo("/admin/doctors");
-    }
-
-    private static DateTime CalculatePracticeStartDate(int yearsOfExperience)
-    {
-        if (yearsOfExperience < 0)
-        {
-            yearsOfExperience = 0;
-        }
-
-        return DateTime.Today.AddYears(-yearsOfExperience);
-    }
-
-    public void Dispose()
-    {
-        if (editContext is not null)
-        {
-            editContext.OnValidationRequested -= HandleValidationRequested;
-
-            editContext.OnFieldChanged -= HandleFieldChanged;
-        }
     }
 }

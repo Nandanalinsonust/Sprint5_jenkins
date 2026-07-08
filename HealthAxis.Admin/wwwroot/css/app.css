@@ -1,23 +1,41 @@
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #f8f4ec;
+    color: #4b3f35;
 }
 
 h1:focus {
     outline: none;
 }
 
-a, .btn-link {
-    color: #0071c1;
+a,
+.btn-link {
+    color: #8b6b44;
 }
+
+    a:hover,
+    .btn-link:hover {
+        color: #6f5335;
+    }
 
 .btn-primary {
     color: #fff;
-    background-color: #1b6ec2;
-    border-color: #1861ac;
+    background-color: #b08968;
+    border-color: #9c7758;
 }
 
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    .btn-primary:hover {
+        color: #fff;
+        background-color: #9c7758;
+        border-color: #8b6b44;
+    }
+
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem #ffffff, 0 0 0 0.25rem rgba(176, 137, 104, 0.45);
 }
 
 .content {
@@ -25,22 +43,23 @@ a, .btn-link {
 }
 
 .valid.modified:not([type=checkbox]) {
-    outline: 1px solid #26b050;
+    outline: 1px solid #a68a64;
 }
 
 .invalid {
-    outline: 1px solid red;
+    outline: 1px solid #b85c5c;
 }
 
 .validation-message {
-    color: red;
+    color: #b85c5c;
 }
 
 #blazor-error-ui {
     color-scheme: light only;
-    background: lightyellow;
+    background: #f5e8d8;
+    color: #5f4428;
     bottom: 0;
-    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    box-shadow: 0 -1px 8px rgba(120, 90, 60, 0.15);
     box-sizing: border-box;
     display: none;
     left: 0;
@@ -58,13 +77,13 @@ a, .btn-link {
     }
 
 .blazor-error-boundary {
-    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNGRkU1MDAiIGZpbGwtcnVsZT0iZXZlbm9kZCIvPjwvZz48L3N2Zz4=) no-repeat 1rem/1.8rem, #b32121;
+    background: url(data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNTYiIGhlaWdodD0iNDkiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgeG1sbnM6eGxpbms9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkveGxpbmsiIG92ZXJmbG93PSJoaWRkZW4iPjxkZWZzPjxjbGlwUGF0aCBpZD0iY2xpcDAiPjxyZWN0IHg9IjIzNSIgeT0iNTEiIHdpZHRoPSI1NiIgaGVpZ2h0PSI0OSIvPjwvY2xpcFBhdGg+PC9kZWZzPjxnIGNsaXAtcGF0aD0idXJsKCNjbGlwMCkiIHRyYW5zZm9ybT0idHJhbnNsYXRlKC0yMzUgLTUxKSI+PHBhdGggZD0iTTI2My41MDYgNTFDMjY0LjcxNyA1MSAyNjUuODEzIDUxLjQ4MzcgMjY2LjYwNiA1Mi4yNjU4TDI2Ny4wNTIgNTIuNzk4NyAyNjcuNTM5IDUzLjYyODMgMjkwLjE4NSA5Mi4xODMxIDI5MC41NDUgOTIuNzk1IDI5MC42NTYgOTIuOTk2QzI5MC44NzcgOTMuNTEzIDI5MSA5NC4wODE1IDI5MSA5NC42NzgyIDI5MSA5Ny4wNjUxIDI4OS4wMzggOTkgMjg2LjYxNyA5OUwyNDAuMzgzIDk5QzIzNy45NjMgOTkgMjM2IDk3LjA2NTEgMjM2IDk0LjY3ODIgMjM2IDk0LjM3OTkgMjM2LjAzMSA5NC4wODg2IDIzNi4wODkgOTMuODA3MkwyMzYuMzM4IDkzLjAxNjIgMjM2Ljg1OCA5Mi4xMzE0IDI1OS40NzMgNTMuNjI5NCAyNTkuOTYxIDUyLjc5ODUgMjYwLjQwNyA1Mi4yNjU4QzI2MS4yIDUxLjQ4MzcgMjYyLjI5NiA1MSAyNjMuNTA2IDUxWk0yNjMuNTg2IDY2LjAxODNDMjYwLjczNyA2Ni4wMTgzIDI1OS4zMTMgNjcuMTI0NSAyNTkuMzEzIDY5LjMzNyAyNTkuMzEzIDY5LjYxMDIgMjU5LjMzMiA2OS44NjA4IDI1OS4zNzEgNzAuMDg4N0wyNjEuNzk1IDg0LjAxNjEgMjY1LjM4IDg0LjAxNjEgMjY3LjgyMSA2OS43NDc1QzI2Ny44NiA2OS43MzA5IDI2Ny44NzkgNjkuNTg3NyAyNjcuODc5IDY5LjMxNzkgMjY3Ljg3OSA2Ny4xMTgyIDI2Ni40NDggNjYuMDE4MyAyNjMuNTg2IDY2LjAxODNaTTI2My41NzYgODYuMDU0N0MyNjEuMDQ5IDg2LjA1NDcgMjU5Ljc4NiA4Ny4zMDA1IDI1OS43ODYgODkuNzkyMSAyNTkuNzg2IDkyLjI4MzcgMjYxLjA0OSA5My41Mjk1IDI2My41NzYgOTMuNTI5NSAyNjYuMTE2IDkzLjUyOTUgMjY3LjM4NyA5Mi4yODM3IDI2Ny4zODcgODkuNzkyMSAyNjcuMzg3IDg3LjMwMDUgMjY2LjExNiA4Ni4wNTQ3IDI2My41NzYgODYuMDU0N1oiIGZpbGw9IiNFFFFFFIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiLz48L2c+PC9zdmc+) no-repeat 1rem/1.8rem, #9c7758;
     padding: 1rem 1rem 1rem 3.7rem;
-    color: white;
+    color: #fff;
 }
 
     .blazor-error-boundary::after {
-        content: "An error has occurred."
+        content: "An error has occurred.";
     }
 
 .loading-progress {
@@ -73,19 +92,19 @@ a, .btn-link {
     width: 8rem;
     height: 8rem;
     inset: 20vh 0 auto 0;
-    margin: 0 auto 0 auto;
+    margin: 0 auto;
 }
 
     .loading-progress circle {
         fill: none;
-        stroke: #e0e0e0;
+        stroke: #e8dcc6;
         stroke-width: 0.6rem;
         transform-origin: 50% 50%;
         transform: rotate(-90deg);
     }
 
         .loading-progress circle:last-child {
-            stroke: #1b6ec2;
+            stroke: #b08968;
             stroke-dasharray: calc(3.141 * var(--blazor-load-percentage, 0%) * 0.8), 500%;
             transition: stroke-dasharray 0.05s ease-in-out;
         }
@@ -94,6 +113,7 @@ a, .btn-link {
     position: absolute;
     text-align: center;
     font-weight: bold;
+    color: #6b5b4d;
     inset: calc(20vh + 3.25rem) 0 auto 0.2rem;
 }
 
@@ -102,25 +122,28 @@ a, .btn-link {
     }
 
 code {
-    color: #c02d76;
+    color: #8b5e34;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-    color: var(--bs-secondary-color);
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: #8d7b68;
     text-align: end;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
     text-align: start;
 }
 
 /* HealthAxis App Startup Loader */
+
 .ha-app-loader {
     min-height: 100vh;
     display: grid;
     place-items: center;
-    background: radial-gradient(circle at top left, rgba(20, 184, 166, 0.22), transparent 32%), radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.2), transparent 30%), linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #172554 100%);
-    color: #ffffff;
+    background: radial-gradient(circle at top left, rgba(200, 173, 127, 0.35), transparent 35%), radial-gradient(circle at bottom right, rgba(176, 137, 104, 0.25), transparent 35%), linear-gradient(135deg, #f8f4ec 0%, #ede3d3 50%, #d8c6ae 100%);
+    color: #4b3f35;
     font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
 
@@ -129,9 +152,9 @@ code {
     padding: 34px 30px;
     border-radius: 30px;
     text-align: center;
-    background: rgba(255, 255, 255, 0.1);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.35);
+    background: rgba(255, 248, 240, 0.92);
+    border: 1px solid rgba(176, 137, 104, 0.22);
+    box-shadow: 0 24px 60px rgba(120, 90, 60, 0.15);
     backdrop-filter: blur(18px);
 }
 
@@ -145,9 +168,9 @@ code {
     font-size: 26px;
     font-weight: 900;
     letter-spacing: -0.5px;
-    color: #ffffff;
-    background: linear-gradient(135deg, #14b8a6, #8b5cf6);
-    box-shadow: 0 18px 42px rgba(20, 184, 166, 0.32);
+    color: #fff;
+    background: linear-gradient(135deg, #d6c2a1, #b08968);
+    box-shadow: 0 18px 42px rgba(176, 137, 104, 0.25);
 }
 
 .ha-loader-title {
@@ -155,15 +178,16 @@ code {
     font-size: 30px;
     font-weight: 900;
     letter-spacing: -0.8px;
+    color: #4b3f35;
 }
 
     .ha-loader-title span {
-        color: #5eead4;
+        color: #b08968;
     }
 
 .ha-loader-subtitle {
     margin: 10px 0 24px;
-    color: #cbd5e1;
+    color: #6b5b4d;
     font-size: 15px;
     line-height: 1.6;
 }
@@ -173,20 +197,20 @@ code {
     height: 8px;
     overflow: hidden;
     border-radius: 999px;
-    background: rgba(255, 255, 255, 0.14);
+    background: rgba(176, 137, 104, 0.15);
 }
 
 .ha-loader-progress-bar {
     width: 42%;
     height: 100%;
     border-radius: inherit;
-    background: linear-gradient(90deg, #14b8a6, #60a5fa, #8b5cf6);
+    background: linear-gradient( 90deg, #e8dcc6, #d6c2a1, #c8ad7f, #b08968 );
     animation: ha-loader-slide 1.25s ease-in-out infinite;
 }
 
 .ha-loader-caption {
     margin-top: 16px;
-    color: #94a3b8;
+    color: #7a6a58;
     font-size: 13px;
     font-weight: 700;
 }
@@ -205,14 +229,14 @@ code {
     }
 }
 
-
 /* HealthAxis Access / Not Authorized / Not Found Page */
+
 .ha-access-page {
     min-height: 100vh;
     display: grid;
     place-items: center;
     padding: 32px;
-    background: radial-gradient(circle at top left, rgba(20, 184, 166, 0.22), transparent 32%), radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.2), transparent 30%), linear-gradient(135deg, #0f172a 0%, #1e293b 45%, #172554 100%);
+    background: radial-gradient(circle at top left, rgba(200, 173, 127, 0.35), transparent 35%), radial-gradient(circle at bottom right, rgba(176, 137, 104, 0.25), transparent 35%), linear-gradient(135deg, #f8f4ec 0%, #ede3d3 50%, #d8c6ae 100%);
 }
 
 .ha-access-card {
@@ -220,10 +244,10 @@ code {
     padding: 38px 34px;
     text-align: center;
     border-radius: 32px;
-    color: #ffffff;
-    background: rgba(255, 255, 255, 0.11);
-    border: 1px solid rgba(255, 255, 255, 0.16);
-    box-shadow: 0 24px 60px rgba(15, 23, 42, 0.36);
+    color: #4b3f35;
+    background: rgba(255, 248, 240, 0.92);
+    border: 1px solid rgba(176, 137, 104, 0.22);
+    box-shadow: 0 24px 60px rgba(120, 90, 60, 0.15);
     backdrop-filter: blur(18px);
 }
 
@@ -234,12 +258,12 @@ code {
     display: grid;
     place-items: center;
     border-radius: 26px;
-    color: #ffffff;
+    color: #fff;
     font-size: 26px;
     font-weight: 900;
     letter-spacing: -0.5px;
-    background: linear-gradient(135deg, #14b8a6, #8b5cf6);
-    box-shadow: 0 18px 42px rgba(20, 184, 166, 0.32);
+    background: linear-gradient(135deg, #d6c2a1, #b08968);
+    box-shadow: 0 18px 42px rgba(176, 137, 104, 0.25);
 }
 
 .ha-access-kicker {
@@ -247,9 +271,9 @@ code {
     margin: 0 auto 14px;
     padding: 8px 13px;
     border-radius: 999px;
-    color: #5eead4;
-    background: rgba(255, 255, 255, 0.09);
-    border: 1px solid rgba(255, 255, 255, 0.14);
+    color: #8b6b44;
+    background: rgba(214, 194, 161, 0.3);
+    border: 1px solid rgba(176, 137, 104, 0.2);
     font-size: 12px;
     font-weight: 900;
     letter-spacing: 0.6px;
@@ -261,12 +285,13 @@ code {
     font-size: clamp(30px, 4vw, 44px);
     font-weight: 900;
     letter-spacing: -1px;
+    color: #4b3f35;
 }
 
 .ha-access-card p {
     margin: 14px auto 26px;
     max-width: 420px;
-    color: #cbd5e1;
+    color: #6b5b4d;
     font-size: 15px;
     line-height: 1.7;
 }
@@ -278,16 +303,17 @@ code {
     min-width: 150px;
     padding: 13px 18px;
     border-radius: 18px;
-    color: #ffffff;
+    color: #fff;
     text-decoration: none;
     font-weight: 900;
-    background: linear-gradient(135deg, #2563eb, #14b8a6);
-    box-shadow: 0 14px 30px rgba(37, 99, 235, 0.28);
+    background: linear-gradient(135deg, #c8ad7f, #b08968);
+    box-shadow: 0 14px 30px rgba(176, 137, 104, 0.25);
     transition: 0.2s ease;
 }
 
     .ha-access-primary-link:hover {
-        color: #ffffff;
+        color: #fff;
+        background: linear-gradient(135deg, #b89a73, #9c7758);
         transform: translateY(-1px);
-        box-shadow: 0 18px 36px rgba(37, 99, 235, 0.34);
+        box-shadow: 0 18px 36px rgba(176, 137, 104, 0.35);
     }

@@ -9,6 +9,7 @@ using HealthAxis.Shared.Dtos.Appointments;
 using HealthAxis.Shared.Dtos.Pagination;
 using HealthAxis.Shared.Enums;
 using Moq;
+using MassTransit;
 
 namespace HealthAxis.Api.ServiceTest
 {
@@ -19,6 +20,7 @@ namespace HealthAxis.Api.ServiceTest
         private readonly Mock<IDoctorRepository> doctorRepositoryMock;
         private readonly Mock<IHealthRecordRepository> healthRecordRepositoryMock;
         private readonly Mock<IMapper> mapperMock;
+        private readonly Mock<IBus> busMock;
 
         private readonly AppointmentService appointmentService;
 
@@ -29,7 +31,7 @@ namespace HealthAxis.Api.ServiceTest
             doctorRepositoryMock = new Mock<IDoctorRepository>();
             healthRecordRepositoryMock = new Mock<IHealthRecordRepository>();
             mapperMock = new Mock<IMapper>();
-
+            busMock = new Mock<IBus>();
             SetupMapper();
 
             appointmentService = new AppointmentService(
@@ -37,7 +39,7 @@ namespace HealthAxis.Api.ServiceTest
                 patientRepositoryMock.Object,
                 doctorRepositoryMock.Object,
                 healthRecordRepositoryMock.Object,
-                mapperMock.Object);
+                mapperMock.Object,busMock.Object);
         }
 
         [Fact]

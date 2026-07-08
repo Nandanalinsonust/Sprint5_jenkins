@@ -2,38 +2,54 @@
 
   <form class="ba-booking-card" (ngSubmit)="submit()">
 
-    <div class="ba-form-header compact-header">
-      <div>
-        <span>Guided Booking Flow</span>
+    <div class="ba-booking-header">
+  <div>
+    <span class="ba-header-tag">
+      Healthcare Appointment Portal
+    </span>
 
-        <h3>Book Appointment</h3>
+    <h1>Book Your Appointment</h1>
 
-        <p>
-          Search specialisation, choose doctor, select date, and book an available slot.
-        </p>
-      </div>
-    </div>
+    <p>
+      Choose a speciality, find your doctor and reserve a convenient appointment slot.
+    </p>
+  </div>
 
-    <div class="ba-progress-row">
-      <div class="ba-progress-item active">
-        <strong>01</strong>
-        <span>Specialisation</span>
-      </div>
+  <div class="ba-header-badge">
+    <span>4 Steps</span>
+    <strong>Quick Booking</strong>
+  </div>
+</div>
 
-      <div class="ba-progress-line"></div>
+    <div class="ba-stepper">
 
-      <div class="ba-progress-item active">
-        <strong>02</strong>
-        <span>Doctor</span>
-      </div>
+  <div class="ba-step active">
+    <div class="ba-step-number">1</div>
+    <span>Speciality</span>
+  </div>
 
-      <div class="ba-progress-line"></div>
+  <div class="ba-step-line"></div>
 
-      <div class="ba-progress-item active">
-        <strong>03</strong>
-        <span>Slot</span>
-      </div>
-    </div>
+  <div class="ba-step active">
+    <div class="ba-step-number">2</div>
+    <span>Doctor</span>
+  </div>
+
+  <div class="ba-step-line"></div>
+
+  <div class="ba-step active">
+    <div class="ba-step-number">3</div>
+    <span>Date</span>
+  </div>
+
+  <div class="ba-step-line"></div>
+
+  <div class="ba-step active">
+    <div class="ba-step-number">4</div>
+    <span>Slot</span>
+  </div>
+
+</div>
 
     <section class="ba-section-card" id="specialisation-section">
       <div class="ba-section-heading">

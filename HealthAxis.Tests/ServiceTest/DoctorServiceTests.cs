@@ -411,7 +411,6 @@ namespace HealthAxis.Api.ServiceTest
         {
             var dto = GetValidCreateDoctorDto();
 
-            dto.PracticeStartDate = DateTime.Today.AddDays(1);
 
             Func<Task> action = async () =>
                 await doctorService.CreateDoctorByAdminAsync(dto);
@@ -916,7 +915,7 @@ namespace HealthAxis.Api.ServiceTest
 
                 Specialisation = SpecialisationType.GeneralPractitioner,
 
-                PracticeStartDate = DateTime.Today.AddYears(-5),
+                YearsOfExperience = 1,
 
                 ConsultationFee = 600
             };
@@ -929,8 +928,8 @@ namespace HealthAxis.Api.ServiceTest
                 FullName = "Updated Doctor",
 
                 Specialisation = SpecialisationType.Dermatologist,
-
-                PracticeStartDate = DateTime.Today.AddYears(-4),
+                
+                YearsOfExperience   = 1,
 
                 ConsultationFee = 800,
 

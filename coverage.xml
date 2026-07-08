@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <results>
   <modules>
-    <module id="771CD316FB77824BB6CA64E0F681BC5B4C00E7E4" name="HealthAxis.Tests.dll" path="HealthAxis.Tests.dll" block_coverage="97.00" line_coverage="95.69" blocks_covered="8664" blocks_not_covered="268" lines_covered="4239" lines_partially_covered="97" lines_not_covered="94">
+    <module id="5B73EE2CB4A7134A8F82B61B743239920C82D1F1" name="HealthAxis.Tests.dll" path="HealthAxis.Tests.dll" block_coverage="97.16" line_coverage="95.80" blocks_covered="8678" blocks_not_covered="254" lines_covered="4244" lines_partially_covered="96" lines_not_covered="90">
       <functions>
         <function id="8284" token="0x6000003" name="AppointmentServiceTests()" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests" block_coverage="100.00" line_coverage="100.00" blocks_covered="14" blocks_not_covered="0" lines_covered="15" lines_partially_covered="0" lines_not_covered="0">
           <ranges>
@@ -544,9 +544,9 @@
             <range source_id="0" start_line="76" end_line="76" start_column="47" end_column="59" covered="yes" />
           </ranges>
         </function>
-        <function id="41995" token="0x6000169" name="&lt;GetAppointmentFilterOptionsAsync_ShouldReturnDistinctPatientsAndDoctors&gt;b__8_2(HealthAxis.Shared.Dtos.Appointments.AppointmentFilterPersonDto)" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests.&lt;&gt;c" block_coverage="0.00" line_coverage="0.00" blocks_covered="0" blocks_not_covered="2" lines_covered="0" lines_partially_covered="0" lines_not_covered="1">
+        <function id="41995" token="0x6000169" name="&lt;GetAppointmentFilterOptionsAsync_ShouldReturnDistinctPatientsAndDoctors&gt;b__8_2(HealthAxis.Shared.Dtos.Appointments.AppointmentFilterPersonDto)" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests.&lt;&gt;c" block_coverage="100.00" line_coverage="100.00" blocks_covered="2" blocks_not_covered="0" lines_covered="1" lines_partially_covered="0" lines_not_covered="0">
           <ranges>
-            <range source_id="0" start_line="77" end_line="77" start_column="45" end_column="56" covered="no" />
+            <range source_id="0" start_line="77" end_line="77" start_column="45" end_column="56" covered="yes" />
           </ranges>
         </function>
         <function id="42003" token="0x600016a" name="&lt;GetAppointmentsByPatientIdAsync_WhenPatientExists_ShouldReturnAppointments&gt;b__22_1(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests.&lt;&gt;c" block_coverage="100.00" line_coverage="100.00" blocks_covered="2" blocks_not_covered="0" lines_covered="1" lines_partially_covered="0" lines_not_covered="0">
@@ -1157,16 +1157,16 @@
             <range source_id="0" start_line="1171" end_line="1171" start_column="9" end_column="10" covered="yes" />
           </ranges>
         </function>
-        <function id="67848" token="0x6000243" name="MoveNext()" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests.&lt;GetAppointmentFilterOptionsAsync_ShouldReturnDistinctPatientsAndDoctors&gt;d__8" block_coverage="75.00" line_coverage="81.82" blocks_covered="30" blocks_not_covered="10" lines_covered="9" lines_partially_covered="0" lines_not_covered="2">
+        <function id="67848" token="0x6000243" name="MoveNext()" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests.&lt;GetAppointmentFilterOptionsAsync_ShouldReturnDistinctPatientsAndDoctors&gt;d__8" block_coverage="100.00" line_coverage="100.00" blocks_covered="40" blocks_not_covered="0" lines_covered="11" lines_partially_covered="0" lines_not_covered="0">
           <ranges>
             <range source_id="0" start_line="66" end_line="66" start_column="9" end_column="10" covered="yes" />
             <range source_id="0" start_line="67" end_line="70" start_column="13" end_column="50" covered="yes" />
             <range source_id="0" start_line="72" end_line="72" start_column="13" end_column="86" covered="yes" />
             <range source_id="0" start_line="74" end_line="74" start_column="13" end_column="51" covered="yes" />
             <range source_id="0" start_line="75" end_line="75" start_column="13" end_column="50" covered="yes" />
-            <range source_id="0" start_line="76" end_line="76" start_column="13" end_column="95" covered="yes" />
-            <range source_id="0" start_line="77" end_line="77" start_column="13" end_column="91" covered="no" />
-            <range source_id="0" start_line="78" end_line="78" start_column="9" end_column="10" covered="no" />
+            <range source_id="0" start_line="76" end_line="76" start_column="13" end_column="97" covered="yes" />
+            <range source_id="0" start_line="77" end_line="77" start_column="13" end_column="93" covered="yes" />
+            <range source_id="0" start_line="78" end_line="78" start_column="9" end_column="10" covered="yes" />
           </ranges>
         </function>
         <function id="68444" token="0x6000246" name="MoveNext()" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests.&lt;GetAppointmentsByDoctorIdAsync_WhenDoctorExists_ShouldReturnAppointments&gt;d__25" block_coverage="100.00" line_coverage="100.00" blocks_covered="35" blocks_not_covered="0" lines_covered="12" lines_partially_covered="0" lines_not_covered="0">
@@ -1315,7 +1315,7 @@
             <range source_id="0" start_line="966" end_line="966" start_column="9" end_column="10" covered="yes" />
           </ranges>
         </function>
-        <function id="75656" token="0x6000273" name="MoveNext()" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests.&lt;GetMyAppointmentsForPatientPagedAsync_ShouldApplyFilters&gt;d__58" block_coverage="95.83" line_coverage="92.00" blocks_covered="46" blocks_not_covered="2" lines_covered="23" lines_partially_covered="1" lines_not_covered="1">
+        <function id="75656" token="0x6000273" name="MoveNext()" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests.&lt;GetMyAppointmentsForPatientPagedAsync_ShouldApplyFilters&gt;d__58" block_coverage="100.00" line_coverage="100.00" blocks_covered="48" blocks_not_covered="0" lines_covered="25" lines_partially_covered="0" lines_not_covered="0">
           <ranges>
             <range source_id="0" start_line="993" end_line="993" start_column="9" end_column="10" covered="yes" />
             <range source_id="0" start_line="994" end_line="994" start_column="13" end_column="49" covered="yes" />
@@ -1324,8 +1324,8 @@
             <range source_id="0" start_line="1006" end_line="1014" start_column="13" end_column="15" covered="yes" />
             <range source_id="0" start_line="1016" end_line="1018" start_column="13" end_column="24" covered="yes" />
             <range source_id="0" start_line="1020" end_line="1020" start_column="13" end_column="44" covered="yes" />
-            <range source_id="0" start_line="1021" end_line="1021" start_column="13" end_column="48" covered="partial" />
-            <range source_id="0" start_line="1022" end_line="1022" start_column="9" end_column="10" covered="no" />
+            <range source_id="0" start_line="1021" end_line="1021" start_column="13" end_column="48" covered="yes" />
+            <range source_id="0" start_line="1022" end_line="1022" start_column="9" end_column="10" covered="yes" />
           </ranges>
         </function>
         <function id="76384" token="0x6000276" name="MoveNext()" namespace="HealthAxis.Api.ServiceTest" type_name="AppointmentServiceTests.&lt;GetMyAppointmentsForPatientPagedAsync_WhenQueryNull_ShouldReturnPagedAppointments&gt;d__57" block_coverage="100.00" line_coverage="100.00" blocks_covered="48" blocks_not_covered="0" lines_covered="16" lines_partially_covered="0" lines_not_covered="0">
@@ -3821,7 +3821,7 @@
         </function>
       </functions>
       <source_files>
-        <source_file id="0" path="C:\Users\310053\source\repos\HealthAxis_3\HealthAxis.Tests\ServiceTest\AppointmentServiceTests.cs" checksum_type="SHA256" checksum="C8498B7D86CC22226965C69F563262ECD44DE3F1A3C802A5A5953D156F5B158F" />
+        <source_file id="0" path="C:\Users\310053\source\repos\HealthAxis_3\HealthAxis.Tests\ServiceTest\AppointmentServiceTests.cs" checksum_type="SHA256" checksum="119A2937BDD4675D4C24F4802B880BF75AD6656BF1D1E732316676AD314B3DC1" />
         <source_file id="1" path="C:\Users\310053\source\repos\HealthAxis_3\HealthAxis.Tests\ServiceTest\AuthServiceTests.cs" checksum_type="SHA256" checksum="EED577525013C0EAEE21C5923517662D7322A79702AD5BF3DDC72D49610BEA24" />
         <source_file id="2" path="C:\Users\310053\source\repos\HealthAxis_3\HealthAxis.Tests\ServiceTest\DoctorServiceTests.cs" checksum_type="SHA256" checksum="0131D69E4DA79A518B4F2E26087FE3B3E0D50F9186FD46B24272CB1AE26ADA3E" />
         <source_file id="3" path="C:\Users\310053\source\repos\HealthAxis_3\HealthAxis.Tests\ServiceTest\HealthRecordServiceTests.cs" checksum_type="SHA256" checksum="2DA1BAA8A14932759817A1377D7D923B88F5BD91734A27F8E951A4F2AAA0D1F7" />
@@ -3831,7 +3831,7 @@
         <skipped_function id="8272" original_id="8272" token="0x6000001" name="Main(string[])" type_name="AutoGeneratedProgram" reason="attribute_excluded" />
       </skipped_functions>
     </module>
-    <module id="D6B829E4BB00544B942750A8EE2EA882F621F5B4" name="HealthAxis.Shared.dll" path="HealthAxis.Shared.dll" block_coverage="85.07" line_coverage="88.31" blocks_covered="57" blocks_not_covered="10" lines_covered="68" lines_partially_covered="0" lines_not_covered="9">
+    <module id="B54D4F2AE1D6D34D8F360A2815ABF6DF11D7B1CD" name="HealthAxis.Shared.dll" path="HealthAxis.Shared.dll" block_coverage="85.07" line_coverage="88.31" blocks_covered="57" blocks_not_covered="10" lines_covered="68" lines_partially_covered="0" lines_not_covered="9">
       <functions>
         <function id="8374" token="0x600000d" name="CreatePatientDto()" namespace="HealthAxis.Shared.Dtos.Patients" type_name="CreatePatientDto" block_coverage="100.00" line_coverage="100.00" blocks_covered="2" blocks_not_covered="0" lines_covered="4" lines_partially_covered="0" lines_not_covered="0">
           <ranges>
@@ -4321,7 +4321,7 @@
         <skipped_function id="11787" original_id="11787" token="0x6000152" name="get_Slots()" type_name="TimeSlots" reason="attribute_excluded" />
       </skipped_functions>
     </module>
-    <module id="CF5749AD7321464DB235F472E61AF372130E17CD" name="HealthAxis.Api.dll" path="HealthAxis.Api.dll" block_coverage="31.08" line_coverage="24.11" blocks_covered="2139" blocks_not_covered="4743" lines_covered="1401" lines_partially_covered="27" lines_not_covered="4382">
+    <module id="10FD9FB04B450940AA8F4755BE556C1565D0E5AC" name="HealthAxis.Api.dll" path="HealthAxis.Api.dll" block_coverage="31.40" line_coverage="24.15" blocks_covered="2161" blocks_not_covered="4721" lines_covered="1403" lines_partially_covered="30" lines_not_covered="4377">
       <functions>
         <function id="25744" token="0x60000fc" name="AppointmentsController(HealthAxis.Api.Services.IAppointmentService)" namespace="HealthAxis.Controllers" type_name="AppointmentsController" block_coverage="0.00" line_coverage="0.00" blocks_covered="0" blocks_not_covered="2" lines_covered="0" lines_partially_covered="0" lines_not_covered="1">
           <ranges>
@@ -6342,9 +6342,9 @@
             <range source_id="4" start_line="157" end_line="157" start_column="22" end_column="32" covered="yes" />
           </ranges>
         </function>
-        <function id="90388" token="0x60003dc" name="&lt;BuildPagedAppointmentResponse&gt;b__32_2(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.Services.Impl" type_name="AppointmentService.&lt;&gt;c" block_coverage="0.00" line_coverage="0.00" blocks_covered="0" blocks_not_covered="11" lines_covered="0" lines_partially_covered="0" lines_not_covered="3">
+        <function id="90388" token="0x60003dc" name="&lt;BuildPagedAppointmentResponse&gt;b__32_2(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.Services.Impl" type_name="AppointmentService.&lt;&gt;c" block_coverage="90.91" line_coverage="0.00" blocks_covered="10" blocks_not_covered="1" lines_covered="0" lines_partially_covered="3" lines_not_covered="0">
           <ranges>
-            <range source_id="4" start_line="615" end_line="617" start_column="21" end_column="60" covered="no" />
+            <range source_id="4" start_line="615" end_line="617" start_column="21" end_column="60" covered="partial" />
           </ranges>
         </function>
         <function id="90451" token="0x60003dd" name="&lt;BuildPagedAppointmentResponse&gt;b__32_3(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.Services.Impl" type_name="AppointmentService.&lt;&gt;c" block_coverage="100.00" line_coverage="100.00" blocks_covered="2" blocks_not_covered="0" lines_covered="1" lines_partially_covered="0" lines_not_covered="0">
@@ -6382,17 +6382,17 @@
             <range source_id="4" start_line="112" end_line="118" start_column="13" end_column="92" covered="yes" />
           </ranges>
         </function>
-        <function id="90812" token="0x60003e7" name="&lt;BuildPagedAppointmentResponse&gt;b__0(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.Services.Impl" type_name="AppointmentService.&lt;&gt;c__DisplayClass32_0" block_coverage="0.00" line_coverage="0.00" blocks_covered="0" blocks_not_covered="4" lines_covered="0" lines_partially_covered="0" lines_not_covered="1">
+        <function id="90812" token="0x60003e7" name="&lt;BuildPagedAppointmentResponse&gt;b__0(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.Services.Impl" type_name="AppointmentService.&lt;&gt;c__DisplayClass32_0" block_coverage="100.00" line_coverage="100.00" blocks_covered="4" blocks_not_covered="0" lines_covered="1" lines_partially_covered="0" lines_not_covered="0">
           <ranges>
-            <range source_id="4" start_line="603" end_line="603" start_column="21" end_column="51" covered="no" />
+            <range source_id="4" start_line="603" end_line="603" start_column="21" end_column="51" covered="yes" />
           </ranges>
         </function>
-        <function id="90852" token="0x60003e8" name="&lt;BuildPagedAppointmentResponse&gt;b__1(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.Services.Impl" type_name="AppointmentService.&lt;&gt;c__DisplayClass32_0" block_coverage="0.00" line_coverage="0.00" blocks_covered="0" blocks_not_covered="7" lines_covered="0" lines_partially_covered="0" lines_not_covered="1">
+        <function id="90852" token="0x60003e8" name="&lt;BuildPagedAppointmentResponse&gt;b__1(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.Services.Impl" type_name="AppointmentService.&lt;&gt;c__DisplayClass32_0" block_coverage="100.00" line_coverage="100.00" blocks_covered="7" blocks_not_covered="0" lines_covered="1" lines_partially_covered="0" lines_not_covered="0">
           <ranges>
-            <range source_id="4" start_line="609" end_line="609" start_column="21" end_column="75" covered="no" />
+            <range source_id="4" start_line="609" end_line="609" start_column="21" end_column="75" covered="yes" />
           </ranges>
         </function>
-        <function id="90920" token="0x60003ea" name="&lt;BuildPagedAppointmentResponse&gt;b__5(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.Services.Impl" type_name="AppointmentService.&lt;&gt;c__DisplayClass32_1" block_coverage="86.21" line_coverage="0.00" blocks_covered="25" blocks_not_covered="4" lines_covered="0" lines_partially_covered="8" lines_not_covered="0">
+        <function id="90920" token="0x60003ea" name="&lt;BuildPagedAppointmentResponse&gt;b__5(HealthAxis.Api.Models.Appointment)" namespace="HealthAxis.Api.Services.Impl" type_name="AppointmentService.&lt;&gt;c__DisplayClass32_1" block_coverage="89.66" line_coverage="0.00" blocks_covered="26" blocks_not_covered="3" lines_covered="0" lines_partially_covered="8" lines_not_covered="0">
           <ranges>
             <range source_id="4" start_line="590" end_line="597" start_column="21" end_column="100" covered="partial" />
           </ranges>
@@ -8733,31 +8733,31 @@
     <skipped_module name="system.net.http.dll" path="system.net.http.dll" reason="no_symbols" />
     <skipped_module name="system.io.memorymappedfiles.dll" path="system.io.memorymappedfiles.dll" reason="no_symbols" />
     <skipped_module name="system.net.primitives.dll" path="system.net.primitives.dll" reason="no_symbols" />
-    <skipped_module name="microsoft.build.framework.dll" path="microsoft.build.framework.dll" reason="no_symbols" />
     <skipped_module name="system.net.security.dll" path="system.net.security.dll" reason="no_symbols" />
+    <skipped_module name="microsoft.build.framework.dll" path="microsoft.build.framework.dll" reason="no_symbols" />
     <skipped_module name="system.xml.xdocument.dll" path="system.xml.xdocument.dll" reason="no_symbols" />
-    <skipped_module name="microsoft.dotnet.templatelocator.dll" path="microsoft.dotnet.templatelocator.dll" reason="no_symbols" />
-    <skipped_module name="system.private.xml.linq.dll" path="system.private.xml.linq.dll" reason="no_symbols" />
-    <skipped_module name="msbuild.dll" path="msbuild.dll" reason="no_symbols" />
     <skipped_module name="system.net.requests.dll" path="system.net.requests.dll" reason="no_symbols" />
-    <skipped_module name="microsoft.deployment.dotnet.releases.dll" path="microsoft.deployment.dotnet.releases.dll" reason="no_symbols" />
-    <skipped_module name="system.threading.thread.dll" path="system.threading.thread.dll" reason="no_symbols" />
+    <skipped_module name="system.private.xml.linq.dll" path="system.private.xml.linq.dll" reason="no_symbols" />
     <skipped_module name="system.net.networkinformation.dll" path="system.net.networkinformation.dll" reason="no_symbols" />
+    <skipped_module name="microsoft.dotnet.templatelocator.dll" path="microsoft.dotnet.templatelocator.dll" reason="no_symbols" />
+    <skipped_module name="msbuild.dll" path="msbuild.dll" reason="no_symbols" />
+    <skipped_module name="system.threading.thread.dll" path="system.threading.thread.dll" reason="no_symbols" />
+    <skipped_module name="microsoft.deployment.dotnet.releases.dll" path="microsoft.deployment.dotnet.releases.dll" reason="no_symbols" />
     <skipped_module name="system.xml.readerwriter.dll" path="system.xml.readerwriter.dll" reason="no_symbols" />
     <skipped_module name="microsoft.build.dll" path="microsoft.build.dll" reason="no_symbols" />
-    <skipped_module name="microsoft.win32.registry.dll" path="microsoft.win32.registry.dll" reason="no_symbols" />
     <skipped_module name="system.private.xml.dll" path="system.private.xml.dll" reason="no_symbols" />
+    <skipped_module name="microsoft.win32.registry.dll" path="microsoft.win32.registry.dll" reason="no_symbols" />
     <skipped_module name="system.text.regularexpressions.dll" path="system.text.regularexpressions.dll" reason="no_symbols" />
     <skipped_module name="system.runtime.loader.dll" path="system.runtime.loader.dll" reason="no_symbols" />
     <skipped_module name="system.diagnostics.fileversioninfo.dll" path="system.diagnostics.fileversioninfo.dll" reason="no_symbols" />
     <skipped_module name="system.net.nameresolution.dll" path="system.net.nameresolution.dll" reason="no_symbols" />
     <skipped_module name="system.runtime.intrinsics.dll" path="system.runtime.intrinsics.dll" reason="no_symbols" />
-    <skipped_module name="microsoft.net.stringtools.dll" path="microsoft.net.stringtools.dll" reason="no_symbols" />
     <skipped_module name="system.io.compression.dll" path="system.io.compression.dll" reason="no_symbols" />
+    <skipped_module name="microsoft.net.stringtools.dll" path="microsoft.net.stringtools.dll" reason="no_symbols" />
     <skipped_module name="system.threading.tasks.dataflow.dll" path="system.threading.tasks.dataflow.dll" reason="no_symbols" />
     <skipped_module name="nuget.protocol.dll" path="nuget.protocol.dll" reason="no_symbols" />
-    <skipped_module name="microsoft.visualstudio.solutionpersistence.dll" path="microsoft.visualstudio.solutionpersistence.dll" reason="no_symbols" />
     <skipped_module name="nuget.configuration.dll" path="nuget.configuration.dll" reason="no_symbols" />
+    <skipped_module name="microsoft.visualstudio.solutionpersistence.dll" path="microsoft.visualstudio.solutionpersistence.dll" reason="no_symbols" />
     <skipped_module name="nuget.credentials.dll" path="nuget.credentials.dll" reason="no_symbols" />
     <skipped_module name="system.serviceprocess.servicecontroller.dll" path="system.serviceprocess.servicecontroller.dll" reason="no_symbols" />
     <skipped_module name="system.security.principal.windows.dll" path="system.security.principal.windows.dll" reason="no_symbols" />
@@ -8772,9 +8772,9 @@
     <skipped_module name="nuget.projectmodel.dll" path="nuget.projectmodel.dll" reason="no_symbols" />
     <skipped_module name="system.threading.threadpool.dll" path="system.threading.threadpool.dll" reason="no_symbols" />
     <skipped_module name="system.io.pipes.dll" path="system.io.pipes.dll" reason="no_symbols" />
-    <skipped_module name="microsoft.build.nugetsdkresolver.dll" path="microsoft.build.nugetsdkresolver.dll" reason="no_symbols" />
     <skipped_module name="system.threading.overlapped.dll" path="system.threading.overlapped.dll" reason="no_symbols" />
     <skipped_module name="system.security.accesscontrol.dll" path="system.security.accesscontrol.dll" reason="no_symbols" />
+    <skipped_module name="microsoft.build.nugetsdkresolver.dll" path="microsoft.build.nugetsdkresolver.dll" reason="no_symbols" />
     <skipped_module name="microsoft.net.sdk.workloadmsbuildsdkresolver.dll" path="microsoft.net.sdk.workloadmsbuildsdkresolver.dll" reason="no_symbols" />
     <skipped_module name="microsoft.net.sdk.workloadmanifestreader.dll" path="microsoft.net.sdk.workloadmanifestreader.dll" reason="no_symbols" />
     <skipped_module name="nuget.frameworks.dll" path="nuget.frameworks.dll" reason="no_symbols" />
@@ -8795,7 +8795,6 @@
     <skipped_module name="system.reflection.primitives.dll" path="system.reflection.primitives.dll" reason="no_symbols" />
     <skipped_module name="system.reflection.emit.ilgeneration.dll" path="system.reflection.emit.ilgeneration.dll" reason="no_symbols" />
     <skipped_module name="microsoft.testplatform.build.dll" path="microsoft.testplatform.build.dll" reason="path_is_excluded" />
-    <skipped_module name="system.diagnostics.stacktrace.dll" path="system.diagnostics.stacktrace.dll" reason="no_symbols" />
     <skipped_module name="vstest.console.dll" path="vstest.console.dll" reason="path_is_excluded" />
     <skipped_module name="microsoft.testplatform.coreutilities.dll" path="microsoft.testplatform.coreutilities.dll" reason="path_is_excluded" />
     <skipped_module name="microsoft.testplatform.platformabstractions.dll" path="microsoft.testplatform.platformabstractions.dll" reason="path_is_excluded" />
@@ -8809,6 +8808,7 @@
     <skipped_module name="microsoft.visualstudio.testplatform.client.dll" path="microsoft.visualstudio.testplatform.client.dll" reason="path_is_excluded" />
     <skipped_module name="microsoft.diagnostics.netcore.client.dll" path="microsoft.diagnostics.netcore.client.dll" reason="no_symbols" />
     <skipped_module name="system.threading.tasks.extensions.dll" path="system.threading.tasks.extensions.dll" reason="no_symbols" />
+    <skipped_module name="system.diagnostics.stacktrace.dll" path="system.diagnostics.stacktrace.dll" reason="no_symbols" />
     <skipped_module name="microsoft.testplatform.extensions.blamedatacollector.dll" path="microsoft.testplatform.extensions.blamedatacollector.dll" reason="path_is_excluded" />
     <skipped_module name="microsoft.testplatform.extensions.eventlogcollector.dll" path="microsoft.testplatform.extensions.eventlogcollector.dll" reason="path_is_excluded" />
     <skipped_module name="mscorlib.dll" path="mscorlib.dll" reason="path_is_excluded" />
@@ -8848,7 +8848,6 @@
     <skipped_module name="microsoft.identitymodel.tokens.dll" path="microsoft.identitymodel.tokens.dll" reason="no_symbols" />
     <skipped_module name="system.identitymodel.tokens.jwt.dll" path="system.identitymodel.tokens.jwt.dll" reason="no_symbols" />
     <skipped_module name="microsoft.identitymodel.logging.dll" path="microsoft.identitymodel.logging.dll" reason="no_symbols" />
-    <skipped_module name="xunit.assert.dll" path="xunit.assert.dll" reason="path_is_excluded" />
     <skipped_module name="microsoft.identitymodel.jsonwebtokens.dll" path="microsoft.identitymodel.jsonwebtokens.dll" reason="no_symbols" />
     <skipped_module name="microsoft.identitymodel.abstractions.dll" path="microsoft.identitymodel.abstractions.dll" reason="no_symbols" />
   </skipped_modules>

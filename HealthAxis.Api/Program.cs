@@ -1,3 +1,4 @@
+using HealthAxis.Api.BackgroundServices;
 using HealthAxis.Api.Data;
 using HealthAxis.Api.Mapping;
 using HealthAxis.Api.Middleware;
@@ -12,9 +13,48 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi;
+using Serilog;
 using System.Text;
+using MassTransit;
+using HealthAxis.Api.Consumers;
+
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Host.UseSerilog((context, services, configuration) =>
+{
+
+    configuration.ReadFrom.Configuration(context.Configuration)
+
+        .ReadFrom.Services(services)
+
+        .Enrich.FromLogContext()
+
+        .WriteTo.Console()
+
+        .WriteTo.File(
+
+            "logs/healthaxis-.log",
+
+            rollingInterval: RollingInterval.Day,
+
+            retainedFileCountLimit: 7);
+
+});
+builder.Services.AddMassTransit(x =>
+{
+    x.AddConsumer<AppointmentBookedConsumer>();
+
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host("localhost", "/", h =>
+        {
+            h.Username("guest");
+            h.Password("guest");
+        });
+
+        cfg.ConfigureEndpoints(context);
+    });
+});
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -129,6 +169,8 @@ builder.Services.AddProblemDetails();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+builder.Services.AddHostedService<HeartbeatBackgroundService>();
+
 const string ClientCorsPolicy = "ClientCorsPolicy";
 
 builder.Services.AddCors(options =>
@@ -183,5 +225,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.UseSerilogRequestLogging();
 
 app.Run();

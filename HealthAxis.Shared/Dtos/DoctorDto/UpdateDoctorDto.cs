@@ -19,9 +19,9 @@ namespace HealthAxis.Shared.Dtos.Doctors
         [Required(ErrorMessage = "Please select the doctor's specialisation.")]
         public SpecialisationType Specialisation { get; set; }
 
-        [Required(ErrorMessage = "Please enter the doctor's practice start date.")]
-        [DataType(DataType.Date)]
-        public DateTime PracticeStartDate { get; set; }
+        [Required(ErrorMessage = "Please enter years of experience.")]
+        [Range(0, 60, ErrorMessage = "Years of experience must be between 0 and 60.")]
+        public int YearsOfExperience { get; set; }
 
         [Required(ErrorMessage = "Please enter the consultation fee.")]
         [Range(

@@ -20,6 +20,7 @@ namespace HealthAxis.Api.Data
         public DbSet<Appointment> Appointments { get; set; }
 
         public DbSet<HealthRecord> HealthRecords { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         private static DateTime UtcDate(int year, int month, int day)
         {

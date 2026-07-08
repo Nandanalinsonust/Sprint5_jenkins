@@ -179,7 +179,7 @@ namespace HealthAxis.Api.Services
 
             doctor.DoctorName = dto.FullName.Trim();
             doctor.Email = normalizedEmail;
-            doctor.YearsOfExperience = CalculateYearsOfExperience(dto.PracticeStartDate);
+            doctor.YearsOfExperience = dto.YearsOfExperience;
             doctor.IsActive = true;
             doctor.MustChangePassword = true;
             doctor.IdentityUserId = identityUser.Id;
@@ -215,7 +215,7 @@ namespace HealthAxis.Api.Services
             doctor.DoctorId = doctorId;
             doctor.Email = existingDoctor.Email;
             doctor.IdentityUserId = existingDoctor.IdentityUserId;
-            doctor.YearsOfExperience = CalculateYearsOfExperience(dto.PracticeStartDate);
+            doctor.YearsOfExperience = dto.YearsOfExperience;
             doctor.CreatedDate = existingDoctor.CreatedDate;
             doctor.MustChangePassword = existingDoctor.MustChangePassword;
 
@@ -314,7 +314,7 @@ namespace HealthAxis.Api.Services
             ValidateDoctorCommonFields(
                 dto.FullName,
                 dto.Email,
-                dto.PracticeStartDate,
+                dto.YearsOfExperience,
                 dto.ConsultationFee);
         }
 
@@ -328,14 +328,14 @@ namespace HealthAxis.Api.Services
             ValidateDoctorCommonFields(
                 dto.FullName,
                 null,
-                dto.PracticeStartDate,
+                dto.YearsOfExperience,
                 dto.ConsultationFee);
         }
 
         private static void ValidateDoctorCommonFields(
             string fullName,
             string? email,
-            DateTime practiceStartDate,
+            int YearsOfExperience,
             decimal consultationFee)
         {
             if (string.IsNullOrWhiteSpace(fullName))
@@ -356,27 +356,15 @@ namespace HealthAxis.Api.Services
                 throw new BusinessRuleException("Doctor email is required.");
             }
 
-            if (practiceStartDate.Date > DateTime.Today)
+            if (YearsOfExperience > 60 || YearsOfExperience < 0)
             {
-                throw new BusinessRuleException("Practice start date cannot be in the future.");
+                throw new BusinessRuleException("Years of experience should be between 0 and 60.");
             }
 
             if (consultationFee < 1 || consultationFee > 100000)
             {
                 throw new BusinessRuleException("Consultation fee must be between 1 and 100,000.");
             }
-        }
-
-        private static int CalculateYearsOfExperience(DateTime practiceStartDate)
-        {
-            int years = DateTime.Today.Year - practiceStartDate.Year;
-
-            if (practiceStartDate.Date > DateTime.Today.AddYears(-years))
-            {
-                years--;
-            }
-
-            return years;
         }
 
         private static string GenerateTemporaryPassword(string doctorName)

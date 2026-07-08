@@ -1,32 +1,30 @@
 <div class="pd-page" [class.pd-sidebar-open]="isSidebarOpen">
 
+
+  <button
+    type="button"
+    class="pd-floating-menu"
+    (click)="toggleSidebar()">
+    ☰
+  </button>
+
   @if (isSidebarOpen) {
-    <div class="pd-sidebar-overlay" (click)="closeSidebar()"></div>
+    <div
+      class="pd-sidebar-overlay"
+      (click)="closeSidebar()">
+    </div>
   }
 
-  <aside class="pd-sidebar" [class.open]="isSidebarOpen">
-    <div class="pd-brand">
-      <div class="pd-brand-logo">HA</div>
+  <aside
+    class="pd-sidebar"
+    [class.open]="isSidebarOpen">
 
-      <div class="pd-brand-copy">
-        <h2>HealthAxis</h2>
-        <span>Patient Portal</span>
-      </div>
-
-      <button
-        type="button"
-        class="pd-sidebar-toggle"
-        (click)="toggleSidebar()">
-        ☰
-      </button>
-    </div>
 
     <nav class="pd-menu">
       <button
         type="button"
         [class.active]="activeSection === 'dashboard'"
         (click)="setActiveSection('dashboard')">
-        <span>⌂</span>
         <strong>Dashboard</strong>
       </button>
 
@@ -34,7 +32,6 @@
         type="button"
         [class.active]="activeSection === 'book'"
         (click)="setActiveSection('book')">
-        <span>＋</span>
         <strong>Book Appointment</strong>
       </button>
 
@@ -42,7 +39,6 @@
         type="button"
         [class.active]="activeSection === 'appointments'"
         (click)="setActiveSection('appointments')">
-        <span>◷</span>
         <strong>My Appointments</strong>
       </button>
 
@@ -50,7 +46,6 @@
         type="button"
         [class.active]="activeSection === 'records'"
         (click)="setActiveSection('records')">
-        <span>▣</span>
         <strong>Health Records</strong>
       </button>
 
@@ -58,7 +53,6 @@
         type="button"
         [class.active]="activeSection === 'profile'"
         (click)="setActiveSection('profile')">
-        <span>◎</span>
         <strong>Profile</strong>
       </button>
 
@@ -66,7 +60,6 @@
         type="button"
         class="pd-logout-menu-btn"
         (click)="logout()">
-        <span>↪</span>
         <strong>Logout</strong>
       </button>
     </nav>
@@ -80,11 +73,11 @@
           <span class="pd-kicker">Patient Workspace</span>
 
           <h1>
-            Welcome back, {{ patientFirstName }}
+            Hi, {{ patientFirstName }}
           </h1>
 
           <p>
-            Manage appointments, care records, and your HealthAxis profile from one place.
+            Manage appointments, records, and your profile.
           </p>
         </div>
       </div>
@@ -130,7 +123,7 @@
             <span class="pd-hero-label">Care Overview</span>
 
             <h2>
-              Your healthcare journey, organized beautifully.
+              HealthAxis , Your Health Partner.
             </h2>
 
             <p>
@@ -152,45 +145,7 @@
             </div>
           </div>
 
-          <div class="pd-chart-card">
-            <div class="pd-donut-wrap">
-              <div
-                class="pd-donut"
-                [style.background]="chartBackground">
-                <div class="pd-donut-center">
-                  <strong>{{ totalOverviewCount }}</strong>
-                  <span>Total Items</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="pd-chart-legend">
-              <div>
-                <span class="blue-dot"></span>
-                Upcoming
-                <strong>{{ upcomingPercentage }}%</strong>
-              </div>
-
-              <div>
-                <span class="amber-dot"></span>
-                Pending
-                <strong>{{ pendingPercentage }}%</strong>
-              </div>
-
-              <div>
-                <span class="green-dot"></span>
-                Completed
-                <strong>{{ completedPercentage }}%</strong>
-              </div>
-
-              <div>
-                <span class="purple-dot"></span>
-                Records
-                <strong>{{ recordPercentage }}%</strong>
-              </div>
-            </div>
-          </div>
-        </article>
+          </article>
 
         <section class="pd-summary-grid premium">
           <article class="pd-summary-card blue">
@@ -274,25 +229,21 @@
 
             <div class="pd-action-grid premium-actions">
               <button type="button" (click)="setActiveSection('book')">
-                <span>＋</span>
                 <strong>Book Appointment</strong>
                 <small>Choose doctor and slot</small>
               </button>
 
               <button type="button" (click)="setActiveSection('appointments')">
-                <span>◷</span>
                 <strong>View Appointments</strong>
                 <small>Track visit status</small>
               </button>
 
               <button type="button" (click)="setActiveSection('records')">
-                <span>▣</span>
                 <strong>Health Records</strong>
                 <small>View medical history</small>
               </button>
 
               <button type="button" (click)="setActiveSection('profile')">
-                <span>◎</span>
                 <strong>Edit Profile</strong>
                 <small>Update personal details</small>
               </button>

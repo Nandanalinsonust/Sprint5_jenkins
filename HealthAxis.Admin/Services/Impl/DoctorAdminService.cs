@@ -86,7 +86,7 @@ namespace HealthAxis.Admin.Services.Impl
             {
                 FullName = doctor.FullName,
                 Specialisation = doctor.Specialisation,
-                PracticeStartDate = GetApproximatePracticeStartDate(doctor.YearsOfExperience),
+                YearsOfExperience = doctor.YearsOfExperience,
                 ConsultationFee = doctor.ConsultationFee,
                 IsActive = !doctor.IsActive
             };

@@ -16,23 +16,39 @@
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (!firstRender)
-        {
             return;
-        }
 
-        var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
-
-        var token = GetQueryValue(uri.Query, "token");
-
-        if (string.IsNullOrWhiteSpace(token))
+        try
         {
-            Navigation.NavigateTo("http://localhost:4200", true);
-            return;
+            Console.WriteLine("STEP 1");
+
+            var uri = Navigation.ToAbsoluteUri(Navigation.Uri);
+
+            var token = GetQueryValue(uri.Query, "token");
+
+            Console.WriteLine("STEP 2");
+
+            if (string.IsNullOrWhiteSpace(token))
+            {
+                Console.WriteLine("NO TOKEN");
+                return;
+            }
+
+            Console.WriteLine("STEP 3");
+
+            await JS.InvokeVoidAsync(
+                "localStorage.setItem",
+                TokenStorageKey,
+                token);
+
+            Console.WriteLine("STEP 4");
+
+            Navigation.NavigateTo("/admin/dashboard", true);
         }
-
-        await JS.InvokeVoidAsync("localStorage.setItem", TokenStorageKey, token);
-
-        Navigation.NavigateTo("/admin/dashboard", true);
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.ToString());
+        }
     }
 
     private static string GetQueryValue(string queryString, string key)
