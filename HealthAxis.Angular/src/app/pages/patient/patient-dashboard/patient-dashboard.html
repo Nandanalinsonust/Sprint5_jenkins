@@ -82,16 +82,82 @@
         </div>
       </div>
 
-      <div class="pd-user-card">
-        <div class="pd-user-avatar">
-          {{ patientFirstName[0] || 'P' }}
+    <div class="pd-profile-menu">
+
+  <button
+    type="button"
+    class="pd-profile-btn"
+    (click)="toggleProfileDropdown()">
+
+    <div class="pd-user-avatar">
+          {{ patientFirstName.charAt(0).toUpperCase() || 'P' }}
+
+    </div>
+
+  </button>
+
+  @if (isProfileDropdownOpen) {
+
+    <div
+      class="pd-profile-overlay"
+      (click)="closeProfileDropdown()">
+    </div>
+
+    <div class="pd-profile-dropdown">
+
+      <div class="pd-profile-header">
+        <div class="pd-user-avatar profile-avatar">
+          {{ patientFirstName.charAt(0).toUpperCase() || 'P' }}
         </div>
 
-        <div>
-          <strong>{{ patient?.patientName || 'Patient' }}</strong>
-          <span>{{ patient?.email || 'Loading profile...' }}</span>
+        <div class="pd-profile-details">
+          <strong>{{ patient?.patientName }}</strong>
+          <span>{{ patient?.email }}</span>
         </div>
       </div>
+
+      <!-- <button
+        type="button"
+        class="pd-dropdown-item"
+        (click)="setActiveSection('profile'); closeProfileDropdown()">
+
+        <i class="fas fa-user-circle">👤</i>
+        <span>View Profile</span>
+
+      </button>
+
+      <button
+        type="button"
+        class="pd-dropdown-item logout"
+        (click)="closeProfileDropdown(); logout()">
+
+        
+  <i class="fas fa-arrow-right-from-bracket">↪ </i>
+
+        <span>Logout</span>
+
+      </button> -->
+      <button
+  type="button"
+  class="pd-dropdown-item"
+  (click)="setActiveSection('profile'); closeProfileDropdown()">
+  <i class="fas fa-user-circle"></i>
+  <span>View Profile</span>
+</button>
+
+<button
+  type="button"
+  class="pd-dropdown-item logout"
+  (click)="closeProfileDropdown(); logout()">
+  <i class="fas fa-arrow-right-from-bracket"></i>
+  <span>Logout</span>
+</button>
+
+    </div>
+
+  }
+
+</div>
     </header>
 
     @if (isDashboardLoading && activeSection === 'dashboard') {

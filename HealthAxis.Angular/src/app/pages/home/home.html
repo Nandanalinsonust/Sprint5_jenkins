@@ -3,24 +3,14 @@
   <header class="ha-navbar">
 
     <div class="ha-brand">
-      <!-- <div class="ha-logo">H</div> -->
 
       <div>
         <h2>{{ brandName }}</h2>
-        <span>Patient Care Portal</span>
+        <span>Health Services Portal</span>
       </div>
     </div>
 
     <nav class="ha-nav-actions">
-
-      <button
-        type="button"
-        class="ha-nav-link"
-        (click)="scrollToAbout()">
-
-        About Us
-
-      </button>
 
       <button
         type="button"
@@ -48,14 +38,8 @@
 
     <section class="ha-hero-content">
 
-      <!-- <div class="ha-kicker">
-        <span></span>
-        {{ platformStatus }}
-      </div> -->
-
       <h1>
-        Personalized Healthcare,
-        Simplified for Everyone
+        Quality Care, Anytime, Anywhere
       </h1>
 
       <p>
@@ -129,7 +113,68 @@
     </section>
 
   </main>
+<!-- ===================== MISSION VISION SECTION ===================== -->
 
+<section class="ha-mission-section">
+
+  <div class="ha-experience-card">
+
+    <h2>
+      Healthcare excellence backed by
+      35+ years of experience.
+    </h2>
+
+    <div class="ha-divider"></div>
+
+    <p>
+      Providing trusted healthcare solutions with a patient-first
+      approach, advanced technology, and compassionate care for
+      individuals and families.
+    </p>
+
+  </div>
+
+  <div class="ha-mission-container">
+
+    <div class="ha-mission-item">
+
+      <div class="ha-icon">
+        <i class="fa-solid fa-staff-snake"></i>
+      </div>
+
+      <div>
+        <h3>Our Mission</h3>
+
+        <p>
+          To deliver accessible, reliable, and personalized healthcare
+          services that improve patient well-being and enhance quality
+          of life through innovation and excellence.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="ha-mission-item">
+
+      <div class="ha-icon">
+        <i class="fa-solid fa-heart-pulse"></i>
+      </div>
+
+      <div>
+        <h3>Our Vision</h3>
+
+        <p>
+          To become the most trusted digital healthcare platform,
+          connecting patients and providers through seamless,
+          secure, and patient-centered experiences.
+        </p>
+      </div>
+
+    </div>
+
+  </div>
+
+</section>
   <section class="ha-highlight-section">
 
     <div class="ha-highlight-left">
@@ -153,49 +198,152 @@
       </p>
 
     </div>
+<div class="ha-highlight-right">
 
+  <div class="ha-feature-card">
+    <span>📅</span>
+    <h4>Easy Appointments</h4>
+    <p>Book doctor visits in just a few clicks.</p>
+  </div>
 
+  <div class="ha-feature-card">
+    <span>📄</span>
+    <h4>Digital Records</h4>
+    <p>Access health records securely anytime.</p>
+  </div>
 
-    <div class="ha-highlight-card">
+  <div class="ha-feature-card">
+    <span>👨‍⚕️</span>
+    <h4>Expert Doctors</h4>
+    <p>Connect with experienced healthcare specialists.</p>
+  </div>
 
-      <span class="ha-highlight-number">
+  <div class="ha-feature-card">
+    <span>🔒</span>
+    <h4>Secure Platform</h4>
+    <p>Protected data with healthcare-grade security.</p>
+  </div>
 
-        {{ currentHighlightIndex + 1 }}
-        /
-        {{ highlights.length }}
+</div>
 
-      </span>
+  </section>
 
-      <h3>
+  <!-- ===================== LOGIN MODAL ===================== -->
+  @if (isLoginModalOpen) {
 
-        {{ currentHighlight.title }}
+<div class="ha-modal-backdrop" (click)="closeModals()">
 
-      </h3>
+  <section
+    class="ha-auth-modal ha-login-modal"
+    (click)="$event.stopPropagation()">
+
+    <button
+      type="button"
+      class="ha-modal-close"
+      (click)="closeModals()">
+      ×
+    </button>
+
+    <!-- Left Side -->
+    <div class="ha-login-banner">
+
+      <h2>Welcome Back</h2>
 
       <p>
-
-        {{ currentHighlight.description }}
-
+        Access appointments, prescriptions,
+        medical records and personalized care
+        all in one secure place.
       </p>
 
-      <div class="ha-carousel-actions">
+      <div class="ha-login-features">
+        <div>✓ Secure Health Records</div>
+        <div>✓ Easy Appointment Booking</div>
+        <div>✓ 24/7 Healthcare Access</div>
+      </div>
+
+    </div>
+
+    <!-- Right Side -->
+    <div class="ha-login-content">
+
+      <div class="ha-auth-header">
+
+        <h3>Sign In</h3>
+
+        <p>
+          Continue to your HealthAxis account.
+        </p>
+
+      </div>
+
+      <form
+        class="ha-auth-form"
+        #loginFormRef="ngForm"
+        (ngSubmit)="submitLogin(loginFormRef)"
+        novalidate>
+
+        <label>
+          Email Address
+
+          <input
+            type="email"
+            name="usernameOrEmail"
+            placeholder="Enter your email"
+            required
+            email
+            [(ngModel)]="loginForm.usernameOrEmail"
+            #usernameOrEmail="ngModel">
+        </label>
+
+        @if (usernameOrEmail.invalid && usernameOrEmail.touched) {
+          <div class="ha-field-error">
+            Enter a valid email address.
+          </div>
+        }
+
+        <label>
+          Password
+
+          <input
+            type="password"
+            name="loginPassword"
+            placeholder="Enter your password"
+            required
+            [(ngModel)]="loginForm.password"
+            #loginPassword="ngModel">
+        </label>
+
+        @if (loginPassword.invalid && loginPassword.touched) {
+          <div class="ha-field-error">
+            Password is required.
+          </div>
+        }
+
+        @if (loginMessage) {
+          <div class="ha-form-message">
+            {{ loginMessage }}
+          </div>
+        }
 
         <button
-          type="button"
-          [disabled]="currentHighlightIndex === 0"
-          (click)="showPreviousHighlight()">
+          class="ha-auth-submit"
+          type="submit"
+          [disabled]="isSubmittingLogin">
 
-          <-
+          {{ isSubmittingLogin ? 'Signing In...' : 'Login' }}
 
         </button>
 
+      </form>
+
+      <div class="ha-auth-footer">
+
+        <span>Don't have an account?</span>
+
         <button
           type="button"
-          [disabled]="currentHighlightIndex === highlights.length - 1"
-          (click)="showNextHighlight()">
-
-          ->
-
+          (click)="openSignupModal()">
+          Create Account
         </button>
 
       </div>
@@ -204,159 +352,60 @@
 
   </section>
 
-  <!-- ===================== LOGIN MODAL ===================== -->
+</div>
 
-  @if (isLoginModalOpen) {
-
-    <div class="ha-modal-backdrop" (click)="closeModals()">
-
-      <section
-        class="ha-auth-modal"
-        (click)="$event.stopPropagation()">
-
-        <button
-          type="button"
-          class="ha-modal-close"
-          (click)="closeModals()">
-          ×
-        </button>
-
-        <div class="ha-auth-header">
-
-          <h2>
-            Welcome Back
-          </h2>
-
-          <p>
-            Login to continue accessing your HealthAxis account.
-          </p>
-
-        </div>
-
-
-        <form
-          class="ha-auth-form"
-          #loginFormRef="ngForm"
-          (ngSubmit)="submitLogin(loginFormRef)"
-          novalidate>
-
-          <label>
-
-            Email Address
-
-            <input
-              type="email"
-              name="usernameOrEmail"
-              placeholder="Enter your email"
-              required
-              email
-              [(ngModel)]="loginForm.usernameOrEmail"
-              #usernameOrEmail="ngModel">
-
-          </label>
-
-          @if (usernameOrEmail.invalid && usernameOrEmail.touched) {
-
-            <div class="ha-field-error">
-              Enter a valid email address.
-            </div>
-
-          }
-
-
-          <label>
-
-            Password
-
-            <input
-              type="password"
-              name="loginPassword"
-              placeholder="Enter your password"
-              required
-              [(ngModel)]="loginForm.password"
-              #loginPassword="ngModel">
-
-          </label>
-
-          @if (loginPassword.invalid && loginPassword.touched) {
-
-            <div class="ha-field-error">
-              Password is required.
-            </div>
-
-          }
-
-
-          @if (loginMessage) {
-
-            <div class="ha-form-message">
-
-              {{ loginMessage }}
-
-            </div>
-
-          }
-
-
-          <button
-            class="ha-auth-submit"
-            type="submit"
-            [disabled]="isSubmittingLogin">
-
-            {{ isSubmittingLogin ? 'Signing In...' : 'Login' }}
-
-          </button>
-
-        </form>
-
-
-        <div class="ha-auth-footer">
-
-          <span>
-            Don't have an account?
-          </span>
-
-          <button
-            type="button"
-            (click)="openSignupModal()">
-
-            Create Account
-
-          </button>
-
-        </div>
-
-      </section>
-
-    </div>
-
-  }
+}
 
 @if (isSignupModalOpen) {
 
-  <div class="ha-modal-backdrop" (click)="closeModals()">
+<div class="ha-modal-backdrop" (click)="closeModals()">
 
-    <section
-      class="ha-auth-modal ha-signup-modal"
-      (click)="$event.stopPropagation()">
+  <section
+    class="ha-auth-modal ha-signup-modal"
+    (click)="$event.stopPropagation()">
 
-      <button
-        type="button"
-        class="ha-modal-close"
-        (click)="closeModals()">
-        ×
-      </button>
+    <button
+      type="button"
+      class="ha-modal-close"
+      (click)="closeModals()">
+      ×
+    </button>
 
-      <div class="ha-auth-header">
+    <!-- Left Panel -->
+    <div class="ha-signup-banner">
 
-        <h2>Create Your Account</h2>
+      <h2>Join HealthAxis</h2>
 
-        <p>
-          Join HealthAxis to manage appointments, access records,
-          and stay connected with your healthcare journey.
-        </p>
+      <p>
+        Your trusted healthcare companion for managing
+        appointments, records and wellness.
+      </p>
+
+      <div class="ha-benefits">
+
+        <div class="ha-benefit-item">
+          ✓ Easy Appointment Scheduling
+        </div>
+
+        <div class="ha-benefit-item">
+          ✓ Digital Health Records
+        </div>
+
+        <div class="ha-benefit-item">
+          ✓ Trusted Healthcare Network
+        </div>
+
+        <div class="ha-benefit-item">
+          ✓ Secure & Private Platform
+        </div>
 
       </div>
+
+    </div>
+
+    <!-- Right Panel -->
+    <div class="ha-signup-content">
+
 
       <form
         class="ha-auth-form"
@@ -376,7 +425,7 @@
               <input
                 type="text"
                 name="fullName"
-                placeholder="John Doe"
+                placeholder="Emma Johnson"
                 required
                 minlength="2"
                 maxlength="100"
@@ -658,14 +707,17 @@
           type="button"
           (click)="openLoginModal()">
 
-          Login
+          Sign In
 
         </button>
 
       </div>
 
-    </section>
+    </div>
 
-  </div>
+  </section>
+
+</div>
 
 }
+

@@ -2,11 +2,14 @@
 using HealthAxis.Api.Exceptions;
 using HealthAxis.Api.Models;
 using HealthAxis.Api.Repository.Interface;
+using HealthAxis.Api.Services.Interface;
 using HealthAxis.Shared.Constants;
 using HealthAxis.Shared.Dtos.Doctors;
 using HealthAxis.Shared.Dtos.Pagination;
 using HealthAxis.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Distributed;
+using Serilog.Core;
 using System.Text.RegularExpressions;
 
 namespace HealthAxis.Api.Services
@@ -16,7 +19,10 @@ namespace HealthAxis.Api.Services
         IAppointmentRepository appointmentRepository,
         IMapper mapper,
         UserManager<IdentityUser> userManager,
-        RoleManager<IdentityRole> roleManager) : IDoctorService
+        RoleManager<IdentityRole> roleManager,
+        ICacheService cacheService,
+        ILogger<DoctorService> logger
+        ) : IDoctorService
     {
         private static readonly Regex DoctorNameRegex = new(
             @"^[A-Za-z]+(?: [A-Za-z]+)*$",
@@ -26,6 +32,13 @@ namespace HealthAxis.Api.Services
         private const string DoctorRoleName = "Doctor";
         private const string DoctorDetailsRequiredMessage = "Doctor details are required.";
 
+        private static readonly TimeSpan DoctorAvailabilityCacheDuration = TimeSpan.FromMinutes(5);
+        private static string BuildDoctorAvailabilityCacheKey(
+    int doctorId,
+    DateTime date)
+        {
+            return $"doctor-availability:{doctorId}:{date:yyyy-MM-dd}";
+        }
         public async Task<List<DoctorDto>> GetAllDoctorsAsync()
         {
             var doctors = await repository.GetAllAsync();
@@ -260,7 +273,9 @@ namespace HealthAxis.Api.Services
             return mapper.Map<DoctorDto>(doctor);
         }
 
-        public async Task<List<SlotAvailabilityDto>> GetDoctorAvailabilityAsync(int doctorId, DateTime? date)
+        public async Task<List<SlotAvailabilityDto>> GetDoctorAvailabilityAsync(
+    int doctorId,
+    DateTime? date)
         {
             ValidateDoctorId(doctorId);
 
@@ -273,25 +288,63 @@ namespace HealthAxis.Api.Services
 
             if (!doctor.IsActive)
             {
-                throw new BusinessRuleException("Doctor is inactive and not available for appointments.");
+                throw new BusinessRuleException(
+                    "Doctor is inactive and not available for appointments.");
             }
-
-            var bookedSlots = new List<string>();
 
             if (date is not null)
             {
-                bookedSlots = await appointmentRepository.GetBookedTimeSlotsByDoctorAndDateAsync(
-                    doctorId,
-                    date.Value);
-            }
+                var selectedDate = date.Value.Date;
 
-            var bookedSlotSet = bookedSlots.ToHashSet(StringComparer.OrdinalIgnoreCase);
+                var cacheKey = BuildDoctorAvailabilityCacheKey(
+                    doctorId,
+                    selectedDate);
+
+                var cachedAvailability =
+                    await cacheService.GetAsync<List<SlotAvailabilityDto>>(cacheKey);
+
+                if (cachedAvailability is not null)
+                {
+                    logger.LogInformation(
+                        "Doctor availability cache HIT. CacheKey: {CacheKey}",
+                        cacheKey);
+
+                    return cachedAvailability;
+                }
+
+                logger.LogInformation(
+                    "Doctor availability cache MISS. CacheKey: {CacheKey}",
+                    cacheKey);
+
+                var bookedSlots =
+                    await appointmentRepository.GetBookedTimeSlotsByDoctorAndDateAsync(
+                        doctorId,
+                        selectedDate);
+
+                var bookedSlotSet = bookedSlots.ToHashSet(
+                    StringComparer.OrdinalIgnoreCase);
+
+                var availability = TimeSlots.Slots
+                    .Select(slot => new SlotAvailabilityDto
+                    {
+                        TimeSlot = slot,
+                        IsBooked = bookedSlotSet.Contains(slot)
+                    })
+                    .ToList();
+
+                await cacheService.SetAsync(
+                    cacheKey,
+                    availability,
+                    DoctorAvailabilityCacheDuration);
+
+                return availability;
+            }
 
             return TimeSlots.Slots
                 .Select(slot => new SlotAvailabilityDto
                 {
                     TimeSlot = slot,
-                    IsBooked = bookedSlotSet.Contains(slot)
+                    IsBooked = false
                 })
                 .ToList();
         }

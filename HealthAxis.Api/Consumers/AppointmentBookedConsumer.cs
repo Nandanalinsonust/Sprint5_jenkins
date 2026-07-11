@@ -5,22 +5,18 @@ using MassTransit;
 
 namespace HealthAxis.Api.Consumers
 {
-    public class AppointmentBookedConsumer
-        : IConsumer<AppointmentBookedEvent>
+    public class AppointmentBookedConsumer : IConsumer<AppointmentBookedEvent>
     {
         private readonly HealthAxisDbContext _dbContext;
         private readonly ILogger<AppointmentBookedConsumer> _logger;
 
-        public AppointmentBookedConsumer(
-            HealthAxisDbContext dbContext,
-            ILogger<AppointmentBookedConsumer> logger)
+        public AppointmentBookedConsumer(HealthAxisDbContext dbContext,ILogger<AppointmentBookedConsumer> logger)
         {
             _dbContext = dbContext;
             _logger = logger;
         }
 
-        public async Task Consume(
-            ConsumeContext<AppointmentBookedEvent> context)
+        public async Task Consume(ConsumeContext<AppointmentBookedEvent> context)
         {
             var message = context.Message;
 
@@ -40,6 +36,7 @@ namespace HealthAxis.Api.Consumers
             _logger.LogInformation(
                 "Notification created for Doctor {DoctorId}",
                 message.DoctorId);
+
         }
     }
 }

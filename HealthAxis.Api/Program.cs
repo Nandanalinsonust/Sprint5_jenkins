@@ -17,6 +17,7 @@ using Serilog;
 using System.Text;
 using MassTransit;
 using HealthAxis.Api.Consumers;
+using HealthAxis.Api.Options;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -40,19 +41,23 @@ builder.Host.UseSerilog((context, services, configuration) =>
             retainedFileCountLimit: 7);
 
 });
+var rabbitmqConfig = builder.Configuration.GetSection("RabbitMQ");
 builder.Services.AddMassTransit(x =>
 {
     x.AddConsumer<AppointmentBookedConsumer>();
 
     x.UsingRabbitMq((context, cfg) =>
     {
-        cfg.Host("localhost", "/", h =>
+        cfg.Host(rabbitmqConfig["HostName"], rabbitmqConfig["VirtualHost"], h =>
         {
-            h.Username("guest");
-            h.Password("guest");
+            h.Username(rabbitmqConfig["Username"]!);
+            h.Password(rabbitmqConfig["Password"]!);
+        });
+        cfg.ReceiveEndpoint("appointment-booked-queue", e =>
+        {
+            e.ConfigureConsumer<AppointmentBookedConsumer>(context);
         });
 
-        cfg.ConfigureEndpoints(context);
     });
 });
 
@@ -160,6 +165,17 @@ builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
+
+//Register Caching
+builder.Services.Configure<GarnetOptions>(builder.Configuration.GetSection("Garnet"));
+builder.Services.AddStackExchangeRedisCache(option =>
+{
+    var garnetOptions = builder.Configuration.GetSection("Garnet").Get<GarnetOptions>() 
+                ?? new GarnetOptions(); //?? - null reference
+
+    option.Configuration = garnetOptions.ConnectionString;
+    option.InstanceName = garnetOptions.InstanceName;
+});
 
 // Register Global Exception Handler.
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();

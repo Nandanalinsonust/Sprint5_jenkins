@@ -56,7 +56,7 @@ export class Home implements OnInit {
   heroTitle = 'Healthcare access made simple, secure, and connected.';
 
   heroDescription =
-    'Book appointments, stay connected with doctors, and keep your care journey organized in one modern digital healthcare platform.';
+    'Bringing modern healthcare closer to you through a secure digital experience.';
 
   platformStatus = 'For Patients and Doctors';
 

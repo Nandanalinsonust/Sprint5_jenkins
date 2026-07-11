@@ -17,9 +17,8 @@ namespace HealthAxis.Api.Services.Impl
         IPatientRepository patientRepository,
         IDoctorRepository doctorRepository,
         IHealthRecordRepository healthRecordRepository,
-        IMapper mapper, IBus bus) : IAppointmentService
+        IMapper mapper,IPublishEndpoint publishEndpoint) : IAppointmentService
     {
-        private readonly IBus _bus = bus;
 
         private const string AppointmentEntityName = "Appointment";
         private const string AppointmentDetailsRequiredMessage = "Appointment details are required.";
@@ -329,7 +328,7 @@ namespace HealthAxis.Api.Services.Impl
                 throw new EntityNotFoundException("Patient", dto.PatientId);
             }
 
-            await _bus.Publish(
+            await publishEndpoint.Publish(
                 new AppointmentBookedEvent
                 {
                     AppointmentId = savedAppointment.AppointmentId,

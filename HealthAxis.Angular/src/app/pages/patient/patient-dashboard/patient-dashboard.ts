@@ -67,6 +67,7 @@ export class PatientDashboard implements OnInit, OnDestroy {
 
   isSidebarOpen = false;
   isLogoutModalOpen = false;
+  isProfileDropdownOpen = false;
 
   private toastTimer?: ReturnType<typeof setTimeout>;
 
@@ -204,6 +205,16 @@ get chartTotalCount(): number {
       clearTimeout(this.toastTimer);
     }
   }
+
+  
+toggleProfileDropdown(): void {
+  this.isProfileDropdownOpen = !this.isProfileDropdownOpen;
+}
+
+closeProfileDropdown(): void {
+  this.isProfileDropdownOpen = false;
+}
+
 
   logout(): void {
     this.isLogoutModalOpen = true;

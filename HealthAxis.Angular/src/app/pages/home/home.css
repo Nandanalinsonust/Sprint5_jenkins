@@ -544,3 +544,560 @@ button {
     flex-direction: column;
   }
 }
+/* ===================== MISSION SECTION ===================== */
+
+.ha-mission-section {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1200px;
+  margin: 80px auto;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(139, 115, 85, 0.12);
+}
+
+/* Left Experience Card */
+
+.ha-experience-card {
+  background: linear-gradient(
+    135deg,
+    #e8c9a7,
+    #f3e5d3
+  );
+  color: #5d4a36;
+  padding: 60px 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ha-experience-card h2 {
+  font-size: 2.2rem;
+  font-weight: 700;
+  line-height: 1.4;
+  margin-bottom: 20px;
+}
+
+.ha-divider {
+  width: 70px;
+  height: 3px;
+  background: #b99063;
+  margin-bottom: 24px;
+  border-radius: 20px;
+}
+
+.ha-experience-card p {
+  font-size: 1rem;
+  line-height: 1.8;
+  color: #7a624a;
+}
+
+/* Right Mission/Vision Area */
+
+.ha-mission-container {
+  background: #faf5ef;
+  padding: 50px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ha-mission-item {
+  display: flex;
+  gap: 20px;
+  padding: 30px 0;
+}
+
+.ha-mission-item:first-child {
+  border-bottom: 1px solid #e6d8c8;
+}
+
+.ha-icon {
+  width: 65px;
+  height: 65px;
+  border: 2px solid #c6a27a;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  color: #b99063;
+  font-size: 24px;
+  flex-shrink: 0;
+}
+
+.ha-mission-item h3 {
+  font-size: 1.5rem;
+  color: #5d4a36;
+  margin-bottom: 12px;
+  font-weight: 600;
+}
+
+.ha-mission-item p {
+  color: #7a624a;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* Hover Effect */
+
+.ha-mission-item:hover .ha-icon {
+  background: #c6a27a;
+  color: #fff;
+  transition: 0.3s ease;
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+  .ha-mission-section {
+    grid-template-columns: 1fr;
+    margin: 50px 20px;
+  }
+
+  .ha-experience-card,
+  .ha-mission-container {
+    padding: 35px 25px;
+  }
+
+  .ha-experience-card h2 {
+    font-size: 1.8rem;
+  }
+
+  .ha-mission-item {
+    flex-direction: column;
+    text-align: center;
+    align-items: center;
+  }
+}
+.ha-highlight-section{
+    display:flex;
+    justify-content:space-between;
+    gap:60px;
+    align-items:center;
+}
+
+.ha-highlight-left{
+    flex:1;
+}
+
+.ha-highlight-right{
+    flex:1;
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.ha-feature-card{
+    background:#f8f1e8;
+    padding:24px;
+    border-radius:16px;
+    border:1px solid #e6d8c8;
+}
+
+.ha-feature-card span{
+    font-size:32px;
+}
+
+.ha-feature-card h4{
+    margin:12px 0 8px;
+    color:#5d4a36;
+}
+
+.ha-feature-card p{
+    color:#7a624a;
+    line-height:1.6;
+}
+
+
+/* Left Side */
+
+.ha-login-banner {
+  width: 40%;
+  padding: 50px;
+  background: linear-gradient(
+    135deg,
+    #d9b99b,
+    #b99572
+  );
+  color: white;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ha-login-banner h2 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+}
+
+.ha-login-banner p {
+  line-height: 1.8;
+  margin-bottom: 30px;
+}
+
+.ha-login-features {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-weight: 500;
+}
+
+/* Right Side */
+
+.ha-login-content {
+  width: 60%;
+  padding: 50px;
+  background: #fffdf9;
+}
+
+.ha-auth-header h3 {
+  font-size: 2rem;
+  color: #4d3d2d;
+  margin-bottom: 10px;
+}
+
+.ha-auth-header p {
+  color: #85715e;
+}
+
+/* Inputs */
+
+.ha-auth-form input {
+  border: 1px solid #e5d3c2;
+  border-radius: 12px;
+  padding: 14px 16px;
+  margin-top: 8px;
+  transition: .3s;
+}
+
+.ha-auth-form input:focus {
+  outline: none;
+  border-color: #b99572;
+  box-shadow: 0 0 0 4px rgba(185,149,114,.15);
+}
+
+/* Login Button */
+
+.ha-auth-submit {
+  background: #b99572;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-weight: 600;
+  transition: .3s;
+}
+
+.ha-auth-submit:hover {
+  background: #a88767;
+  transform: translateY(-2px);
+}
+
+/* Responsive */
+
+@media (max-width: 768px) {
+
+  .ha-login-modal {
+    flex-direction: column;
+  }
+
+  .ha-login-banner,
+  .ha-login-content {
+    width: 100%;
+  }
+
+  .ha-login-banner {
+    padding: 30px;
+  }
+
+}
+.ha-login-modal {
+  width: 900px;
+  max-width: 95%;
+  min-height: 550px;
+
+  display: flex;
+  border-radius: 24px;
+  overflow: hidden;
+  background: #fffdf9;
+  position: relative;
+  padding: 0;
+}
+
+/* Close Button */
+
+.ha-modal-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  left: auto;
+
+  width: 36px;
+  height: 36px;
+
+  border: none;
+  border-radius: 50%;
+  background: #f3e5d3;
+  color: #5d4a36;
+  cursor: pointer;
+  z-index: 5;
+}
+
+/* Left Side */
+
+.ha-login-banner {
+  width: 42%;
+  background: #d7b798;
+  color: white;
+
+  padding: 50px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ha-login-banner h2 {
+  font-size: 3rem;
+  margin-bottom: 24px;
+}
+
+.ha-login-banner p {
+  line-height: 1.8;
+  margin-bottom: 32px;
+}
+
+.ha-login-features {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  font-size: 1rem;
+}
+
+/* Right Side */
+
+.ha-login-content {
+  width: 58%;
+  padding: 50px;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ha-auth-header {
+  margin-bottom: 30px;
+}
+
+.ha-auth-header h3 {
+  font-size: 3rem;
+  margin-bottom: 10px;
+  color: #4b3727;
+}
+
+.ha-auth-header p {
+  color: #7a624a;
+}
+
+/* Form */
+
+.ha-auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ha-auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ha-auth-form input {
+  height: 52px;
+  border-radius: 12px;
+  border: 1px solid #e4d5c5;
+  padding: 0 16px;
+}
+
+/* Footer */
+
+.ha-auth-footer {
+  margin-top: 20px;
+
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.ha-auth-footer button {
+  border: none;
+  background: transparent;
+  color: #9b7350;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ha-signup-modal {
+  width: 1100px;
+  max-width: 95vw;
+  min-height: 700px;
+
+  display: flex;
+  overflow: hidden;
+  border-radius: 24px;
+
+  background: #fff;
+  position: relative;
+}
+.ha-signup-banner {
+  width: 35%;
+  padding: 50px;
+  border-radius: 30px;
+
+  background: linear-gradient(
+    180deg,
+    #e7cfb3,
+    #c8ab87
+  );
+
+
+  color: #4b3728;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+.ha-benefit-item {
+  background: rgba(255,255,255,.4);
+  padding: 14px 18px;
+  border-radius: 30px;
+  backdrop-filter: blur(4px);
+}
+
+
+.ha-signup-banner h2 {
+  font-size: 2.5rem;
+  margin-bottom: 16px;
+}
+
+.ha-signup-banner p {
+  line-height: 1.8;
+  margin-bottom: 40px;
+}
+
+.ha-benefits {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ha-benefit-item {
+  background: rgba(255,255,255,.4);
+  padding: 14px 18px;
+  border-radius: 14px;
+  backdrop-filter: blur(4px);
+}
+
+.ha-signup-content {
+  width: 65%;
+  padding: 40px;
+  overflow-y: auto;
+}
+.ha-signup-modal {
+  display: flex;
+  align-items: stretch;
+}
+
+.ha-signup-banner {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.ha-signup-content {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  padding: 60px 50px;
+}
+.ha-signup-content {
+  height: 100%;
+}
+
+.ha-auth-form {
+  flex: 1;
+}
+.ha-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 24px 16px;
+  margin-top: 20px;
+}
+.ha-auth-footer {
+  margin-top: 24px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.ha-auth-footer span {
+  font-size: 1rem;
+}
+
+.ha-auth-footer button {
+  background: none;
+  border: none;
+  color: #b08a63;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ha-signup-banner {
+  padding: 70px 55px;
+}
+
+.ha-signup-banner h2 {
+  margin-bottom: 24px;
+}
+
+.ha-signup-banner p {
+  margin-bottom: 50px;
+}
+.ha-signup-modal {
+  border-radius: 32px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.12);
+}
+
+.ha-signup-banner {
+  margin: 16px;
+  border-radius: 24px;
+}
+/* Ensure every field container behaves the same */
+.ha-form-grid > div,
+.ha-form-group {
+  display: flex;
+  flex-direction: column;
+}
+
+/* Consistent label spacing */
+.ha-form-grid label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 500;
+  color: #4b3727;
+}
+
+/* Make inputs and select identical */
+.ha-auth-form input,
+.ha-auth-form select {
+  width: 100%;
+  height: 56px;
+  padding: 0 18px;
+  border: 1px solid #e4d5c5;
+  border-radius: 14px;
+  box-sizing: border-box;
+  margin-top: 0; /* important */
+}
+
