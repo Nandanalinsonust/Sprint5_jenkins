@@ -7,8 +7,7 @@
       <h2>Health Records</h2>
 
       <p>
-        Review your diagnosis, prescriptions, visit notes, and care history from
-        your completed consultations.
+        Look over your medical diagnoses, prescriptions, appointment notes, and care records from previous consultations.
       </p>
     </div>
 
@@ -43,8 +42,7 @@
           name="visitDateFilter"
           [(ngModel)]="selectedVisitDate"
           (ngModelChange)="applyFilters()">
-      </label>
-
+      </label><br>
       <label>
         Page Size
 
@@ -182,8 +180,8 @@
     <section class="hr-pagination-card">
 
       <div>
-        <strong>Page {{ pageNumber }} of {{ totalPages || 1 }}</strong>
-        <span>Total Records: {{ totalRecords }}</span>
+        <strong>Page {{ pageNumber }} of {{ totalPages || 1 }}</strong><br><br>
+        <span> Total Records: {{ totalRecords }}</span>
       </div>
 
       <div class="hr-pagination-actions">

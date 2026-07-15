@@ -36,7 +36,7 @@ else
         <div>
             <h1>Doctors</h1>
 
-            <p>Register, update, activate, and manage HealthAxis doctor profiles.</p>
+            <p>Manage doctor accounts, profile information, and activation status.</p>
         </div>
 
         <button class="hc-page-primary-btn" @onclick="GoToAddDoctor">
@@ -75,7 +75,7 @@ else
             <div>
                 <h3>Doctor Directory</h3>
 
-                <p>Search and filter doctor records directly from backend data.</p>
+                <p>Search, review, and manage doctor records from the HealthAxis system.</p>
             </div>
 
             <span class="ha-result-count">
@@ -137,11 +137,11 @@ else
         @if (!doctors.Any())
         {
             <div class="hc-empty-state">
-                <div class="hc-empty-icon">✚</div>
 
                 <h3>No doctors found</h3>
 
                 <p>Try changing the search text, specialisation, or status filters.</p>
+
             </div>
         }
         else
@@ -256,9 +256,7 @@ else
     {
         <div class="ha-modal-backdrop">
             <div class="ha-logout-modal">
-                <div class="ha-logout-icon">
-                    HA
-                </div>
+               
 
                 <h3>
                     @(selectedDoctorCurrentStatus ? "Deactivate Doctor?" : "Activate Doctor?")

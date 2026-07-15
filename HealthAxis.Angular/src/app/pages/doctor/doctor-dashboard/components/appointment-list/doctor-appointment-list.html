@@ -7,7 +7,7 @@
       <h2>My Appointments</h2>
 
       <p>
-        Review patient appointments, confirm pending visits, and add health records after consultation.
+        Track patient appointments, confirm pending consultations, and record medical information after each visit.
       </p>
     </div>
 
@@ -172,12 +172,12 @@
 
               <div class="da-info-tile">
                 <span>Date</span>
-                <strong>📅 {{ formatDate(appt.scheduledDate) }}</strong>
+                <strong>{{ formatDate(appt.scheduledDate) }}</strong>
               </div>
 
               <div class="da-info-tile">
                 <span>Time Slot</span>
-                <strong>🕒 {{ appt.timeSlot }}</strong>
+                <strong>{{ appt.timeSlot }}</strong>
               </div>
 
               <div class="da-info-tile">
@@ -279,17 +279,16 @@
   }
 
   @if (isConfirmModalOpen && selectedAppointment) {
-    <div>
-      <button
-    type="button"
-    class="da-modal-backdrop"
-    (click)="closeConfirmModal()">
-</button>
+    <div
+      class="da-modal-backdrop"
+      (click)="closeConfirmModal()"
+      (keydown.escape)="closeConfirmModal()">
 
-        <section
-  class="da-action-modal"
-  (click)="$event.stopPropagation()"
-  (keydown)="$event.stopPropagation()">
+      <dialog
+        open
+        class="da-action-modal"
+        (click)="$event.stopPropagation()"
+        (keydown.escape)="closeConfirmModal(); $event.stopPropagation()">
 
         <div class="da-modal-accent"></div>
 
@@ -348,23 +347,22 @@
           </button>
         </div>
 
-      </section>
+      </dialog>
 
     </div>
   }
 
   @if (isHealthRecordModalOpen && selectedAppointment) {
-    <div>
-      <button
-    type="button"
-    class="da-modal-backdrop"
-    (click)="requestCloseHealthRecordModal()">
-</button>
+    <div
+      class="da-modal-backdrop"
+      (click)="requestCloseHealthRecordModal()"
+      (keydown.escape)="requestCloseHealthRecordModal()">
 
-        <section
-  class="da-action-modal"
-  (click)="$event.stopPropagation()"
-  (keydown)="$event.stopPropagation()">
+      <dialog
+        open
+        class="da-action-modal wide"
+        (click)="$event.stopPropagation()"
+        (keydown.escape)="requestCloseHealthRecordModal(); $event.stopPropagation()">
 
         <div class="da-modal-accent complete"></div>
 
@@ -485,23 +483,22 @@
 
         </form>
 
-      </section>
+      </dialog>
 
     </div>
   }
 
   @if (isHealthRecordSaveConfirmOpen && selectedAppointment) {
-    <div>
-      <button
-    type="button"
-    class="da-modal-backdrop"
-    (click)="closeHealthRecordSaveConfirm()">
-</button>
+    <div
+      class="da-modal-backdrop"
+      (click)="closeHealthRecordSaveConfirm()"
+      (keydown.escape)="closeHealthRecordSaveConfirm()">
 
-        <section
-  class="da-action-modal"
-  (click)="$event.stopPropagation()"
-  (keydown)="$event.stopPropagation()">
+      <dialog
+        open
+        class="da-action-modal"
+        (click)="$event.stopPropagation()"
+        (keydown.escape)="closeHealthRecordSaveConfirm(); $event.stopPropagation()">
 
         <div class="da-modal-accent complete"></div>
 
@@ -530,10 +527,6 @@
           <strong>
             Health record will be saved and appointment status will become Completed.
           </strong>
-
-          <p>
-            Backend completes the appointment only after the health record is saved successfully.
-          </p>
         </div>
 
         <div class="da-modal-actions">
@@ -554,23 +547,22 @@
           </button>
         </div>
 
-      </section>
+      </dialog>
 
     </div>
   }
 
   @if (isDiscardHealthRecordModalOpen) {
-    <div>
-      <button
-    type="button"
-    class="da-modal-backdrop"
-    (click)="closeDiscardHealthRecordModal()">
-</button>
+    <div
+      class="da-modal-backdrop"
+      (click)="closeDiscardHealthRecordModal()"
+      (keydown.escape)="closeDiscardHealthRecordModal()">
 
-        <section
-  class="da-action-modal"
-  (click)="$event.stopPropagation()"
-  (keydown)="$event.stopPropagation()">
+      <dialog
+        open
+        class="da-action-modal"
+        (click)="$event.stopPropagation()"
+        (keydown.escape)="closeDiscardHealthRecordModal(); $event.stopPropagation()">
 
         <div class="da-modal-accent danger"></div>
 
@@ -615,7 +607,7 @@
           </button>
         </div>
 
-      </section>
+      </dialog>
 
     </div>
   }

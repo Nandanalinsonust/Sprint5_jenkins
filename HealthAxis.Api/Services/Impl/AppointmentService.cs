@@ -13,44 +13,16 @@ using HealthAxis.Api.Services.Interface;
 
 namespace HealthAxis.Api.Services.Impl
 {
-    public sealed class AppointmentServiceDependencies
-    {
-        public IAppointmentRepository AppointmentRepository { get; init; } = default!;
-        public IPatientRepository PatientRepository { get; init; } = default!;
-        public IDoctorRepository DoctorRepository { get; init; } = default!;
-        public IHealthRecordRepository HealthRecordRepository { get; init; } = default!;
-        public IMapper Mapper { get; init; } = default!;
-        public IPublishEndpoint PublishEndpoint { get; init; } = default!;
-        public ILogger<AppointmentService> Logger { get; init; } = default!;
-        public ICacheService CacheService { get; init; } = default!;
-    }
     public class AppointmentService(
-    AppointmentServiceDependencies dependencies)
-    : IAppointmentService
+        IAppointmentRepository appointmentRepository,
+        IPatientRepository patientRepository,
+        IDoctorRepository doctorRepository,
+        IHealthRecordRepository healthRecordRepository,
+        IMapper mapper, IPublishEndpoint publishEndpoint, ILogger<AppointmentService> logger, ICacheService cacheService) : IAppointmentService
     {
-        private readonly IAppointmentRepository appointmentRepository =
-    dependencies.AppointmentRepository;
 
-        private readonly IPatientRepository patientRepository =
-            dependencies.PatientRepository;
-
-        private readonly IDoctorRepository doctorRepository =
-            dependencies.DoctorRepository;
-
-        private readonly IHealthRecordRepository healthRecordRepository =
-            dependencies.HealthRecordRepository;
-
-        private readonly IMapper mapper =
-            dependencies.Mapper;
-
-        private readonly IPublishEndpoint publishEndpoint =
-            dependencies.PublishEndpoint;
-
-        private readonly ILogger<AppointmentService> logger =
-            dependencies.Logger;
-
-        private readonly ICacheService cacheService =
-            dependencies.CacheService;
+        private const string AppointmentBookedEventType = "AppointmentBooked";
+        private const string EventStagePublished = "Published";
         private const string AppointmentEntityName = "Appointment";
         private const string AppointmentDetailsRequiredMessage = "Appointment details are required.";
         private const string CancellationDetailsRequiredMessage = "Cancellation details are required.";
@@ -124,85 +96,85 @@ namespace HealthAxis.Api.Services.Impl
         }
 
         public async Task<PagedResponse<AppointmentDto>> GetAllAppointmentsPagedAsync(AppointmentPaginationQueryDto query)
-{
+        {
             query ??= new AppointmentPaginationQueryDto();
 
             int pageNumber = query.PageNumber <= 0 ? 1 : query.PageNumber;
 
-    int pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
+            int pageSize = query.PageSize <= 0 ? 10 : query.PageSize;
 
-    pageSize = pageSize > 100 ? 100 : pageSize;
+            pageSize = pageSize > 100 ? 100 : pageSize;
 
-    var appointments = await appointmentRepository.GetAllAsync();
+            var appointments = await appointmentRepository.GetAllAsync();
 
-    var filteredAppointments = appointments.AsEnumerable();
+            var filteredAppointments = appointments.AsEnumerable();
 
-    if (!string.IsNullOrWhiteSpace(query.SearchTerm))
-    {
-        string searchTerm = query.SearchTerm.Trim();
+            if (!string.IsNullOrWhiteSpace(query.SearchTerm))
+            {
+                string searchTerm = query.SearchTerm.Trim();
 
-        filteredAppointments = filteredAppointments.Where(a =>
-            (a.Patient != null &&
-             a.Patient.PatientName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-            (a.Doctor != null &&
-             a.Doctor.DoctorName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
-            a.TimeSlot.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
-            (!string.IsNullOrWhiteSpace(a.CancellationReason) &&
-             a.CancellationReason.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
-    }
+                filteredAppointments = filteredAppointments.Where(a =>
+                    (a.Patient != null &&
+                     a.Patient.PatientName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    (a.Doctor != null &&
+                     a.Doctor.DoctorName.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)) ||
+                    a.TimeSlot.Contains(searchTerm, StringComparison.OrdinalIgnoreCase) ||
+                    (!string.IsNullOrWhiteSpace(a.CancellationReason) &&
+                     a.CancellationReason.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)));
+            }
 
-    if (query.PatientId is not null)
-    {
-        filteredAppointments = filteredAppointments.Where(a =>
-            a.PatientId == query.PatientId.Value);
-    }
+            if (query.PatientId is not null)
+            {
+                filteredAppointments = filteredAppointments.Where(a =>
+                    a.PatientId == query.PatientId.Value);
+            }
 
-    if (query.DoctorId is not null)
-    {
-        filteredAppointments = filteredAppointments.Where(a =>
-            a.DoctorId == query.DoctorId.Value);
-    }
+            if (query.DoctorId is not null)
+            {
+                filteredAppointments = filteredAppointments.Where(a =>
+                    a.DoctorId == query.DoctorId.Value);
+            }
 
-    if (query.Status is not null)
-    {
-        filteredAppointments = filteredAppointments.Where(a =>
-            a.Status == query.Status.Value);
-    }
+            if (query.Status is not null)
+            {
+                filteredAppointments = filteredAppointments.Where(a =>
+                    a.Status == query.Status.Value);
+            }
 
-    if (query.ScheduledDate is not null)
-    {
-        filteredAppointments = filteredAppointments.Where(a =>
-            a.ScheduledDate.Date == query.ScheduledDate.Value.Date);
-    }
+            if (query.ScheduledDate is not null)
+            {
+                filteredAppointments = filteredAppointments.Where(a =>
+                    a.ScheduledDate.Date == query.ScheduledDate.Value.Date);
+            }
 
-    if (query.UpcomingOnly is not null && query.UpcomingOnly.Value)
-    {
-        filteredAppointments = filteredAppointments.Where(a =>
-            a.ScheduledDate.Date >= DateTime.Today &&
-            a.Status != AppointmentStatus.Cancelled &&
-            a.Status != AppointmentStatus.Completed);
-    }
+            if (query.UpcomingOnly is not null && query.UpcomingOnly.Value)
+            {
+                filteredAppointments = filteredAppointments.Where(a =>
+                    a.ScheduledDate.Date >= DateTime.Today &&
+                    a.Status != AppointmentStatus.Cancelled &&
+                    a.Status != AppointmentStatus.Completed);
+            }
 
-    int totalRecords = filteredAppointments.Count();
+            int totalRecords = filteredAppointments.Count();
 
-    var pagedAppointments = filteredAppointments
-        .OrderByDescending(a => a.ScheduledDate)
-        .ThenBy(a => a.TimeSlot)
-        .Skip((pageNumber - 1) * pageSize)
-        .Take(pageSize)
-        .ToList();
+            var pagedAppointments = filteredAppointments
+                .OrderByDescending(a => a.ScheduledDate)
+                .ThenBy(a => a.TimeSlot)
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToList();
 
-    var mappedAppointments = mapper.Map<List<AppointmentDto>>(pagedAppointments);
+            var mappedAppointments = mapper.Map<List<AppointmentDto>>(pagedAppointments);
 
-    return new PagedResponse<AppointmentDto>
-    {
-        Items = mappedAppointments,
-        PageNumber = pageNumber,
-        PageSize = pageSize,
-        TotalRecords = totalRecords,
-        TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
-    };
-}
+            return new PagedResponse<AppointmentDto>
+            {
+                Items = mappedAppointments,
+                PageNumber = pageNumber,
+                PageSize = pageSize,
+                TotalRecords = totalRecords,
+                TotalPages = (int)Math.Ceiling(totalRecords / (double)pageSize)
+            };
+        }
 
         public async Task<AppointmentDto> GetAppointmentByIdAsync(int appointmentId)
         {
@@ -357,10 +329,9 @@ namespace HealthAxis.Api.Services.Impl
 
             await cacheService.RemoveAsync(cacheKey);
 
-            DoctorAvailabilityCacheInvalidated(
-    logger,
-    cacheKey,
-    null);
+            logger.LogInformation(
+                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
+                cacheKey);
 
             var patient = await patientRepository.GetByIdAsync(dto.PatientId);
 
@@ -445,10 +416,9 @@ namespace HealthAxis.Api.Services.Impl
 
             await cacheService.RemoveAsync(cacheKey);
 
-            DoctorAvailabilityCacheInvalidated(
-    logger,
-    cacheKey,
-    null);
+            logger.LogInformation(
+                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
+                cacheKey);
 
             if (updatedAppointment is null)
             {
@@ -585,10 +555,14 @@ namespace HealthAxis.Api.Services.Impl
 
             await cacheService.RemoveAsync(cacheKey);
 
-            DoctorAvailabilityCacheInvalidated(
-    logger,
-    cacheKey,
-    null);
+            logger.LogInformation(
+                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
+                cacheKey);
+
+            if (updatedAppointment is null)
+            {
+                throw new EntityNotFoundException(AppointmentEntityName, dto.AppointmentId);
+            }
 
             return mapper.Map<AppointmentDto>(updatedAppointment);
         }
@@ -779,10 +753,10 @@ namespace HealthAxis.Api.Services.Impl
 
             var patient = await GetLoggedInPatientAsync(identityUserId);
 
-            
+
             // Ignore any patientId sent from body and force logged-in patient's PatientId.
             dto.PatientId = patient.PatientId;
-            
+
             return await BookAppointmentAsync(dto);
         }
 
@@ -810,7 +784,7 @@ namespace HealthAxis.Api.Services.Impl
             {
                 throw new ForbiddenAccessException("Patients can cancel only their own appointments.");
             }
-  
+
             return await CancelAppointmentAsync(dto);
         }
         public async Task<List<AppointmentDto>> GetMyAppointmentsForDoctorAsync(string identityUserId)
@@ -1069,14 +1043,19 @@ namespace HealthAxis.Api.Services.Impl
         }
         private void LogAppointmentBookedEventPublished(Appointment appointment)
         {
-            AppointmentBookedEventLog(
-    logger,
-    appointment.AppointmentId,
-    appointment.PatientId,
-    appointment.DoctorId,
-    appointment.ScheduledDate.ToString("yyyy-MM-dd"),
-    appointment.TimeSlot,
-    null);
+            using var scope = logger.BeginScope(new Dictionary<string, object>
+            {
+                ["EventType"] = AppointmentBookedEventType,
+                ["AppointmentId"] = appointment.AppointmentId,
+                ["PatientId"] = appointment.PatientId,
+                ["DoctorId"] = appointment.DoctorId,
+                ["ScheduledDate"] = appointment.ScheduledDate.ToString("yyyy-MM-dd"),
+                ["TimeSlot"] = appointment.TimeSlot
+            });
+
+            logger.LogInformation(
+                "Appointment booked event published to RabbitMQ. EventStage: {EventStage}",
+                EventStagePublished);
         }
         private static string BuildDoctorAvailabilityCacheKey(
     int doctorId,
@@ -1084,42 +1063,6 @@ namespace HealthAxis.Api.Services.Impl
         {
             return $"doctor-availability:{doctorId}:{date:yyyy-MM-dd}";
         }
-        private static readonly Action<ILogger, string, Exception?>
-    DoctorAvailabilityCacheInvalidated =
-        LoggerMessage.Define<string>(
-            LogLevel.Information,
-            new EventId(
-                1004,
-                nameof(DoctorAvailabilityCacheInvalidated)),
-            "Doctor availability cache invalidated. CacheKey: {CacheKey}");
-        private static readonly Action<
-        ILogger,
-        int,
-        int,
-        int,
-        string,
-        string,
-        Exception?> AppointmentBookedEventLog =
-            LoggerMessage.Define<
-                int,
-                int,
-                int,
-                string,
-                string>(
-                LogLevel.Information,
-                new EventId(1005, nameof(AppointmentBookedEventLog)),
-                """
-            ==========================================
-                  MASSTRANSIT EVENT PUBLISHED
-            ==========================================
 
-            Appointment Id : {AppointmentId}
-            Patient Id     : {PatientId}
-            Doctor Id      : {DoctorId}
-            Scheduled Date : {ScheduledDate}
-            Time Slot      : {TimeSlot}
-
-            ==========================================
-            """);
     }
 }

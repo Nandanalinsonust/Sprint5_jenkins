@@ -921,8 +921,8 @@ namespace HealthAxis.Api.ServiceTest
                 FullName = "Updated Doctor",
 
                 Specialisation = SpecialisationType.Dermatologist,
-                
-                YearsOfExperience   = 1,
+
+                YearsOfExperience = 1,
 
                 ConsultationFee = 800,
 

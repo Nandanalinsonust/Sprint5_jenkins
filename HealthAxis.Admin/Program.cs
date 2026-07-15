@@ -27,7 +27,6 @@ builder.Services.AddScoped<AuthenticationStateProvider>(sp =>
 {
     return sp.GetRequiredService<CustomAuthenticationStateProvider>();
 });
-
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IAdminDashboardService, AdminDashboardService>();
 builder.Services.AddScoped<IDoctorAdminService, DoctorAdminService>();

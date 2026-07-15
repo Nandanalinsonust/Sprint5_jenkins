@@ -1,25 +1,21 @@
 <section class="al-appointments-shell">
 
   <div class="al-hero-card">
+    <div>
+      <span class="al-kicker">Appointment Timeline</span>
 
-  <div class="al-hero-content">
-    <span class="al-kicker">
-      Healthcare Dashboard
-    </span>
+      <h2>My Appointments</h2>
 
-    <h2>My Appointments</h2>
+      <p>
+        Review your scheduled, pending, completed, and cancelled appointments in one clean timeline.
+      </p>
+    </div>
 
-    <p>
-      Track upcoming consultations, completed visits, confirmations and cancellations from one place.
-    </p>
+    <div class="al-hero-badge">
+      <strong>{{ totalRecords }}</strong>
+      <span>Total Visits</span>
+    </div>
   </div>
-
-  <div class="al-hero-badge">
-    <strong>{{ totalRecords }}</strong>
-    <span>Total Visits</span>
-  </div>
-
-</div>
 
   <section class="al-filter-card">
 
@@ -148,98 +144,88 @@
       @for (appt of appointments; track appt.appointmentId) {
 
         <article
-  class="al-appt-card"
-  [class.pending]="appt.status === 'Pending'"
-  [class.confirmed]="appt.status === 'Confirmed'"
-  [class.completed]="appt.status === 'Completed'"
-  [class.cancelled]="appt.status === 'Cancelled'">
+          class="al-appt-card"
+          [class.pending]="appt.status === 'Pending'"
+          [class.confirmed]="appt.status === 'Confirmed'"
+          [class.completed]="appt.status === 'Completed'"
+          [class.cancelled]="appt.status === 'Cancelled'">
 
-  <div class="al-card-top"></div>
+          <div class="al-status-rail"></div>
 
-  <div class="al-appt-main">
+          <div class="al-appt-main">
 
-    <div class="al-appt-header">
+            <div class="al-appt-header">
+              <div>
+                <span class="al-appt-label">Doctor Consultation</span>
 
-      <div>
-        <div class="al-appt-tag">
-          Consultation
-        </div>
+                <h3>{{ appt.doctorName }}</h3>
 
-        <h3>{{ appt.doctorName }}</h3>
+                <p>{{ appt.specialisation }}</p>
+              </div>
 
-        <p>
-          {{ appt.specialisation }}
-        </p>
-      </div>
+              <span [class]="getStatusClass(appt.status)">
+                {{ appt.status }}
+              </span>
+            </div>
 
-      <span [class]="getStatusClass(appt.status)">
-        {{ appt.status }}
-      </span>
+            <div class="al-appt-info-grid">
 
-    </div>
+              <div class="al-info-tile">
+                <span>Date</span>
+                <strong>📅 {{ formatDate(appt.scheduledDate) }}</strong>
+              </div>
 
-    <div class="al-appt-info-grid">
+              <div class="al-info-tile">
+                <span>Time Slot</span>
+                <strong>🕒 {{ appt.timeSlot }}</strong>
+              </div>
 
-      <div class="al-info-tile">
-        <span>Visit Date</span>
-        <strong>{{ formatDate(appt.scheduledDate) }}</strong>
-      </div>
+              <div class="al-info-tile">
+                <span>Appointment ID</span>
+                <strong>#{{ appt.appointmentId }}</strong>
+              </div>
 
-      <div class="al-info-tile">
-        <span>Time Slot</span>
-        <strong>{{ appt.timeSlot }}</strong>
-      </div>
+            </div>
 
-      <div class="al-info-tile">
-        <span>Reference</span>
-        <strong>#{{ appt.appointmentId }}</strong>
-      </div>
+            @if (appt.cancellationReason) {
+              <div class="al-cancel-reason">
+                <strong>Cancellation Reason:</strong>
+                {{ appt.cancellationReason }}
+              </div>
+            }
 
-    </div>
+            <div class="al-appt-footer">
+              <p>
+                @if (appt.status === 'Pending') {
+                  This appointment is waiting for confirmation.
+                }
 
-    @if (appt.cancellationReason) {
-      <div class="al-cancel-reason">
-        <strong>Reason:</strong>
-        {{ appt.cancellationReason }}
-      </div>
-    }
+                @if (appt.status === 'Confirmed') {
+                  This appointment has been confirmed by the clinic.
+                }
 
-    <div class="al-appt-footer">
+                @if (appt.status === 'Completed') {
+                  This consultation has been completed.
+                }
 
-      <p>
+                @if (appt.status === 'Cancelled') {
+                  This appointment has been cancelled.
+                }
+              </p>
 
-        @if (appt.status === 'Pending') {
-          Awaiting confirmation from clinic staff.
-        }
+              @if (appt.status === 'Pending') {
+                <button
+                  type="button"
+                  class="al-cancel-btn"
+                  (click)="openCancelModal(appt)">
+                  Cancel Appointment
+                </button>
+              }
+            </div>
 
-        @if (appt.status === 'Confirmed') {
-          Appointment successfully confirmed.
-        }
+          </div>
 
-        @if (appt.status === 'Completed') {
-          Consultation has been completed.
-        }
-
-        @if (appt.status === 'Cancelled') {
-          Appointment no longer active.
-        }
-
-      </p>
-
-      @if (appt.status === 'Pending') {
-        <button
-          type="button"
-          class="al-cancel-btn"
-          (click)="openCancelModal(appt)">
-          Cancel
-        </button>
-      }
-
-    </div>
-
-  </div>
-
-</article>
+        </article>
 
       }
 
@@ -274,9 +260,16 @@
   }
 
   @if (isCancelModalOpen && selectedAppointment) {
-    <div class="al-modal-backdrop" (click)="closeCancelModal()">
+    <div
+      class="al-modal-backdrop"
+      (click)="closeCancelModal()"
+      (keydown.escape)="closeCancelModal()">
 
-      <section class="al-cancel-modal" (click)="$event.stopPropagation()">
+      <dialog
+        open
+        class="al-cancel-modal"
+        (click)="$event.stopPropagation()"
+        (keydown.escape)="closeCancelModal(); $event.stopPropagation()">
 
         <div class="al-modal-accent"></div>
 
@@ -342,7 +335,7 @@
           </button>
         </div>
 
-      </section>
+      </dialog>
 
     </div>
   }

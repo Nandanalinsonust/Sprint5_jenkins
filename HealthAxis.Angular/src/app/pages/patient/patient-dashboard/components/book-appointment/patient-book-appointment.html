@@ -252,7 +252,7 @@
           [disabled]="isTimeSlotDisabled(slot)"
           (click)="selectTimeSlot(slot)">
 
-          <strong>{{ slot.timeSlot }} : </strong>
+          <strong>{{ slot.timeSlot }}</strong><br><br>
 
           <span>{{ getSlotStatus(slot) }}</span>
 
@@ -306,29 +306,29 @@
 
         <div class="ba-confirm-details">
           <div>
-            <span>Doctor</span>
+            <span>Doctor : </span>
             <strong>{{ selectedDoctor.doctorName }}</strong>
           </div>
 
           <div>
-            <span>Specialisation</span>
+            <span>Specialisation : </span>
             <strong>{{ selectedDoctor.specialisation }}</strong>
           </div>
 
           <div>
-            <span>Date</span>
+            <span>Date : </span>
             <strong>{{ form.scheduledDate }}</strong>
           </div>
-
           <div>
-            <span>Time Slot</span>
+            <span>Consultation Fee : </span>
+            <strong>₹{{ selectedDoctor.consultationFee }}</strong>
+          </div>
+          <div>
+            <span>Time Slot : </span><br>
             <strong>{{ form.timeSlot }}</strong>
           </div>
 
-          <div>
-            <span>Consultation Fee</span>
-            <strong>₹{{ selectedDoctor.consultationFee }}</strong>
-          </div>
+          
         </div>
 
         <div class="ba-confirm-actions">

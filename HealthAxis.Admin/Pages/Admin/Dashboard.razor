@@ -15,7 +15,7 @@
     <div class="hc-page-loading">
         <div class="hc-loading-card">
             <div class="hc-loading-spinner"></div>
-            <p>Loading HealthAxis dashboard...</p>
+            <p>Loading dashboard...</p>
         </div>
     </div>
 }
@@ -30,7 +30,7 @@ else if (dashboardReport is not null)
     <div class="hc-page-heading">
         <div>
             <h1>Dashboard</h1>
-            <p>Monitor today’s HealthAxis operations and manage admin activity.</p>
+            <p>Track daily operations across HealthAxis and oversee administrator actions</p>
         </div>
 
         <div class="hc-dashboard-date-card">
@@ -41,7 +41,6 @@ else if (dashboardReport is not null)
 
     <div class="hc-report-grid ha-dashboard-report-grid">
         <div class="hc-report-card hc-report-blue ha-dashboard-report-card">
-            <div class="hc-report-icon ha-dashboard-report-icon">✚</div>
             <div>
                 <p>Total Doctors</p>
                 <h2>@dashboardReport.TotalDoctors</h2>
@@ -50,7 +49,6 @@ else if (dashboardReport is not null)
         </div>
 
         <div class="hc-report-card hc-report-teal ha-dashboard-report-card">
-            <div class="hc-report-icon ha-dashboard-report-icon">♙</div>
             <div>
                 <p>Total Patients</p>
                 <h2>@dashboardReport.TotalPatients</h2>
@@ -59,7 +57,6 @@ else if (dashboardReport is not null)
         </div>
 
         <div class="hc-report-card hc-report-purple ha-dashboard-report-card">
-            <div class="hc-report-icon ha-dashboard-report-icon">📅</div>
             <div>
                 <p>Total Appointments</p>
                 <h2>@dashboardReport.TotalAppointments</h2>
@@ -68,7 +65,6 @@ else if (dashboardReport is not null)
         </div>
 
         <div class="hc-report-card hc-report-orange ha-dashboard-report-card">
-            <div class="hc-report-icon ha-dashboard-report-icon">▣</div>
             <div>
                 <p>Today’s Schedule</p>
                 <h2>@dashboardReport.TodaysAppointments</h2>
@@ -129,7 +125,6 @@ else if (dashboardReport is not null)
 
             <div class="hc-quick-actions">
                 <button class="hc-action-card ha-action-card" @onclick="GoToDoctors">
-                    <span>✚</span>
                     <div>
                         <strong>Manage Doctors</strong>
                         <p>Add, update, and activate doctor profiles.</p>
@@ -137,7 +132,6 @@ else if (dashboardReport is not null)
                 </button>
 
                 <button class="hc-action-card ha-action-card" @onclick="GoToPatients">
-                    <span>♙</span>
                     <div>
                         <strong>View Patients</strong>
                         <p>Review patient profiles and demographic details.</p>
@@ -145,7 +139,6 @@ else if (dashboardReport is not null)
                 </button>
 
                 <button class="hc-action-card ha-action-card" @onclick="GoToAppointments">
-                    <span>📅</span>
                     <div>
                         <strong>Manage Appointments</strong>
                         <p>Book appointments and review appointment status.</p>

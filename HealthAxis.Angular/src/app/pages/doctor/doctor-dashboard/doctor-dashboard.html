@@ -1,27 +1,16 @@
 <section class="dd-page">
+<aside class="dd-sidebar" [class.open]="isSidebarOpen">
 
-    <aside
-  class="dd-sidebar"
-  [class.open]="isSidebarOpen"
-  aria-label="Doctor navigation">
+  <!-- Always visible -->
+  <button
+    type="button"
+    class="dd-sidebar-toggle"
+    (click)="toggleSidebar()">
+    ☰
+  </button>
 
-    <div class="dd-brand">
-      <div class="dd-brand-logo">
-        HX
-      </div>
-
-      <div class="dd-brand-copy">
-        <h2 id="sidebarTitle">HealthAxis</h2>
-        <span>Doctor Workspace</span>
-      </div>
-
-      <button
-        type="button"
-        class="dd-sidebar-toggle"
-        (click)="toggleSidebar()">
-        ☰
-      </button>
-    </div>
+  <!-- Hidden initially -->
+  <div class="dd-sidebar-content" *ngIf="isSidebarOpen">
 
     <nav class="dd-menu">
 
@@ -29,7 +18,6 @@
         type="button"
         [class.active]="activeSection === 'dashboard'"
         (click)="setActiveSection('dashboard')">
-        <span>⌂</span>
         <strong>Dashboard</strong>
       </button>
 
@@ -37,7 +25,6 @@
         type="button"
         [class.active]="activeSection === 'appointments'"
         (click)="setActiveSection('appointments')">
-        <span>📅</span>
         <strong>Appointments</strong>
       </button>
 
@@ -45,7 +32,6 @@
         type="button"
         [class.active]="activeSection === 'records'"
         (click)="setActiveSection('records')">
-        <span>▣</span>
         <strong>Health Records</strong>
       </button>
 
@@ -53,7 +39,6 @@
         type="button"
         [class.active]="activeSection === 'profile'"
         (click)="setActiveSection('profile')">
-        <span>👤</span>
         <strong>Profile</strong>
       </button>
 
@@ -61,21 +46,17 @@
         type="button"
         class="dd-logout-menu-btn"
         (click)="openLogoutModal()">
-        <span>↪</span>
         <strong>Logout</strong>
       </button>
 
     </nav>
 
-  </aside>
+  </div>
 
+</aside>
+  
   @if (isSidebarOpen) {
-    <button
-  type="button"
-  class="dd-sidebar-overlay"
-  aria-label="Close sidebar"
-  (click)="closeSidebar()">
-</button>
+    <div class="dd-sidebar-overlay" (click)="closeSidebar()"></div>
   }
 
   <main class="dd-main">
@@ -83,28 +64,56 @@
     <header class="dd-topbar">
       <div class="dd-topbar-left">
         <div>
-          <span class="dd-kicker">Doctor Workspace</span>
 
           <h1>Welcome back, {{ doctorFirstName }}</h1>
 
           <p>
-            Manage patient appointments, consultations, health records, and your HealthAxis doctor profile.
+            Access and manage appointments, consultations, medical records, and your HealthAxis professional profile from one place.
           </p>
         </div>
       </div>
 
       @if (doctor) {
-        <div class="dd-user-card">
-          <div class="dd-user-avatar">
-            {{ doctor.doctorName[0] }}
-          </div>
 
-          <div>
-            <strong>{{ doctor.doctorName }}</strong>
-            <span>{{ doctor.specialisation }}</span>
-          </div>
-        </div>
-      }
+  <div class="dd-profile-menu">
+
+    <button
+      type="button"
+      class="dd-user-avatar"
+      (click)="toggleProfileMenu()">
+
+      {{ doctor.doctorName[0] }}
+
+    </button>
+
+    @if (isProfileMenuOpen) {
+      
+ <div
+    class="dd-dropdown-overlay"
+    (click)="isProfileMenuOpen = false">
+  </div>
+
+      <div class="dd-profile-dropdown">
+
+        <button
+          type="button"
+          (click)="setActiveSection('profile')">
+          View Profile
+        </button>
+
+        <button
+          type="button"
+          (click)="openLogoutModal()">
+          Logout
+        </button>
+
+      </div>
+    }
+
+  </div>
+
+}
+
     </header>
 
     @if (mustChangeTemporaryPassword) {
@@ -231,13 +240,11 @@
 
           <section class="dd-hero-panel">
             <div class="dd-hero-content">
-              <span class="dd-hero-label">Clinical Overview</span>
 
-              <h2>Today’s care queue, appointments, and records in one place.</h2>
+              <h2>Your central hub for appointments, consultations, and patient records.</h2>
 
-              <p>
-                Track pending confirmations, upcoming appointments, completed consultations,
-                and patient health records from your HealthAxis doctor workspace.
+              <p><br>
+Stay updated on appointment confirmations, scheduled consultations, completed visits, and patient health records all within your HealthAxis workspace.
               </p>
 
               <div class="dd-hero-actions">
@@ -254,49 +261,7 @@
               </div>
             </div>
 
-              <aside
-  class="dd-chart-card"
-  aria-label="Dashboard statistics">
-              <div class="dd-donut-wrap">
-                <div class="dd-donut" [style.background]="chartBackground">
-                  <div class="dd-donut-center">
-<strong>{{ totalOverviewCount }}</strong>                    <span>Total Items</span>
-                  </div>
-                </div>
-              </div>
-
-              <div class="dd-chart-legend">
-                <div>
-                  <span class="blue-dot"></span>
-                  Upcoming
-                  <strong>{{ summary.upcomingCount }}</strong>
-                </div>
-
-                <div>
-                  <span class="amber-dot"></span>
-                  Pending
-                  <strong>{{ summary.pendingCount }}</strong>
-                </div>
-
-                <div>
-                  <span class="sky-dot"></span>
-                  Confirmed
-                  <strong>{{ summary.confirmedCount }}</strong>
-                </div>
-
-                <div>
-                  <span class="green-dot"></span>
-                  Completed
-                  <strong>{{ summary.completedCount }}</strong>
-                </div>
-
-                <div>
-                  <span class="purple-dot"></span>
-                  Records
-                  <strong>{{ summary.healthRecordCount }}</strong>
-                </div>
-              </div>
-            </aside>
+            
           </section>
 
           <section class="dd-summary-grid">
@@ -377,27 +342,23 @@
                 <div>
                   <span class="dd-panel-eyebrow">Quick Actions</span>
 
-                  <h3>Doctor Tools</h3>
+                  <h3>Doctor Support Center Tools</h3>
 
-                  <p>Jump quickly to common doctor tasks.</p>
                 </div>
               </div>
 
               <div class="dd-action-grid">
                 <button type="button" (click)="setActiveSection('appointments')">
-                  <span>📅</span>
                   <strong>Appointments</strong>
                   <small>Confirm visits and add records</small>
                 </button>
 
                 <button type="button" (click)="setActiveSection('records')">
-                  <span>▣</span>
                   <strong>Records</strong>
                   <small>View added health records</small>
                 </button>
 
                 <button type="button" (click)="setActiveSection('profile')">
-                  <span>👤</span>
                   <strong>Profile</strong>
                   <small>View doctor profile</small>
                 </button>
@@ -475,12 +436,7 @@
   </main>
 
   @if (isTempPasswordConfirmOpen) {
-    <div>
-      <button
-  type="button"
-  class="dd-confirm-backdrop"
-  aria-label="Close confirmation dialog"
-  (click)="closeTempPasswordConfirm()">
+    <div class="dd-confirm-backdrop" (click)="closeTempPasswordConfirm()">
 
       <section class="dd-confirm-modal" (click)="$event.stopPropagation()">
 
@@ -522,22 +478,13 @@
   @if (isLogoutModalOpen) {
     <div class="dd-confirm-backdrop" (click)="closeLogoutModal()">
 
-        <section
-  class="dd-confirm-modal danger"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="logoutDialogTitle"
-  (click)="$event.stopPropagation()">
+      <section class="dd-confirm-modal danger" (click)="$event.stopPropagation()">
 
-        <div class="dd-confirm-icon danger">
-          ↪
-        </div>
+       
 
         <span class="dd-confirm-kicker danger-text">Logout Confirmation</span>
 
-        <h3 id="logoutDialogTitle">
-  Do you want to logout?
-</h3>
+        <h3>Do you want to logout?</h3>
 
         <p>
           You will be redirected to the HealthAxis home page.

@@ -4,7 +4,6 @@
 @using HealthAxis.Admin.Layout
 @using Microsoft.AspNetCore.Components.Forms
 @using Microsoft.JSInterop
-@using HealthAxis.Shared.Dtos
 @using HealthAxis.Shared.Dtos.Doctors
 @using HealthAxis.Shared.Enums
 @using HealthAxis.Admin.Services.Interfaces
@@ -17,31 +16,24 @@
 
 <PageTitle>Add Doctor | HealthAxis Admin</PageTitle>
 
-<div class="hc-page-heading">
-    <div>
-        <h1>Add Doctor</h1>
+<div class="hc-form-shell">
 
-        <p>Register a new doctor profile for HealthAxis.</p>
+    <div class="hc-page-heading">
+        <div>
+            <h1>Add Doctor</h1>
+            <p>Register a new doctor profile for HealthAxis.</p>
+        </div>
+
+        <button class="hc-secondary-btn" @onclick="BackToDoctors">
+            Back to Doctors
+        </button>
     </div>
 
-    <button class="hc-secondary-btn" @onclick="BackToDoctors">
-        Back to Doctors
-    </button>
-</div>
-
-<section class="hc-form-shell">
     <div class="hc-form-card">
 
         <div class="hc-form-card-header">
-            <div class="hc-form-icon">✚</div>
-
             <div>
                 <h3>Doctor Registration</h3>
-
-                <p>
-                    Admin creates doctor account.
-                    API will generate a temporary password.
-                </p>
             </div>
         </div>
 
@@ -139,7 +131,7 @@
         }
 
     </div>
-</section>
+    </div>
 
 @if (createdDoctor is not null)
 {

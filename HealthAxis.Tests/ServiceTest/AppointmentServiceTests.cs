@@ -28,7 +28,6 @@ namespace HealthAxis.Api.ServiceTest
 
         private readonly AppointmentService appointmentService;
 
-
         public AppointmentServiceTests()
         {
             appointmentRepositoryMock = new Mock<IAppointmentRepository>();
@@ -42,20 +41,15 @@ namespace HealthAxis.Api.ServiceTest
 
             SetupMapper();
 
-            var dependencies = new AppointmentServiceDependencies
-            {
-                AppointmentRepository = appointmentRepositoryMock.Object,
-                PatientRepository = patientRepositoryMock.Object,
-                DoctorRepository = doctorRepositoryMock.Object,
-                HealthRecordRepository = healthRecordRepositoryMock.Object,
-                Mapper = mapperMock.Object,
-                PublishEndpoint = publishEndpointMock.Object,
-                Logger = loggerMock.Object,
-                CacheService = cacheServiceMock.Object
-            };
-
-            appointmentService = new AppointmentService(dependencies);
-
+            appointmentService = new AppointmentService(
+    appointmentRepositoryMock.Object,
+    patientRepositoryMock.Object,
+    doctorRepositoryMock.Object,
+    healthRecordRepositoryMock.Object,
+    mapperMock.Object,
+    publishEndpointMock.Object,
+    loggerMock.Object,
+    cacheServiceMock.Object);
         }
 
         [Fact]
@@ -614,7 +608,7 @@ namespace HealthAxis.Api.ServiceTest
         }
 
         [Fact]
-       
+
         public async Task CompleteAppointmentAsync_WhenRepositoryReturnsNull_ShouldThrow()
         {
             var appointment = GetAppointmentWithStatus(AppointmentStatus.Confirmed);
@@ -1142,7 +1136,7 @@ namespace HealthAxis.Api.ServiceTest
             result.Should().OnlyContain(appointment => appointment.Status == AppointmentStatus.Pending);
         }
 
-      
+
         [Fact]
         public async Task GetAppointmentByIdForDoctorAsync_WhenOwner_ShouldReturnAppointment()
         {

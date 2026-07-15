@@ -15,6 +15,7 @@ import { HealthRecordApiService } from '../../../core/services/health-record-api
 import { DoctorAppointmentList } from './components/appointment-list/doctor-appointment-list';
 import { DoctorHealthRecords } from './components/health-records/doctor-health-records';
 import { DoctorProfile } from './components/profile/doctor-profile';
+import { CommonModule } from '@angular/common';
 
 type DoctorDashboardSection =
   | 'dashboard'
@@ -50,7 +51,8 @@ interface DoctorToastEvent {
     FormsModule,
     DoctorAppointmentList,
     DoctorHealthRecords,
-    DoctorProfile
+    DoctorProfile,
+    CommonModule
   ],
   templateUrl: './doctor-dashboard.html',
   styleUrl: './doctor-dashboard.css'
@@ -76,6 +78,7 @@ export class DoctorDashboard implements OnInit, OnDestroy {
 
   isSidebarOpen = false;
   isLogoutModalOpen = false;
+  isProfileMenuOpen = false;
 
   mustChangeTemporaryPassword = false;
   isTempPasswordConfirmOpen = false;
@@ -443,6 +446,10 @@ get chartTotalCount(): number {
       confirmPassword: ''
     };
   }
+
+toggleProfileMenu(): void {
+  this.isProfileMenuOpen = !this.isProfileMenuOpen;
+}
 
   private getErrorMessage(error: unknown): string {
     if (
