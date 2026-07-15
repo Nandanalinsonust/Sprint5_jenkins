@@ -1,4 +1,4 @@
-﻿namespace HealthAxis.Api.Contracts
+﻿namespace HealthAxis.Api.Messaging.Contracts
 {
     public class AppointmentBookedEvent
     {

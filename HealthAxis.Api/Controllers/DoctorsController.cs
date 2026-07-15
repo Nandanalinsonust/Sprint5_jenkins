@@ -1,15 +1,16 @@
-﻿using HealthAxis.Shared.Enums;
-using HealthAxis.Api.Services;
+﻿using HealthAxis.Api.Services;
+using HealthAxis.Shared.Enums;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Serilog.Core;
 using System.Security.Claims;
 
 namespace HealthAxis.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class DoctorsController(IDoctorService service) : ControllerBase
+    public class DoctorsController(IDoctorService service,ILogger<DoctorsController> logger) : ControllerBase
     {
         [HttpGet("me")]
         [Authorize(
@@ -75,7 +76,6 @@ namespace HealthAxis.Api.Controllers
             [FromQuery] DateTime? date)
         {
             var result = await service.GetDoctorAvailabilityAsync(doctorId, date);
-
             return Ok(result);
         }
     }

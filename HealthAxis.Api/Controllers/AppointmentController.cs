@@ -6,13 +6,14 @@ using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 using HealthAxis.Shared.Dtos.Pagination;
 using HealthAxis.Shared.Dtos.Appointments;
+using HealthAxis.Api.Models;
 
 
 namespace HealthAxis.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class AppointmentsController(IAppointmentService service) : ControllerBase
+    public class AppointmentsController(IAppointmentService service,ILogger<AppointmentsController> logger) : ControllerBase
     {
 
         private const string InvalidUserTokenMessage = "Invalid user token.";
@@ -30,6 +31,10 @@ namespace HealthAxis.Controllers
         {
             var appointments = await service.GetAllAppointmentsPagedAsync(query);
 
+            logger.LogInformation(
+    "Admin retrieved appointments. PageNumber: {PageNumber}, PageSize: {PageSize}",
+    query.PageNumber,
+    query.PageSize);
             return Ok(appointments);
         }
 
@@ -68,6 +73,9 @@ namespace HealthAxis.Controllers
 
             if (string.IsNullOrWhiteSpace(identityUserId))
             {
+                logger.LogWarning(
+    "User token missing NameIdentifier claim. Endpoint: {Endpoint}",
+    nameof(GetMyAppointments));
                 return Unauthorized(new
                 {
                     Message = InvalidUserTokenMessage
@@ -79,7 +87,7 @@ namespace HealthAxis.Controllers
                 var appointments = await service.GetMyAppointmentsForPatientPagedAsync(
                     identityUserId,
                     query);
-
+                
                 return Ok(appointments);
             }
 
@@ -88,7 +96,7 @@ namespace HealthAxis.Controllers
                 var appointments = await service.GetMyAppointmentsForDoctorPagedAsync(
                     identityUserId,
                     query);
-
+              
                 return Ok(appointments);
             }
 
@@ -106,6 +114,11 @@ namespace HealthAxis.Controllers
 
             if (string.IsNullOrWhiteSpace(identityUserId))
             {
+
+                logger.LogWarning(
+                        "Unauthorized access attempt. Endpoint: {Endpoint}",
+                        nameof(GetMyUpcomingAppointments));
+
                 return Unauthorized(new
                 {
                     Message = InvalidUserTokenMessage
@@ -140,6 +153,11 @@ namespace HealthAxis.Controllers
 
             if (string.IsNullOrWhiteSpace(identityUserId))
             {
+
+                logger.LogWarning(
+                        "Unauthorized access attempt. Endpoint: {Endpoint}",
+                        nameof(GetMyPendingAppointments));
+
                 return Unauthorized(new
                 {
                     Message = InvalidUserTokenMessage
@@ -174,6 +192,11 @@ namespace HealthAxis.Controllers
 
             if (string.IsNullOrWhiteSpace(identityUserId))
             {
+
+                logger.LogWarning(
+                        "Unauthorized access attempt. Endpoint: {Endpoint}",
+                        nameof(GetMyTodayConfirmedAppointments));
+
                 return Unauthorized(new
                 {
                     Message = InvalidUserTokenMessage
@@ -205,6 +228,11 @@ namespace HealthAxis.Controllers
 
                 if (string.IsNullOrWhiteSpace(identityUserId))
                 {
+
+                    logger.LogWarning(
+                            "Unauthorized access attempt. Endpoint: {Endpoint}",
+                            nameof(GetAppointmentById));
+
                     return Unauthorized(new
                     {
                         Message = InvalidUserTokenMessage
@@ -224,6 +252,11 @@ namespace HealthAxis.Controllers
 
                 if (string.IsNullOrWhiteSpace(identityUserId))
                 {
+
+                    logger.LogWarning(
+                            "Unauthorized access attempt. Endpoint: {Endpoint}",
+                            nameof(GetAppointmentById));
+
                     return Unauthorized(new
                     {
                         Message = InvalidUserTokenMessage
@@ -367,6 +400,11 @@ namespace HealthAxis.Controllers
 
             if (string.IsNullOrWhiteSpace(identityUserId))
             {
+
+                logger.LogWarning(
+                        "Unauthorized access attempt. Endpoint: {Endpoint}",
+                        nameof(BookAppointment));
+
                 return Unauthorized(new
                 {
                     Message = InvalidUserTokenMessage
@@ -377,6 +415,11 @@ namespace HealthAxis.Controllers
                 request,
                 identityUserId);
 
+            logger.LogInformation(
+            "Appointment booked successfully. AppointmentId: {AppointmentId}, DoctorId: {DoctorId}, UserId: {UserId}",
+            appointment.AppointmentId,
+            request.DoctorId,
+            identityUserId);
             return CreatedAtAction(
                 nameof(GetAppointmentById),
                 new { appointmentId = appointment.AppointmentId },
@@ -408,6 +451,9 @@ namespace HealthAxis.Controllers
 
             if (string.IsNullOrWhiteSpace(identityUserId))
             {
+                logger.LogWarning(
+    "Unauthorized access attempt. Endpoint: {Endpoint}",
+    nameof(ConfirmAppointment));
                 return Unauthorized(new
                 {
                     Message = InvalidUserTokenMessage
@@ -417,7 +463,10 @@ namespace HealthAxis.Controllers
             var appointment = await service.ConfirmAppointmentForDoctorAsync(
                 appointmentId,
                 identityUserId);
-
+            logger.LogInformation(
+    "Appointment confirmed. AppointmentId: {AppointmentId}, DoctorUserId: {DoctorUserId}",
+    appointmentId,
+    identityUserId);
             return Ok(appointment);
         }
 
@@ -432,6 +481,11 @@ namespace HealthAxis.Controllers
 
             if (string.IsNullOrWhiteSpace(identityUserId))
             {
+
+                logger.LogWarning(
+                        "Unauthorized access attempt. Endpoint: {Endpoint}",
+                        nameof(CompleteAppointment));
+
                 return Unauthorized(new
                 {
                     Message = InvalidUserTokenMessage
@@ -441,7 +495,10 @@ namespace HealthAxis.Controllers
             var appointment = await service.CompleteAppointmentForDoctorAsync(
                 appointmentId,
                 identityUserId);
-
+            logger.LogInformation(
+    "Appointment completed. AppointmentId: {AppointmentId}, DoctorUserId: {DoctorUserId}",
+    appointmentId,
+    identityUserId);
             return Ok(appointment);
         }
 
@@ -457,6 +514,10 @@ namespace HealthAxis.Controllers
             {
                 var appointment = await service.CancelAppointmentAsync(request);
 
+                logger.LogInformation(
+    "Appointment cancelled by admin. AppointmentId: {AppointmentId}, Reason: {Reason}",
+    request.AppointmentId,
+    request.Reason);
                 return Ok(appointment);
             }
 
@@ -466,6 +527,9 @@ namespace HealthAxis.Controllers
 
                 if (string.IsNullOrWhiteSpace(identityUserId))
                 {
+                    logger.LogWarning(
+    "Unauthorized access attempt. Endpoint: {Endpoint}",
+    nameof(CancelAppointment));
                     return Unauthorized(new
                     {
                         Message = InvalidUserTokenMessage
@@ -475,7 +539,11 @@ namespace HealthAxis.Controllers
                 var appointment = await service.CancelAppointmentForPatientAsync(
                     request,
                     identityUserId);
-
+                logger.LogInformation(
+    "Appointment cancelled. AppointmentId: {AppointmentId}, UserId: {UserId}, Reason: {Reason}",
+    request.AppointmentId,
+    identityUserId,
+    request.Reason);
                 return Ok(appointment);
             }
 
@@ -494,7 +562,11 @@ namespace HealthAxis.Controllers
                 var appointment = await service.CancelAppointmentForDoctorAsync(
                     request,
                     identityUserId);
-
+                logger.LogInformation(
+    "Appointment cancelled. AppointmentId: {AppointmentId}, UserId: {UserId}, Reason: {Reason}",
+    request.AppointmentId,
+    identityUserId,
+    request.Reason);
                 return Ok(appointment);
             }
 

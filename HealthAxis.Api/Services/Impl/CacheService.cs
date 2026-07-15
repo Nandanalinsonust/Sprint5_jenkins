@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Caching.Distributed;
 using System.Text.Json;
 
-namespace HealthCareApp.Services.Impl
+namespace HealthAxis.Api.Services.Impl
 {
     public class CacheService : ICacheService
     {

@@ -337,6 +337,12 @@ namespace HealthAxis.Api.Services
                     availability,
                     DoctorAvailabilityCacheDuration);
 
+                logger.LogInformation(
+                    "Doctor availability cached. CacheKey: {CacheKey}, ExpiryMinutes: {ExpiryMinutes}",
+                    cacheKey,
+                    DoctorAvailabilityCacheDuration.TotalMinutes);
+
+
                 return availability;
             }
 

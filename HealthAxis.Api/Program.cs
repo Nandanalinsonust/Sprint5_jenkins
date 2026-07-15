@@ -16,50 +16,27 @@ using Microsoft.OpenApi;
 using Serilog;
 using System.Text;
 using MassTransit;
-using HealthAxis.Api.Consumers;
 using HealthAxis.Api.Options;
+using HealthAxis.Api.Messaging.Consumers;
+
+
+Log.Logger = new LoggerConfiguration()
+    .WriteTo.Console()
+    .CreateBootstrapLogger();
+Log.Information("HealthAxis App Api Starting ...");
 
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Host.UseSerilog((context, services, configuration) =>
+
+// Configure Serilog.
+builder.Services.AddSerilog((services, configuration) =>
 {
-
-    configuration.ReadFrom.Configuration(context.Configuration)
-
+    configuration
+        .ReadFrom.Configuration(builder.Configuration)
         .ReadFrom.Services(services)
-
-        .Enrich.FromLogContext()
-
-        .WriteTo.Console()
-
-        .WriteTo.File(
-
-            "logs/healthaxis-.log",
-
-            rollingInterval: RollingInterval.Day,
-
-            retainedFileCountLimit: 7);
-
+        .Enrich.FromLogContext();
 });
-var rabbitmqConfig = builder.Configuration.GetSection("RabbitMQ");
-builder.Services.AddMassTransit(x =>
-{
-    x.AddConsumer<AppointmentBookedConsumer>();
 
-    x.UsingRabbitMq((context, cfg) =>
-    {
-        cfg.Host(rabbitmqConfig["HostName"], rabbitmqConfig["VirtualHost"], h =>
-        {
-            h.Username(rabbitmqConfig["Username"]!);
-            h.Password(rabbitmqConfig["Password"]!);
-        });
-        cfg.ReceiveEndpoint("appointment-booked-queue", e =>
-        {
-            e.ConfigureConsumer<AppointmentBookedConsumer>(context);
-        });
-
-    });
-});
 
 // Add services to the container.
 builder.Services.AddControllers()
@@ -68,6 +45,24 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy =
             System.Text.Json.JsonNamingPolicy.CamelCase;
     });
+
+// Register garnet hosted service for background processing.
+builder.Services.AddHostedService<GarnetHostedService>();
+
+// Register Garnet options from configuration.
+builder.Services.Configure<GarnetOptions>(
+    builder.Configuration.GetSection("Garnet"));
+
+// Register distributed cache using embedded Garnet.
+builder.Services.AddStackExchangeRedisCache(options =>
+{
+    var garnetOptions = builder.Configuration
+        .GetSection("Garnet")
+        .Get<GarnetOptions>()!;
+
+    options.Configuration = garnetOptions.ConnectionString;
+    options.InstanceName = garnetOptions.InstanceName;
+});
 
 // Register HealthAxisDbContext with SQL Server.
 builder.Services.AddDbContext<HealthAxisDbContext>(options =>
@@ -112,6 +107,11 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
+builder.Services.AddAuthorization();
+
+// Swagger/OpenAPI.
+builder.Services.AddEndpointsApiExplorer();
+
 builder.Services.AddSwaggerGen(options =>
 {
     options.SwaggerDoc("v1", new OpenApiInfo
@@ -135,8 +135,6 @@ builder.Services.AddSwaggerGen(options =>
 });
 
 
-builder.Services.AddAuthorization();
-
 // Register DbContext for generic repository constructor.
 builder.Services.AddScoped<DbContext, HealthAxisDbContext>();
 
@@ -158,34 +156,44 @@ builder.Services.AddScoped<IDoctorRepository, DoctorRepository>();
 builder.Services.AddScoped<IAppointmentRepository, AppointmentRepository>();
 builder.Services.AddScoped<IHealthRecordRepository, HealthRecordRepository>();
 
-builder.Services.AddScoped<IAuthService, AuthService>();
 
 // Register services.
 builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
+builder.Services.AddScoped<ICacheService, CacheService>();
 
-//Register Caching
-builder.Services.Configure<GarnetOptions>(builder.Configuration.GetSection("Garnet"));
-builder.Services.AddStackExchangeRedisCache(option =>
+
+// Register background services.
+builder.Services.AddHostedService<HeartbeatBackgroundService>();
+//builder.Services.AddHostedService<NotificationCleanupService>();
+
+// Register MassTransit with RabbitMQ.
+var rabbitmqConfig = builder.Configuration.GetSection("RabbitMQ");
+builder.Services.AddMassTransit(x =>
 {
-    var garnetOptions = builder.Configuration.GetSection("Garnet").Get<GarnetOptions>() 
-                ?? new GarnetOptions(); //?? - null reference
+    x.AddConsumer<AppointmentBookedConsumer>();
 
-    option.Configuration = garnetOptions.ConnectionString;
-    option.InstanceName = garnetOptions.InstanceName;
+    x.UsingRabbitMq((context, cfg) =>
+    {
+        cfg.Host(rabbitmqConfig["HostName"], rabbitmqConfig["VirtualHost"], h =>
+        {
+            h.Username(rabbitmqConfig["Username"]!);
+            h.Password(rabbitmqConfig["Password"]!);
+        });
+        cfg.ReceiveEndpoint("appointment-booked-queue", e =>
+        {
+            e.ConfigureConsumer<AppointmentBookedConsumer>(context);
+        });
+
+    });
 });
 
 // Register Global Exception Handler.
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 
-// Swagger/OpenAPI.
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-builder.Services.AddHostedService<HeartbeatBackgroundService>();
 
 const string ClientCorsPolicy = "ClientCorsPolicy";
 
@@ -205,21 +213,19 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
+app.UseSerilogRequestLogging();
+
 // Seed roles and default admin.
 using (var scope = app.Services.CreateScope())
 {
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
-    await RoleSeeder.SeedRoleAsync(roleManager);
-}
 
-using (var scope = app.Services.CreateScope())
-{
-    var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
     var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    await RoleSeeder.SeedRoleAsync(roleManager);
+
     await AdminSeeder.SeedAdminAsync(userManager, roleManager, builder.Configuration);
 }
-
-// Seed roles and default admin.
 
 // Global exception handler middleware.
 app.UseExceptionHandler();
@@ -235,13 +241,11 @@ app.UseHttpsRedirection();
 
 
 app.UseCors(ClientCorsPolicy);
-
 app.UseAuthentication();
 
 app.UseAuthorization();
 
 app.MapControllers();
 
-app.UseSerilogRequestLogging();
 
 app.Run();

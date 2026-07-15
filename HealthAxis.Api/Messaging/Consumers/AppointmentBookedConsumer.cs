@@ -1,9 +1,9 @@
-﻿using HealthAxis.Api.Contracts;
-using HealthAxis.Api.Data;
+﻿using HealthAxis.Api.Data;
+using HealthAxis.Api.Messaging.Contracts;
 using HealthAxis.Api.Models;
 using MassTransit;
 
-namespace HealthAxis.Api.Consumers
+namespace HealthAxis.Api.Messaging.Consumers
 {
     public class AppointmentBookedConsumer : IConsumer<AppointmentBookedEvent>
     {

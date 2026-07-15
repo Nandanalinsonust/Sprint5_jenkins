@@ -1,5 +1,5 @@
 ﻿using AutoMapper;
-using HealthAxis.Api.Contracts;
+using HealthAxis.Api.Messaging.Contracts;
 using HealthAxis.Api.Exceptions;
 using HealthAxis.Api.Models;
 using HealthAxis.Api.Repository.Interface;
