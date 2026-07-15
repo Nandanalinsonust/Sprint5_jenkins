@@ -8,8 +8,6 @@ using HealthAxis.Shared.Dtos.Doctors;
 using HealthAxis.Shared.Dtos.Pagination;
 using HealthAxis.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Caching.Distributed;
-using Serilog.Core;
 using System.Text.RegularExpressions;
 
 namespace HealthAxis.Api.Services

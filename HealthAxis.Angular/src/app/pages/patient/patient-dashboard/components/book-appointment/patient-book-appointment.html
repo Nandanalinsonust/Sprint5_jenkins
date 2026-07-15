@@ -1,3 +1,8 @@
+<app-toast
+  [visible]="toastVisible"
+  [message]="toastMessage"
+  [type]="toastType">
+</app-toast>
 <section class="ba-booking-shell compact">
 
   <form class="ba-booking-card" (ngSubmit)="submit()">
@@ -9,47 +14,10 @@
     </span>
 
     <h1>Book Your Appointment</h1>
-
-    <p>
-      Choose a speciality, find your doctor and reserve a convenient appointment slot.
-    </p>
-  </div>
-
-  <div class="ba-header-badge">
-    <span>4 Steps</span>
-    <strong>Quick Booking</strong>
   </div>
 </div>
 
-    <div class="ba-stepper">
 
-  <div class="ba-step active">
-    <div class="ba-step-number">1</div>
-    <span>Speciality</span>
-  </div>
-
-  <div class="ba-step-line"></div>
-
-  <div class="ba-step active">
-    <div class="ba-step-number">2</div>
-    <span>Doctor</span>
-  </div>
-
-  <div class="ba-step-line"></div>
-
-  <div class="ba-step active">
-    <div class="ba-step-number">3</div>
-    <span>Date</span>
-  </div>
-
-  <div class="ba-step-line"></div>
-
-  <div class="ba-step active">
-    <div class="ba-step-number">4</div>
-    <span>Slot</span>
-  </div>
-
-</div>
 
     <section class="ba-section-card" id="specialisation-section">
       <div class="ba-section-heading">
@@ -114,7 +82,6 @@
 
                 <div>
                   <strong>{{ specialisation }}</strong>
-                  <small>View available doctors</small>
                 </div>
               </button>
             }
@@ -125,135 +92,185 @@
 
       </div>
 
-      @if (selectedSpecialisation) {
-        <div class="ba-selected-specialisation">
-          <span>Selected care type</span>
-          <strong>{{ selectedSpecialisation }}</strong>
-        </div>
-      }
+        @if (selectedSpecialisation) {
+  <div class="ba-selected-specialisation">
+    <span>Selected care type : </span>
+    <strong>{{ selectedSpecialisation }}</strong>
+  </div>
+}
     </section>
 
-    @if (selectedSpecialisation) {
       <section class="ba-section-card" id="doctor-section">
-        <div class="ba-section-heading">
-          <span>Step 2</span>
 
-          <h4>Select Doctor</h4>
+  <div class="ba-section-heading">
+    <span>Step 2</span>
 
-          <p>
-            Showing active doctors for {{ selectedSpecialisation }}.
-          </p>
-        </div>
+    <h4>Select Doctor</h4>
 
-        @if (filteredDoctors.length === 0) {
-          <div class="ba-empty-state">
-            No active doctors available for this specialisation.
-          </div>
-        }
+    <p>
+      Select any available doctor.
+    </p>
+  </div>
 
-        @if (filteredDoctors.length > 0) {
-          <div class="ba-doctor-grid">
-            @for (doctor of filteredDoctors; track doctor.doctorId) {
-              <button
-                type="button"
-                class="ba-doctor-card"
-                [class.selected]="form.doctorId === doctor.doctorId"
-                (click)="selectDoctor(doctor.doctorId)">
+  @if (!selectedSpecialisation) {
 
-                <div class="ba-doctor-avatar">
-                  {{ doctor.doctorName.split(' ')[1]?.[0] || doctor.doctorName[0] || 'D' }}
-                </div>
+  <div class="ba-empty-state">
+    Select a specialisation to view available doctors.
+  </div>
 
-                <div class="ba-doctor-info">
-                  <h5>{{ doctor.doctorName }}</h5>
-
-                  <p>{{ doctor.specialisation }}</p>
-
-                  <div class="ba-doctor-meta">
-                    <span>{{ doctor.yearsOfExperience }} yrs exp</span>
-                    <span>₹{{ doctor.consultationFee }}</span>
-                  </div>
-                </div>
-
-              </button>
-            }
-          </div>
-        }
-      </section>
-    }
-
-    @if (form.doctorId) {
-      <section class="ba-section-card" id="date-section">
-        <div class="ba-section-heading">
-          <span>Step 3</span>
-
-          <h4>Select Date</h4>
-
-          <p>
-            Pick a date within the next 30 days to view available slots for {{ selectedDoctor?.doctorName }}.
-          </p>
-        </div>
-
-        <label class="ba-date-field">
-          Appointment Date
-
-          <input
-            type="date"
-            name="scheduledDate"
-            [min]="todayDate"
-            [max]="maxBookingDate"
-            [(ngModel)]="form.scheduledDate"
-            (ngModelChange)="onDateChange()">
-        </label>
-      </section>
-    }
-
-    @if (form.doctorId && form.scheduledDate) {
-      <section class="ba-section-card" id="slot-section">
-        <div class="ba-section-heading">
-          <span>Step 4</span>
-
-          <h4>Select Time Slot</h4>
-
-          <p>
-Booked and past time slots are shown in red and cannot be selected.          </p>
-        </div>
-
-        @if (isLoadingSlots) {
-          <div class="ba-empty-state">
-            Loading available slots...
-          </div>
-        }
-
-        @if (!isLoadingSlots && timeSlots.length === 0) {
-          <div class="ba-empty-state">
-            No slots available for this doctor.
-          </div>
-        }
-
-        @if (!isLoadingSlots && timeSlots.length > 0) {
-          <div class="ba-slot-grid">
-         @for (slot of timeSlots; track slot.timeSlot) {
-  <button
-    type="button"
-    [class]="getSlotClass(slot)"
-    [disabled]="isTimeSlotDisabled(slot)"
-    (click)="selectTimeSlot(slot)">
-
-    <strong>{{ slot.timeSlot }}</strong>
-    <span>{{ getSlotStatus(slot) }}</span>
-  </button>
 }
+
+@else if (filteredDoctors.length === 0) {
+
+  <div class="ba-empty-state">
+    No active doctors available for this specialisation.
+  </div>
+
+}
+
+@else {
+
+  <div class="ba-doctor-grid">
+
+    @for (doctor of filteredDoctors; track doctor.doctorId) {
+
+      <button
+        type="button"
+        class="ba-doctor-card"
+        [class.selected]="form.doctorId === doctor.doctorId"
+        (click)="selectDoctor(doctor.doctorId)">
+
+        <div class="ba-doctor-avatar">
+          {{ doctor.doctorName.split(' ')[1]?.[0] || doctor.doctorName[0] || 'D' }}
+        </div>
+
+        <div class="ba-doctor-info">
+          <h5>{{ doctor.doctorName }}</h5>
+          <p>{{ doctor.specialisation }}</p>
+
+          <div class="ba-doctor-meta">
+            <span>{{ doctor.yearsOfExperience }} yrs exp</span>
+            <span>₹{{ doctor.consultationFee }}</span>
           </div>
-        }
-      </section>
+        </div>
+
+      </button>
+
     }
 
+  </div>
+
+}
+
+</section>
+
+      <section class="ba-section-card" id="date-section">
+
+  <div class="ba-section-heading">
+
+    <span>Step 3</span>
+
+    <h4>Select Date</h4>
+
+    <p>
+      Choose an appointment date.
+    </p>
+
+  </div>
+
+  <label class="ba-date-field">
+
+    Appointment Date
+
+    <input
+      type="date"
+      name="scheduledDate"
+      [min]="todayDate"
+      [max]="maxBookingDate"
+      [(ngModel)]="form.scheduledDate"
+      (ngModelChange)="onDateChange()">
+
+  </label>
+
+</section>
+
+      <section class="ba-section-card" id="slot-section">
+
+  <div class="ba-section-heading">
+
+    <span>Step 4</span>
+
+    <h4>Select Time Slot</h4>
+
+    <p>
+      Booked and past time slots are shown in red and cannot be selected.
+    </p>
+
+  </div>
+
+  @if (!form.doctorId) {
+
+    <div class="ba-empty-state">
+      Select a doctor first.
+    </div>
+
+  }
+
+  @else if (!form.scheduledDate) {
+
+    <div class="ba-empty-state">
+      Select a date to view available slots.
+    </div>
+
+  }
+
+  @else if (isLoadingSlots) {
+
+    <div class="ba-empty-state">
+      Loading available slots...
+    </div>
+
+  }
+
+  @else if (timeSlots.length === 0) {
+
+    <div class="ba-empty-state">
+      No slots available for this doctor.
+    </div>
+
+  }
+
+  @else {
+
+    <div class="ba-slot-grid">
+
+      @for (slot of timeSlots; track slot.timeSlot) {
+
+        <button
+          type="button"
+          [class]="getSlotClass(slot)"
+          [disabled]="isTimeSlotDisabled(slot)"
+          (click)="selectTimeSlot(slot)">
+
+          <strong>{{ slot.timeSlot }}</strong>
+
+          <span>{{ getSlotStatus(slot) }}</span>
+
+        </button>
+
+      }
+
+    </div>
+
+  }
+
+</section>
+<!-- 
     @if (message) {
       <div class="ba-form-message">
         {{ message }}
       </div>
-    }
+    } -->
 
     <div class="ba-submit-row" id="submit-section">
       <div class="ba-submit-note">
@@ -270,8 +287,7 @@ Booked and past time slots are shown in red and cannot be selected.          </p
     </div>
 
   </form>
-
-  @if (isBookingConfirmOpen && selectedDoctor) {
+@if (isBookingConfirmOpen && selectedDoctor) {
     <div class="ba-confirm-backdrop" (click)="closeBookingConfirm()">
 
       <section class="ba-confirm-modal" (click)="$event.stopPropagation()">
@@ -333,8 +349,6 @@ Booked and past time slots are shown in red and cannot be selected.          </p
         </div>
 
       </section>
-
     </div>
   }
-
 </section>

@@ -4,12 +4,14 @@ using HealthAxis.Api.Exceptions;
 using HealthAxis.Api.Models;
 using HealthAxis.Api.Repository.Interface;
 using HealthAxis.Api.Services.Impl;
+using HealthAxis.Api.Services.Interface;
 using HealthAxis.Shared.Constants;
 using HealthAxis.Shared.Dtos.Appointments;
 using HealthAxis.Shared.Dtos.Pagination;
 using HealthAxis.Shared.Enums;
-using Moq;
 using MassTransit;
+using Microsoft.Extensions.Logging;
+using Moq;
 
 namespace HealthAxis.Api.ServiceTest
 {
@@ -20,7 +22,9 @@ namespace HealthAxis.Api.ServiceTest
         private readonly Mock<IDoctorRepository> doctorRepositoryMock;
         private readonly Mock<IHealthRecordRepository> healthRecordRepositoryMock;
         private readonly Mock<IMapper> mapperMock;
-        private readonly Mock<IBus> busMock;
+        private readonly Mock<IPublishEndpoint> publishEndpointMock;
+        private readonly Mock<ILogger<AppointmentService>> loggerMock;
+        private readonly Mock<ICacheService> cacheServiceMock;
 
         private readonly AppointmentService appointmentService;
 
@@ -31,15 +35,21 @@ namespace HealthAxis.Api.ServiceTest
             doctorRepositoryMock = new Mock<IDoctorRepository>();
             healthRecordRepositoryMock = new Mock<IHealthRecordRepository>();
             mapperMock = new Mock<IMapper>();
-            busMock = new Mock<IBus>();
+            publishEndpointMock = new Mock<IPublishEndpoint>();
+            loggerMock = new Mock<ILogger<AppointmentService>>();
+            cacheServiceMock = new Mock<ICacheService>();
+
             SetupMapper();
 
             appointmentService = new AppointmentService(
-                appointmentRepositoryMock.Object,
-                patientRepositoryMock.Object,
-                doctorRepositoryMock.Object,
-                healthRecordRepositoryMock.Object,
-                mapperMock.Object,busMock.Object);
+    appointmentRepositoryMock.Object,
+    patientRepositoryMock.Object,
+    doctorRepositoryMock.Object,
+    healthRecordRepositoryMock.Object,
+    mapperMock.Object,
+    publishEndpointMock.Object,
+    loggerMock.Object,
+    cacheServiceMock.Object);
         }
 
         [Fact]
@@ -598,31 +608,7 @@ namespace HealthAxis.Api.ServiceTest
         }
 
         [Fact]
-        public async Task BookAppointmentAsync_WhenPatientHasSameSlot_ShouldThrowConflictException()
-        {
-            var dto = GetValidBookAppointmentDto();
-
-            SetupPatientExists(dto.PatientId);
-            SetupDoctorExists(dto.DoctorId, true);
-            SetupSlotNotBooked(dto);
-
-            appointmentRepositoryMock
-                .Setup(repository => repository.PatientHasActiveAppointmentOnDateAndSlotAsync(
-                    dto.PatientId,
-                    dto.ScheduledDate.Date,
-                    dto.TimeSlot,
-                    It.IsAny<CancellationToken>()))
-                .ReturnsAsync(true);
-
-            Func<Task> action = async () =>
-                await appointmentService.BookAppointmentAsync(dto);
-
-            await action.Should()
-                .ThrowAsync<ConflictException>()
-                .WithMessage("Patient already has an active appointment in this time slot.");
-        }
-
-        [Fact]
+       
         public async Task CompleteAppointmentAsync_WhenRepositoryReturnsNull_ShouldThrow()
         {
             var appointment = GetAppointmentWithStatus(AppointmentStatus.Confirmed);

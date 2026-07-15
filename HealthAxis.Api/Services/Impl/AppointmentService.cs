@@ -9,6 +9,7 @@ using HealthAxis.Shared.Dtos.Auth;
 using HealthAxis.Shared.Dtos.Pagination;
 using HealthAxis.Shared.Enums;
 using MassTransit;
+using HealthAxis.Api.Services.Interface;
 
 namespace HealthAxis.Api.Services.Impl
 {
@@ -17,9 +18,11 @@ namespace HealthAxis.Api.Services.Impl
         IPatientRepository patientRepository,
         IDoctorRepository doctorRepository,
         IHealthRecordRepository healthRecordRepository,
-        IMapper mapper,IPublishEndpoint publishEndpoint) : IAppointmentService
+        IMapper mapper,IPublishEndpoint publishEndpoint, ILogger<AppointmentService> logger,ICacheService cacheService) : IAppointmentService
     {
 
+        private const string AppointmentBookedEventType = "AppointmentBooked";
+        private const string EventStagePublished = "Published";
         private const string AppointmentEntityName = "Appointment";
         private const string AppointmentDetailsRequiredMessage = "Appointment details are required.";
         private const string CancellationDetailsRequiredMessage = "Cancellation details are required.";
@@ -298,7 +301,7 @@ namespace HealthAxis.Api.Services.Impl
 
             if (patientHasSameSlot)
             {
-                throw new ConflictException("Patient already has an active appointment in this time slot.");
+                throw new ConflictException("You already has an active appointment in this time slot.");
             }
 
             var patientHasAppointmentWithDoctor = await appointmentRepository.PatientHasActiveAppointmentWithDoctorOnDateAsync(
@@ -308,7 +311,7 @@ namespace HealthAxis.Api.Services.Impl
 
             if (patientHasAppointmentWithDoctor)
             {
-                throw new ConflictException("Patient already has an active appointment with this doctor on the selected date.");
+                throw new ConflictException("You already has an active appointment with this doctor on the selected date.");
 
             }
 
@@ -320,6 +323,15 @@ namespace HealthAxis.Api.Services.Impl
             appointment.CreatedDate = DateTime.Now;
 
             var savedAppointment = await appointmentRepository.CreateAsync(appointment);
+            var cacheKey = BuildDoctorAvailabilityCacheKey(
+    savedAppointment.DoctorId,
+    savedAppointment.ScheduledDate);
+
+            await cacheService.RemoveAsync(cacheKey);
+
+            logger.LogInformation(
+                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
+                cacheKey);
 
             var patient = await patientRepository.GetByIdAsync(dto.PatientId);
 
@@ -329,15 +341,16 @@ namespace HealthAxis.Api.Services.Impl
             }
 
             await publishEndpoint.Publish(
-                new AppointmentBookedEvent
-                {
-                    AppointmentId = savedAppointment.AppointmentId,
-                    PatientName = patient.PatientName,
-                    DoctorId = savedAppointment.DoctorId,
-                    ScheduledDate = savedAppointment.ScheduledDate,
-                    TimeSlot = savedAppointment.TimeSlot
-                });
+     new AppointmentBookedEvent
+     {
+         AppointmentId = savedAppointment.AppointmentId,
+         PatientName = patient.PatientName,
+         DoctorId = savedAppointment.DoctorId,
+         ScheduledDate = savedAppointment.ScheduledDate,
+         TimeSlot = savedAppointment.TimeSlot
+     });
 
+            LogAppointmentBookedEventPublished(savedAppointment);
             return mapper.Map<AppointmentDto>(savedAppointment);
         }
 
@@ -390,6 +403,22 @@ namespace HealthAxis.Api.Services.Impl
             var updatedAppointment = await appointmentRepository.UpdateAsync(
                 appointmentId,
                 existingAppointment);
+
+
+            if (updatedAppointment is null)
+            {
+                throw new EntityNotFoundException(AppointmentEntityName, appointmentId);
+            }
+
+            var cacheKey = BuildDoctorAvailabilityCacheKey(
+    updatedAppointment.DoctorId,
+    updatedAppointment.ScheduledDate);
+
+            await cacheService.RemoveAsync(cacheKey);
+
+            logger.LogInformation(
+                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
+                cacheKey);
 
             if (updatedAppointment is null)
             {
@@ -514,6 +543,21 @@ namespace HealthAxis.Api.Services.Impl
             var updatedAppointment = await appointmentRepository.UpdateAsync(
                 dto.AppointmentId,
                 appointment);
+
+            if (updatedAppointment is null)
+            {
+                throw new EntityNotFoundException(AppointmentEntityName, dto.AppointmentId);
+            }
+
+            var cacheKey = BuildDoctorAvailabilityCacheKey(
+    updatedAppointment.DoctorId,
+    updatedAppointment.ScheduledDate);
+
+            await cacheService.RemoveAsync(cacheKey);
+
+            logger.LogInformation(
+                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
+                cacheKey);
 
             if (updatedAppointment is null)
             {
@@ -712,7 +756,7 @@ namespace HealthAxis.Api.Services.Impl
             
             // Ignore any patientId sent from body and force logged-in patient's PatientId.
             dto.PatientId = patient.PatientId;
-
+            
             return await BookAppointmentAsync(dto);
         }
 
@@ -740,7 +784,7 @@ namespace HealthAxis.Api.Services.Impl
             {
                 throw new ForbiddenAccessException("Patients can cancel only their own appointments.");
             }
-
+  
             return await CancelAppointmentAsync(dto);
         }
         public async Task<List<AppointmentDto>> GetMyAppointmentsForDoctorAsync(string identityUserId)
@@ -997,5 +1041,28 @@ namespace HealthAxis.Api.Services.Impl
                 throw new AppointmentRuleException("Cancellation reason cannot exceed 200 characters.");
             }
         }
+        private void LogAppointmentBookedEventPublished(Appointment appointment)
+        {
+            using var scope = logger.BeginScope(new Dictionary<string, object>
+            {
+                ["EventType"] = AppointmentBookedEventType,
+                ["AppointmentId"] = appointment.AppointmentId,
+                ["PatientId"] = appointment.PatientId,
+                ["DoctorId"] = appointment.DoctorId,
+                ["ScheduledDate"] = appointment.ScheduledDate.ToString("yyyy-MM-dd"),
+                ["TimeSlot"] = appointment.TimeSlot
+            });
+
+            logger.LogInformation(
+                "Appointment booked event published to RabbitMQ. EventStage: {EventStage}",
+                EventStagePublished);
+        }
+        private static string BuildDoctorAvailabilityCacheKey(
+    int doctorId,
+    DateTime date)
+        {
+            return $"doctor-availability:{doctorId}:{date:yyyy-MM-dd}";
+        }
+
     }
 }

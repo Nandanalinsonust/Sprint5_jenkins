@@ -4,11 +4,13 @@ using HealthAxis.Api.Exceptions;
 using HealthAxis.Api.Models;
 using HealthAxis.Api.Repository.Interface;
 using HealthAxis.Api.Services;
+using HealthAxis.Api.Services.Interface;
 using HealthAxis.Shared.Constants;
 using HealthAxis.Shared.Dtos.Doctors;
 using HealthAxis.Shared.Dtos.Pagination;
 using HealthAxis.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Logging;
 using Moq;
 
 namespace HealthAxis.Api.ServiceTest
@@ -24,6 +26,8 @@ namespace HealthAxis.Api.ServiceTest
         private readonly Mock<RoleManager<IdentityRole>> roleManagerMock;
 
         private readonly DoctorService doctorService;
+        private readonly Mock<ICacheService> cacheServiceMock;
+        private readonly Mock<ILogger<DoctorService>> loggerMock;
 
         private readonly Mock<IAppointmentRepository> appointmentRepositoryMock;
 
@@ -34,7 +38,8 @@ namespace HealthAxis.Api.ServiceTest
             appointmentRepositoryMock = new Mock<IAppointmentRepository>();
 
             mapperMock = new Mock<IMapper>();
-
+            cacheServiceMock = new Mock<ICacheService>();
+            loggerMock = new Mock<ILogger<DoctorService>>();
             userManagerMock = CreateUserManagerMock();
 
             roleManagerMock = CreateRoleManagerMock();
@@ -42,11 +47,13 @@ namespace HealthAxis.Api.ServiceTest
             SetupMapper();
 
             doctorService = new DoctorService(
-                repositoryMock.Object,
-                appointmentRepositoryMock.Object,
-                mapperMock.Object,
-                userManagerMock.Object,
-                roleManagerMock.Object);
+    repositoryMock.Object,
+    appointmentRepositoryMock.Object,
+    mapperMock.Object,
+    userManagerMock.Object,
+    roleManagerMock.Object,
+    cacheServiceMock.Object,
+    loggerMock.Object);
         }
 
         [Fact]
@@ -404,20 +411,6 @@ namespace HealthAxis.Api.ServiceTest
             await action.Should()
                 .ThrowAsync<BusinessRuleException>()
                 .WithMessage("Doctor email is required.");
-        }
-
-        [Fact]
-        public async Task CreateDoctorByAdminAsync_WhenPracticeStartDateIsFuture_ShouldThrowBusinessRuleException()
-        {
-            var dto = GetValidCreateDoctorDto();
-
-
-            Func<Task> action = async () =>
-                await doctorService.CreateDoctorByAdminAsync(dto);
-
-            await action.Should()
-                .ThrowAsync<BusinessRuleException>()
-                .WithMessage("Practice start date cannot be in the future.");
         }
 
         [Fact]

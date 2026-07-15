@@ -8,7 +8,6 @@ import {
 
 import { FormsModule } from '@angular/forms';
 import { timeout } from 'rxjs';
-
 import { BookAppointmentDto } from '../../../../../shared/models/appointment.models';
 import { DoctorDto } from '../../../../../shared/models/doctor.models';
 
@@ -20,11 +19,12 @@ import {
 } from '../../../../../core/services/doctor-api.service';
 
 import { AppointmentApiService } from '../../../../../core/services/appointment-api.service';
+import { ToastComponent } from '../../../../../toast/toast-component/toast-component';
 
 @Component({
   selector: 'app-book-appointment',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule,ToastComponent],
   templateUrl: './patient-book-appointment.html',
   styleUrl: './patient-book-appointment.css'
 })
@@ -50,6 +50,9 @@ export class PatientBookAppointment implements OnInit {
   isSubmitting = false;
   isBookingConfirmOpen = false;
 
+  toastVisible = false;
+  toastMessage = '';
+  toastType: 'success' | 'error' | 'warning' = 'success';
   form: BookAppointmentDto = {
     patientId: 0,
     doctorId: null!,
@@ -136,12 +139,21 @@ export class PatientBookAppointment implements OnInit {
         this.doctors = doctors ?? [];
 
         this.specialisations = Array.from(
-          new Set(
-            this.doctors
-              .filter((doctor: DoctorDto) => doctor.isActive)
-              .map((doctor: DoctorDto) => doctor.specialisation)
-          )
-        ).sort();
+  new Set(
+    this.doctors
+      .filter((doctor: DoctorDto) => doctor.isActive)
+      .map((doctor: DoctorDto) => doctor.specialisation)
+  )
+).sort();
+
+this.filteredDoctors = [];
+
+this.isLoadingDoctors = false;
+  this.cdr.detectChanges();
+
+this.filteredDoctors = this.doctors.filter(
+  (doctor: DoctorDto) => doctor.isActive
+);
 
         if (this.doctors.length === 0) {
           this.message = 'No active doctors are available for booking right now.';
@@ -198,24 +210,23 @@ export class PatientBookAppointment implements OnInit {
     this.timeSlots = [];
     this.message = '';
 
-    this.scrollToSection('doctor-section');
     this.cdr.detectChanges();
   }
 
   clearSpecialisation(): void {
-    this.selectedSpecialisation = '';
-    this.specialisationSearchTerm = '';
-    this.filteredDoctors = [];
-    this.isSpecialisationDropdownOpen = false;
+  this.selectedSpecialisation = '';
+  this.specialisationSearchTerm = '';
+  this.filteredDoctors = [];
+  this.isSpecialisationDropdownOpen = false;
 
-    this.form.doctorId = null!;
-    this.form.scheduledDate = '';
-    this.form.timeSlot = '';
-    this.timeSlots = [];
-    this.message = '';
+  this.form.doctorId = null!;
+  this.form.scheduledDate = '';
+  this.form.timeSlot = '';
+  this.timeSlots = [];
+  this.message = '';
 
-    this.cdr.detectChanges();
-  }
+  this.cdr.detectChanges();
+}
 
   selectDoctor(doctorId: number): void {
     this.form.doctorId = doctorId;
@@ -224,13 +235,11 @@ export class PatientBookAppointment implements OnInit {
     this.timeSlots = [];
     this.message = '';
 
-    this.scrollToSection('date-section');
     this.cdr.detectChanges();
   }
 
   loadDoctorAvailability(doctorId: number, date: string): void {
     this.isLoadingSlots = true;
-    this.message = '';
     this.cdr.detectChanges();
 
     this.doctorApiService.getDoctorAvailability(doctorId, date).pipe(
@@ -265,7 +274,6 @@ export class PatientBookAppointment implements OnInit {
 
     if (this.form.doctorId && this.form.scheduledDate) {
       this.loadDoctorAvailability(this.form.doctorId, this.form.scheduledDate);
-      this.scrollToSection('slot-section');
     }
 
     this.cdr.detectChanges();
@@ -279,7 +287,6 @@ export class PatientBookAppointment implements OnInit {
     this.form.timeSlot = slot.timeSlot;
     this.message = '';
 
-    this.scrollToSection('submit-section');
     this.cdr.detectChanges();
   }
 
@@ -403,6 +410,12 @@ export class PatientBookAppointment implements OnInit {
       timeout(15000)
     ).subscribe({
       next: () => {
+        
+this.showToast(
+    'Appointment booked successfully.',
+    'success'
+  );
+
         this.isSubmitting = false;
         this.isBookingConfirmOpen = false;
 
@@ -413,6 +426,15 @@ export class PatientBookAppointment implements OnInit {
       },
       error: (error: unknown) => {
         console.log('Book appointment API error:', error);
+
+        
+        const errorMessage = this.getErrorMessage(error);
+
+          this.showToast(
+            errorMessage,
+            'error'
+          );
+
 
         this.isSubmitting = false;
         this.isBookingConfirmOpen = false;
@@ -443,10 +465,6 @@ export class PatientBookAppointment implements OnInit {
       return false;
     }
 
-    if (!this.selectedSpecialisation) {
-      this.message = 'Please select a specialisation.';
-      return false;
-    }
 
     if (!this.form.doctorId) {
       this.message = 'Please select a doctor.';
@@ -529,20 +547,6 @@ export class PatientBookAppointment implements OnInit {
     }, 120);
   }
 
-  private scrollToSection(sectionId: string): void {
-    setTimeout(() => {
-      const section = document.getElementById(sectionId);
-
-      if (!section) {
-        return;
-      }
-
-      section.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start'
-      });
-    }, 250);
-  }
 
   private getSlotStartDateTime(timeSlot: string): Date | null {
     const startTime = timeSlot.split('-')[0]?.trim();
@@ -576,44 +580,36 @@ export class PatientBookAppointment implements OnInit {
     return slotDateTime;
   }
 
-  private getErrorMessage(error: unknown): string {
-    if (
-      typeof error === 'object' &&
-      error !== null &&
-      'error' in error
-    ) {
-      const apiError = error as {
-        error?: {
-          message?: string;
-          Message?: string;
-          errors?: Record<string, string[]>;
-        };
-        name?: string;
-      };
+  private getErrorMessage(error: any): string {
 
-      if (apiError.name === 'TimeoutError') {
-        return 'The server is taking too long to respond. Please try again.';
-      }
+  console.log('API Error:', error);
 
-      if (apiError.error?.message) {
-        return apiError.error.message;
-      }
-
-      if (apiError.error?.Message) {
-        return apiError.error.Message;
-      }
-
-      if (apiError.error?.errors) {
-        const firstError = Object.values(apiError.error.errors)[0]?.[0];
-
-        if (firstError) {
-          return firstError;
-        }
-      }
-    }
-
-    return 'Something went wrong while booking the appointment.';
+  if (error?.name === 'TimeoutError') {
+    return 'The server is taking too long to respond. Please try again.';
   }
+
+  if (error?.error?.message) {
+    return error.error.message;
+  }
+
+  if (error?.error?.Message) {
+    return error.error.Message;
+  }
+
+  if (error?.error?.detail) {
+    return error.error.detail;
+  }
+
+  if (typeof error?.error === 'string') {
+    return error.error;
+  }
+
+  if (error?.message) {
+    return error.message;
+  }
+
+  return 'Something went wrong while booking the appointment.';
+}
 
   private getDateAfterDays(days: number): string {
     const date = new Date();
@@ -622,4 +618,22 @@ export class PatientBookAppointment implements OnInit {
 
     return date.toISOString().split('T')[0];
   }
+  showToast(
+  message: string,
+  type: 'success' | 'error' | 'warning'
+): void {
+
+  this.toastVisible = false;
+
+  setTimeout(() => {
+    this.toastMessage = message;
+    this.toastType = type;
+    this.toastVisible = true;
+
+    setTimeout(() => {
+      this.toastVisible = false;
+      this.cdr.detectChanges();
+    }, 4000);
+  }, 50);
+}
 }
