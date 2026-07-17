@@ -1,15 +1,12 @@
 ﻿namespace HealthAxis.Api.Messaging.Contracts
 {
-    public class AppointmentBookedEvent
+    public record AppointmentBookedEvent
     {
-        public int AppointmentId { get; set; }
-
-        public string PatientName { get; set; } = string.Empty;
-
-        public int DoctorId { get; set; }
-
-        public DateTime ScheduledDate { get; set; }
-
-        public string TimeSlot { get; set; } = string.Empty;
+        public int AppointmentId { get; init; }
+        public int DoctorId { get; init; }
+        public string DoctorName { get; init; } = string.Empty;
+        public string PatientName { get; init; } = string.Empty;
+        public DateTime ScheduledDate { get; init; }
+        public string TimeSlot { get; init; } = string.Empty;
     }
 }

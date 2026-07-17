@@ -464,7 +464,13 @@ else
 
         currentPage = 1;
 
-        searchCancellationTokenSource?.Cancel();
+        
+        if (searchCancellationTokenSource != null)
+        {
+            await searchCancellationTokenSource.CancelAsync();
+            searchCancellationTokenSource.Dispose();
+        }
+
 
         searchCancellationTokenSource = new CancellationTokenSource();
 

@@ -31,7 +31,7 @@ export class PatientHealthRecords {
   selectedRecord?: HealthRecordDto;
   isModalOpen = false;
 
-  constructor(private healthRecordApiService: HealthRecordApiService) {
+  constructor(private readonly healthRecordApiService: HealthRecordApiService) {
     this.loadRecords();
   }
 

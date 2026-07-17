@@ -1043,19 +1043,28 @@ namespace HealthAxis.Api.Services.Impl
         }
         private void LogAppointmentBookedEventPublished(Appointment appointment)
         {
-            using var scope = logger.BeginScope(new Dictionary<string, object>
-            {
-                ["EventType"] = AppointmentBookedEventType,
-                ["AppointmentId"] = appointment.AppointmentId,
-                ["PatientId"] = appointment.PatientId,
-                ["DoctorId"] = appointment.DoctorId,
-                ["ScheduledDate"] = appointment.ScheduledDate.ToString("yyyy-MM-dd"),
-                ["TimeSlot"] = appointment.TimeSlot
-            });
-
             logger.LogInformation(
-                "Appointment booked event published to RabbitMQ. EventStage: {EventStage}",
-                EventStagePublished);
+                """
+
+        ==========================================
+              MASSTRANSIT EVENT PUBLISHED
+        ==========================================
+
+        Event Type     : AppointmentBooked
+        Appointment Id : {AppointmentId}
+        Patient Id     : {PatientId}
+        Doctor Id      : {DoctorId}
+        Scheduled Date : {ScheduledDate}
+        Time Slot      : {TimeSlot}
+
+        ==========================================
+
+        """,
+                appointment.AppointmentId,
+                appointment.PatientId,
+                appointment.DoctorId,
+                appointment.ScheduledDate.ToString("yyyy-MM-dd"),
+                appointment.TimeSlot);
         }
         private static string BuildDoctorAvailabilityCacheKey(
     int doctorId,

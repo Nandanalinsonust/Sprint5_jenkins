@@ -20,6 +20,27 @@ namespace HealthAxis.Api.Messaging.Consumers
         {
             var message = context.Message;
 
+            _logger.LogInformation(
+                """
+        ==========================================
+              MASSTRANSIT EVENT CONSUMED
+        ==========================================
+
+        Event Type     : AppointmentBooked
+        Patient Name   : {PatientName}
+        Doctor Id      : {DoctorId}
+        Appointment Id : {AppointmentId}
+        Date           : {ScheduledDate}
+        Time Slot      : {TimeSlot}
+
+        ==========================================
+        """,
+                message.PatientName,
+                message.DoctorId,
+                message.AppointmentId,
+                message.ScheduledDate.ToString("yyyy-MM-dd"),
+                message.TimeSlot);
+
             var notification = new Notification
             {
                 DoctorId = message.DoctorId,
@@ -36,6 +57,28 @@ namespace HealthAxis.Api.Messaging.Consumers
             _logger.LogInformation(
                 "Notification created for Doctor {DoctorId}",
                 message.DoctorId);
+            _logger.LogInformation(
+    """
+    ==========================================
+          MASSTRANSIT EVENT PUBLISHED
+    ==========================================
+
+    Event Type     : AppointmentBooked
+    Patient Name   : {PatientName}
+    Doctor Id      : {DoctorId}
+    Appointment Id : {AppointmentId}
+    Date           : {ScheduledDate}
+    Time Slot      : {TimeSlot}
+
+    ==========================================
+    """,
+
+context.Message.PatientName,
+context.Message.DoctorId,
+context.Message.AppointmentId,
+context.Message.ScheduledDate.ToString("yyyy-MM-dd"),
+context.Message.TimeSlot
+);
 
         }
     }

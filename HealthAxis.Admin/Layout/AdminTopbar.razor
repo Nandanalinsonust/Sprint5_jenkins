@@ -50,7 +50,8 @@
 }
 
 @code {
-    private const string AngularHomeUrl = "http://localhost:4200";
+    private readonly string? AngularHomeUrl =
+    Environment.GetEnvironmentVariable("AngularHomeUrl");
 
     private string adminEmail = "Admin";
 
@@ -82,6 +83,6 @@
 
         showLogoutConfirmation = false;
 
-        Navigation.NavigateTo(AngularHomeUrl, forceLoad: true);
+        Navigation.NavigateTo(AngularHomeUrl!, forceLoad: true);
     }
 }

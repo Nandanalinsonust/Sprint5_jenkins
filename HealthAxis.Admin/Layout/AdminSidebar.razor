@@ -1,4 +1,6 @@
-﻿@if (isSidebarOpen)
+﻿@using Microsoft.AspNetCore.Components.Routing
+
+@if (isSidebarOpen)
 {
     <div class="ha-sidebar-click-overlay"
          @onclick="CloseSidebar">

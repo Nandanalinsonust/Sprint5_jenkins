@@ -71,8 +71,8 @@ export class PatientProfile implements OnInit {
   @Output() passwordChanged = new EventEmitter<void>();
 
   constructor(
-    private patientApiService: PatientApiService,
-    private authService: AuthService
+    private readonly patientApiService: PatientApiService,
+    private readonly authService: AuthService
   ) {
     this.todayDate = new Date().toISOString().split('T')[0];
   }
@@ -108,7 +108,7 @@ export class PatientProfile implements OnInit {
   }
 
   get isPhoneInvalid(): boolean {
-    const phone = this.form.phoneNumber.replace(/\s/g, '');
+    const phone = this.form.phoneNumber.replaceAll(/\s/g, '');
     const phonePattern = /^[0-9]{10}$/;
 
     return !phonePattern.test(phone);

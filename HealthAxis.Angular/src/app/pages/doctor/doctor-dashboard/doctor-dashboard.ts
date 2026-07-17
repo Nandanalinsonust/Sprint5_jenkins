@@ -95,11 +95,11 @@ export class DoctorDashboard implements OnInit, OnDestroy {
   private toastTimer?: ReturnType<typeof setTimeout>;
 
   constructor(
-    private authService: AuthService,
-    private doctorApiService: DoctorApiService,
-    private appointmentApiService: AppointmentApiService,
-    private healthRecordApiService: HealthRecordApiService,
-    private router: Router
+    private readonly authService: AuthService,
+    private readonly doctorApiService: DoctorApiService,
+    private readonly appointmentApiService: AppointmentApiService,
+    private readonly healthRecordApiService: HealthRecordApiService,
+    private readonly router: Router
   ) {
   }
 

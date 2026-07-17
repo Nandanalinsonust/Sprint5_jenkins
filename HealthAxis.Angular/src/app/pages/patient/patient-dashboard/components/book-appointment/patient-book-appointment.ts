@@ -63,10 +63,10 @@ export class PatientBookAppointment implements OnInit {
   @Output() bookingSuccess = new EventEmitter<void>();
 
   constructor(
-    private patientApiService: PatientApiService,
-    private doctorApiService: DoctorApiService,
-    private appointmentApiService: AppointmentApiService,
-    private cdr: ChangeDetectorRef
+    private readonly patientApiService: PatientApiService,
+    private readonly doctorApiService: DoctorApiService,
+    private readonly appointmentApiService: AppointmentApiService,
+    private readonly cdr: ChangeDetectorRef
   ) {
     this.todayDate = new Date().toISOString().split('T')[0];
     this.maxBookingDate = this.getDateAfterDays(30);

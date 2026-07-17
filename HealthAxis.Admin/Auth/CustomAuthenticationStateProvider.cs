@@ -38,7 +38,7 @@ namespace HealthAxis.Admin.Auth
 
             var claims = ParseClaimsFromJwt(token);
 
-            if (!claims.Any())
+            if (claims.Count == 0)
             {
                 return CreateAnonymousAuthenticationState();
             }
@@ -83,7 +83,7 @@ namespace HealthAxis.Admin.Auth
             return new ClaimsPrincipal(identity);
         }
 
-        private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+        private static List<Claim> ParseClaimsFromJwt(string jwt)
         {
             var claims = new List<Claim>();
 

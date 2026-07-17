@@ -218,8 +218,6 @@
 
     private EditContext? editContext;
 
-    private ValidationMessageStore? validationMessageStore;
-
     private DoctorCreatedResponseDto? createdDoctor;
 
     private bool isSaving;
@@ -250,7 +248,6 @@
     {
         editContext = new EditContext(doctor);
 
-        validationMessageStore = new ValidationMessageStore(editContext);
     }
     private async Task SaveDoctor()
     {
