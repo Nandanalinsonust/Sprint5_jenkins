@@ -28,6 +28,7 @@ namespace HealthAxis.Api.ServiceTest
 
         private readonly AppointmentService appointmentService;
 
+
         public AppointmentServiceTests()
         {
             appointmentRepositoryMock = new Mock<IAppointmentRepository>();
@@ -41,15 +42,20 @@ namespace HealthAxis.Api.ServiceTest
 
             SetupMapper();
 
-            appointmentService = new AppointmentService(
-    appointmentRepositoryMock.Object,
-    patientRepositoryMock.Object,
-    doctorRepositoryMock.Object,
-    healthRecordRepositoryMock.Object,
-    mapperMock.Object,
-    publishEndpointMock.Object,
-    loggerMock.Object,
-    cacheServiceMock.Object);
+            var dependencies = new AppointmentServiceDependencies
+            {
+                AppointmentRepository = appointmentRepositoryMock.Object,
+                PatientRepository = patientRepositoryMock.Object,
+                DoctorRepository = doctorRepositoryMock.Object,
+                HealthRecordRepository = healthRecordRepositoryMock.Object,
+                Mapper = mapperMock.Object,
+                PublishEndpoint = publishEndpointMock.Object,
+                Logger = loggerMock.Object,
+                CacheService = cacheServiceMock.Object
+            };
+
+            appointmentService = new AppointmentService(dependencies);
+
         }
 
         [Fact]

@@ -45,12 +45,12 @@ namespace HealthAxis.Api.Repository.Impl
                 .ToListAsync(ct);
         }
 
-        public new async Task<Appointment?> GetByIdAsync(int appointmentId, CancellationToken ct = default)
+        public new async Task<Appointment?> GetByIdAsync(int id, CancellationToken ct = default)
         {
             return await _context.Appointments
                 .Include(a => a.Patient)
                 .Include(a => a.Doctor)
-                .FirstOrDefaultAsync(a => a.AppointmentId == appointmentId, ct);
+                .FirstOrDefaultAsync(a => a.AppointmentId == id, ct);
         }
 
         public async Task<List<Appointment>> GetByPatientIdAsync(int patientId, CancellationToken ct = default)

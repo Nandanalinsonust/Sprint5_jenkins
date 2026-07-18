@@ -200,7 +200,11 @@ else if (appointment is not null)
                 return;
             }
 
-            if (!DateTime.TryParse(appointment.ScheduledDate, out scheduledDate))
+            if (!DateTime.TryParse(
+        appointment.ScheduledDate,
+        System.Globalization.CultureInfo.InvariantCulture,
+        System.Globalization.DateTimeStyles.None,
+        out scheduledDate))
             {
                 scheduledDate = DateTime.MinValue;
             }

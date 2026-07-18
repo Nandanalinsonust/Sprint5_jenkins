@@ -1,6 +1,9 @@
 <section class="dd-page">
 
-  <aside class="dd-sidebar" [class.open]="isSidebarOpen">
+    <aside
+  class="dd-sidebar"
+  [class.open]="isSidebarOpen"
+  aria-label="Doctor navigation">
 
     <div class="dd-brand">
       <div class="dd-brand-logo">
@@ -8,7 +11,7 @@
       </div>
 
       <div class="dd-brand-copy">
-        <h2>HealthAxis</h2>
+        <h2 id="sidebarTitle">HealthAxis</h2>
         <span>Doctor Workspace</span>
       </div>
 
@@ -67,7 +70,12 @@
   </aside>
 
   @if (isSidebarOpen) {
-    <div class="dd-sidebar-overlay" (click)="closeSidebar()"></div>
+    <button
+  type="button"
+  class="dd-sidebar-overlay"
+  aria-label="Close sidebar"
+  (click)="closeSidebar()">
+</button>
   }
 
   <main class="dd-main">
@@ -246,7 +254,9 @@
               </div>
             </div>
 
-            <aside class="dd-chart-card">
+              <aside
+  class="dd-chart-card"
+  aria-label="Dashboard statistics">
               <div class="dd-donut-wrap">
                 <div class="dd-donut" [style.background]="chartBackground">
                   <div class="dd-donut-center">
@@ -465,7 +475,12 @@
   </main>
 
   @if (isTempPasswordConfirmOpen) {
-    <div class="dd-confirm-backdrop" (click)="closeTempPasswordConfirm()">
+    <div>
+      <button
+  type="button"
+  class="dd-confirm-backdrop"
+  aria-label="Close confirmation dialog"
+  (click)="closeTempPasswordConfirm()">
 
       <section class="dd-confirm-modal" (click)="$event.stopPropagation()">
 
@@ -507,7 +522,12 @@
   @if (isLogoutModalOpen) {
     <div class="dd-confirm-backdrop" (click)="closeLogoutModal()">
 
-      <section class="dd-confirm-modal danger" (click)="$event.stopPropagation()">
+        <section
+  class="dd-confirm-modal danger"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="logoutDialogTitle"
+  (click)="$event.stopPropagation()">
 
         <div class="dd-confirm-icon danger">
           ↪
@@ -515,7 +535,9 @@
 
         <span class="dd-confirm-kicker danger-text">Logout Confirmation</span>
 
-        <h3>Do you want to logout?</h3>
+        <h3 id="logoutDialogTitle">
+  Do you want to logout?
+</h3>
 
         <p>
           You will be redirected to the HealthAxis home page.

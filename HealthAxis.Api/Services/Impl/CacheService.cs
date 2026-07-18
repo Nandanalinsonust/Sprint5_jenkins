@@ -9,7 +9,10 @@ namespace HealthAxis.Api.Services.Impl
         private readonly IDistributedCache distributedCache;
 
         private readonly ILogger<CacheService> logger;
-
+        private static readonly JsonSerializerOptions JsonSerializerOptions = new()
+        {
+            PropertyNameCaseInsensitive = true
+        };
         public CacheService(
             IDistributedCache distributedCache,
             ILogger<CacheService> logger)
@@ -34,11 +37,8 @@ namespace HealthAxis.Api.Services.Impl
             try
             {
                 return JsonSerializer.Deserialize<T>(
-                    cachedValue,
-                    new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+    cachedValue,
+    JsonSerializerOptions);
             }
             catch (JsonException ex)
             {

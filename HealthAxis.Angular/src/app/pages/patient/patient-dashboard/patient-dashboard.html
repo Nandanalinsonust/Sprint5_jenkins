@@ -99,9 +99,13 @@
   @if (isProfileDropdownOpen) {
 
     <div
-      class="pd-profile-overlay"
-      (click)="closeProfileDropdown()">
-    </div>
+  class="pd-profile-overlay"
+  role="button"
+  tabindex="0"
+  (click)="closeProfileDropdown()"
+  (keydown.enter)="closeProfileDropdown()"
+  (keydown.space)="closeProfileDropdown()">
+</div>
 
     <div class="pd-profile-dropdown">
 
@@ -116,27 +120,6 @@
         </div>
       </div>
 
-      <!-- <button
-        type="button"
-        class="pd-dropdown-item"
-        (click)="setActiveSection('profile'); closeProfileDropdown()">
-
-        <i class="fas fa-user-circle">👤</i>
-        <span>View Profile</span>
-
-      </button>
-
-      <button
-        type="button"
-        class="pd-dropdown-item logout"
-        (click)="closeProfileDropdown(); logout()">
-
-        
-  <i class="fas fa-arrow-right-from-bracket">↪ </i>
-
-        <span>Logout</span>
-
-      </button> -->
       <button
   type="button"
   class="pd-dropdown-item"
@@ -388,9 +371,20 @@
   </main>
 
   @if (isLogoutModalOpen) {
-    <div class="pd-confirm-backdrop" (click)="closeLogoutModal()">
+      <div
+  class="pd-confirm-backdrop"
+  role="button"
+  tabindex="0"
+  (click)="closeLogoutModal()"
+  (keydown.enter)="closeLogoutModal()"
+  (keydown.space)="closeLogoutModal()">
 
-      <section class="pd-confirm-modal" (click)="$event.stopPropagation()">
+        <section
+  class="pd-confirm-modal"
+  tabindex="-1"
+  (click)="$event.stopPropagation()"
+  (keydown.enter)="$event.stopPropagation()"
+  (keydown.space)="$event.stopPropagation()">
 
         <div class="pd-confirm-icon">
           ↪

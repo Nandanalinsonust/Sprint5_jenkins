@@ -1,59 +1,67 @@
 ﻿using HealthAxis.Api.Data;
-
 using HealthAxis.Api.Models;
-
 using HealthAxis.Api.Repository.Interface;
-
-using Microsoft.EntityFrameworkCore;
-
 using HealthAxis.Shared.Enums;
+using Microsoft.EntityFrameworkCore;
 
 namespace HealthAxis.Api.Repository.Impl
 {
     public class DoctorRepository : Repository<Doctor>, IDoctorRepository
     {
-        private readonly HealthAxisDbContext _context;
+        private readonly HealthAxisDbContext context;
 
-        public DoctorRepository(HealthAxisDbContext context) : base(context)
+        public DoctorRepository(HealthAxisDbContext context)
+            : base(context)
         {
-            _context = context;
+            this.context = context;
         }
 
-        public async Task<List<Doctor>> GetAllActiveAsync(CancellationToken ct = default)
+        public async Task<List<Doctor>> GetAllActiveAsync(
+            CancellationToken ct = default)
         {
-            return await _context.Doctors
-                .Where(d => d.IsActive)
+            return await context.Doctors
+                .Where(doctor => doctor.IsActive)
                 .ToListAsync(ct);
         }
 
-        public async Task<List<Doctor>> GetBySpecialisationAsync(SpecialisationType specialisation, CancellationToken ct = default)
+        public async Task<List<Doctor>> GetBySpecialisationAsync(
+            SpecialisationType specialisation,
+            CancellationToken ct = default)
         {
-            return await _context.Doctors
-                .Where(d => d.Specialisation == specialisation)
+            return await context.Doctors
+                .Where(doctor => doctor.Specialisation == specialisation)
                 .ToListAsync(ct);
         }
 
-        public async Task<List<Doctor>> GetActiveBySpecialisationAsync(SpecialisationType specialisation, CancellationToken ct = default)
+        public async Task<List<Doctor>> GetActiveBySpecialisationAsync(
+            SpecialisationType specialisation,
+            CancellationToken ct = default)
         {
-            return await _context.Doctors
-                .Where(d => d.IsActive && d.Specialisation == specialisation)
+            return await context.Doctors
+                .Where(doctor =>
+                    doctor.IsActive &&
+                    doctor.Specialisation == specialisation)
                 .ToListAsync(ct);
-
         }
-        public async Task<bool> ExistsByEmailAsync(string email, CancellationToken ct = default)
+
+        public async Task<bool> ExistsByEmailAsync(
+            string email,
+            CancellationToken ct = default)
         {
-            string normalizedEmail = email.ToUpperInvariant();
-
-            return await _context.Doctors
-                .AnyAsync(d => d.Email.ToUpper() == normalizedEmail, ct);
+            return await context.Doctors
+                .AnyAsync(
+                    doctor => doctor.Email == email,
+                    ct);
         }
+
         public async Task<Doctor?> GetByIdentityUserIdAsync(
-    string identityUserId,
-    CancellationToken ct = default)
+            string identityUserId,
+            CancellationToken ct = default)
         {
-            return await _context.Doctors
-                .FirstOrDefaultAsync(d => d.IdentityUserId == identityUserId, ct);
+            return await context.Doctors
+                .FirstOrDefaultAsync(
+                    doctor => doctor.IdentityUserId == identityUserId,
+                    ct);
         }
-
     }
-    }
+}

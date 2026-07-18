@@ -216,9 +216,23 @@
   }
 
   @if (isDiscardPasswordModalOpen) {
-    <div class="dp-confirm-backdrop" (click)="closeDiscardPasswordModal()">
+    <div
+      class="dp-confirm-backdrop"
+      role="button"
+      tabindex="0"
+      aria-label="Close discard password changes modal"
+      (click)="closeDiscardPasswordModal()"
+      (keydown.enter)="closeDiscardPasswordModal()"
+      (keydown.space)="$event.preventDefault(); closeDiscardPasswordModal()">
 
-      <section class="dp-confirm-modal" (click)="$event.stopPropagation()">
+      <section
+        class="dp-confirm-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="discardPasswordTitle"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()">
 
         <div class="dp-confirm-icon warning">
           !
@@ -226,7 +240,7 @@
 
         <span class="dp-confirm-kicker">Password Form</span>
 
-        <h3>Discard password changes?</h3>
+        <h3 id="discardPasswordTitle">Discard password changes?</h3>
 
         <p>
           You have entered password details. If you discard, the password fields will be cleared.
@@ -254,9 +268,23 @@
   }
 
   @if (isPasswordConfirmModalOpen) {
-    <div class="dp-confirm-backdrop" (click)="closePasswordConfirmModal()">
+    <div
+      class="dp-confirm-backdrop"
+      role="button"
+      tabindex="0"
+      aria-label="Close password confirmation modal"
+      (click)="closePasswordConfirmModal()"
+      (keydown.enter)="closePasswordConfirmModal()"
+      (keydown.space)="$event.preventDefault(); closePasswordConfirmModal()">
 
-      <section class="dp-confirm-modal" (click)="$event.stopPropagation()">
+      <section
+        class="dp-confirm-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="passwordConfirmTitle"
+        tabindex="-1"
+        (click)="$event.stopPropagation()"
+        (keydown)="$event.stopPropagation()">
 
         <div class="dp-confirm-icon success">
           ✓
@@ -264,7 +292,7 @@
 
         <span class="dp-confirm-kicker">Confirm Password Change</span>
 
-        <h3>Change your password?</h3>
+        <h3 id="passwordConfirmTitle">Change your password?</h3>
 
         <p>
           After changing your password, use the new password for future logins.

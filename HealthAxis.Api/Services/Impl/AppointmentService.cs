@@ -13,16 +13,44 @@ using HealthAxis.Api.Services.Interface;
 
 namespace HealthAxis.Api.Services.Impl
 {
-    public class AppointmentService(
-        IAppointmentRepository appointmentRepository,
-        IPatientRepository patientRepository,
-        IDoctorRepository doctorRepository,
-        IHealthRecordRepository healthRecordRepository,
-        IMapper mapper,IPublishEndpoint publishEndpoint, ILogger<AppointmentService> logger,ICacheService cacheService) : IAppointmentService
+    public sealed class AppointmentServiceDependencies
     {
+        public IAppointmentRepository AppointmentRepository { get; init; } = default!;
+        public IPatientRepository PatientRepository { get; init; } = default!;
+        public IDoctorRepository DoctorRepository { get; init; } = default!;
+        public IHealthRecordRepository HealthRecordRepository { get; init; } = default!;
+        public IMapper Mapper { get; init; } = default!;
+        public IPublishEndpoint PublishEndpoint { get; init; } = default!;
+        public ILogger<AppointmentService> Logger { get; init; } = default!;
+        public ICacheService CacheService { get; init; } = default!;
+    }
+    public class AppointmentService(
+    AppointmentServiceDependencies dependencies)
+    : IAppointmentService
+    {
+        private readonly IAppointmentRepository appointmentRepository =
+    dependencies.AppointmentRepository;
 
-        private const string AppointmentBookedEventType = "AppointmentBooked";
-        private const string EventStagePublished = "Published";
+        private readonly IPatientRepository patientRepository =
+            dependencies.PatientRepository;
+
+        private readonly IDoctorRepository doctorRepository =
+            dependencies.DoctorRepository;
+
+        private readonly IHealthRecordRepository healthRecordRepository =
+            dependencies.HealthRecordRepository;
+
+        private readonly IMapper mapper =
+            dependencies.Mapper;
+
+        private readonly IPublishEndpoint publishEndpoint =
+            dependencies.PublishEndpoint;
+
+        private readonly ILogger<AppointmentService> logger =
+            dependencies.Logger;
+
+        private readonly ICacheService cacheService =
+            dependencies.CacheService;
         private const string AppointmentEntityName = "Appointment";
         private const string AppointmentDetailsRequiredMessage = "Appointment details are required.";
         private const string CancellationDetailsRequiredMessage = "Cancellation details are required.";
@@ -329,9 +357,10 @@ namespace HealthAxis.Api.Services.Impl
 
             await cacheService.RemoveAsync(cacheKey);
 
-            logger.LogInformation(
-                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
-                cacheKey);
+            DoctorAvailabilityCacheInvalidated(
+    logger,
+    cacheKey,
+    null);
 
             var patient = await patientRepository.GetByIdAsync(dto.PatientId);
 
@@ -416,9 +445,10 @@ namespace HealthAxis.Api.Services.Impl
 
             await cacheService.RemoveAsync(cacheKey);
 
-            logger.LogInformation(
-                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
-                cacheKey);
+            DoctorAvailabilityCacheInvalidated(
+    logger,
+    cacheKey,
+    null);
 
             if (updatedAppointment is null)
             {
@@ -555,14 +585,10 @@ namespace HealthAxis.Api.Services.Impl
 
             await cacheService.RemoveAsync(cacheKey);
 
-            logger.LogInformation(
-                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
-                cacheKey);
-
-            if (updatedAppointment is null)
-            {
-                throw new EntityNotFoundException(AppointmentEntityName, dto.AppointmentId);
-            }
+            DoctorAvailabilityCacheInvalidated(
+    logger,
+    cacheKey,
+    null);
 
             return mapper.Map<AppointmentDto>(updatedAppointment);
         }
@@ -1043,28 +1069,14 @@ namespace HealthAxis.Api.Services.Impl
         }
         private void LogAppointmentBookedEventPublished(Appointment appointment)
         {
-            logger.LogInformation(
-                """
-
-        ==========================================
-              MASSTRANSIT EVENT PUBLISHED
-        ==========================================
-
-        Event Type     : AppointmentBooked
-        Appointment Id : {AppointmentId}
-        Patient Id     : {PatientId}
-        Doctor Id      : {DoctorId}
-        Scheduled Date : {ScheduledDate}
-        Time Slot      : {TimeSlot}
-
-        ==========================================
-
-        """,
-                appointment.AppointmentId,
-                appointment.PatientId,
-                appointment.DoctorId,
-                appointment.ScheduledDate.ToString("yyyy-MM-dd"),
-                appointment.TimeSlot);
+            AppointmentBookedEventLog(
+    logger,
+    appointment.AppointmentId,
+    appointment.PatientId,
+    appointment.DoctorId,
+    appointment.ScheduledDate.ToString("yyyy-MM-dd"),
+    appointment.TimeSlot,
+    null);
         }
         private static string BuildDoctorAvailabilityCacheKey(
     int doctorId,
@@ -1072,6 +1084,42 @@ namespace HealthAxis.Api.Services.Impl
         {
             return $"doctor-availability:{doctorId}:{date:yyyy-MM-dd}";
         }
+        private static readonly Action<ILogger, string, Exception?>
+    DoctorAvailabilityCacheInvalidated =
+        LoggerMessage.Define<string>(
+            LogLevel.Information,
+            new EventId(
+                1004,
+                nameof(DoctorAvailabilityCacheInvalidated)),
+            "Doctor availability cache invalidated. CacheKey: {CacheKey}");
+        private static readonly Action<
+        ILogger,
+        int,
+        int,
+        int,
+        string,
+        string,
+        Exception?> AppointmentBookedEventLog =
+            LoggerMessage.Define<
+                int,
+                int,
+                int,
+                string,
+                string>(
+                LogLevel.Information,
+                new EventId(1005, nameof(AppointmentBookedEventLog)),
+                """
+            ==========================================
+                  MASSTRANSIT EVENT PUBLISHED
+            ==========================================
 
+            Appointment Id : {AppointmentId}
+            Patient Id     : {PatientId}
+            Doctor Id      : {DoctorId}
+            Scheduled Date : {ScheduledDate}
+            Time Slot      : {TimeSlot}
+
+            ==========================================
+            """);
     }
 }

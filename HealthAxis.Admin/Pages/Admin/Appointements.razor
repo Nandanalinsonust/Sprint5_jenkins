@@ -589,19 +589,16 @@ else
         }
     }
 
-    private List<AppointmentFilterPersonDto> FilteredPeopleList
+    private List<AppointmentFilterPersonDto> GetFilteredPeopleList()
     {
-        get
-        {
-            return FilteredPeople.ToList();
-        }
+        return FilteredPeople.ToList();
     }
 
     private int PeopleTotalRecords
     {
         get
         {
-            return FilteredPeopleList.Count;
+            return GetFilteredPeopleList().Count;
         }
     }
 
@@ -650,7 +647,7 @@ else
     {
         get
         {
-            return FilteredPeopleList
+            return GetFilteredPeopleList()
                 .Skip((currentPage - 1) * pageSize)
                 .Take(pageSize);
         }
@@ -1028,7 +1025,11 @@ else
             return exactDate.Date;
         }
 
-        if (DateTime.TryParse(trimmedValue, out var parsedDate))
+        if (DateTime.TryParse(
+        trimmedValue,
+        System.Globalization.CultureInfo.InvariantCulture,
+        System.Globalization.DateTimeStyles.None,
+        out var parsedDate))
         {
             return parsedDate.Date;
         }
@@ -1038,7 +1039,11 @@ else
 
     private async Task OnDailySummaryDateChanged(ChangeEventArgs args)
     {
-        if (DateTime.TryParse(args.Value?.ToString(), out var selectedDate))
+        if (DateTime.TryParse(
+                args.Value?.ToString(),
+                System.Globalization.CultureInfo.InvariantCulture,
+                System.Globalization.DateTimeStyles.None,
+                out var selectedDate))
         {
             selectedDailySummaryDate = selectedDate.Date;
 
@@ -1217,7 +1222,11 @@ else
 
     private static DateTime ParseDate(string date)
     {
-        return DateTime.TryParse(date, out var parsedDate)
+        return DateTime.TryParse(
+            date,
+            System.Globalization.CultureInfo.InvariantCulture,
+            System.Globalization.DateTimeStyles.None,
+            out var parsedDate)
             ? parsedDate
             : DateTime.MinValue;
     }

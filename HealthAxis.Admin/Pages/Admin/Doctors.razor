@@ -220,7 +220,7 @@ else
 
                                         <button class="@GetToggleButtonClass(doctor.IsActive)"
                                                 @onclick="() => ShowStatusConfirmation(doctor.DoctorId, doctor.FullName, doctor.IsActive)">
-                                            @(doctor.IsActive ? "Deactivate" : "Activate")
+                                            @ConfirmButtonText
                                         </button>
                                     </div>
                                 </td>
@@ -673,5 +673,19 @@ else
         }
 
         return $"{parts[0][0]}{parts[1][0]}".ToUpper();
+    }
+    private string ConfirmButtonText
+    {
+        get
+        {
+            if (isUpdatingDoctorStatus)
+            {
+                return "Updating...";
+            }
+
+            return selectedDoctorCurrentStatus
+                ? "Yes, Deactivate"
+                : "Yes, Activate";
+        }
     }
 }

@@ -29,6 +29,23 @@ namespace HealthAxis.Api.Services
         private const string DoctorEntityName = "Doctor";
         private const string DoctorRoleName = "Doctor";
         private const string DoctorDetailsRequiredMessage = "Doctor details are required.";
+        private static readonly Action<ILogger, string, Exception?> DoctorAvailabilityCacheHit =
+    LoggerMessage.Define<string>(
+        LogLevel.Information,
+        new EventId(1001, nameof(DoctorAvailabilityCacheHit)),
+        "Doctor availability cache HIT. CacheKey: {CacheKey}");
+
+        private static readonly Action<ILogger, string, Exception?> DoctorAvailabilityCacheMiss =
+            LoggerMessage.Define<string>(
+                LogLevel.Information,
+                new EventId(1002, nameof(DoctorAvailabilityCacheMiss)),
+                "Doctor availability cache MISS. CacheKey: {CacheKey}");
+
+        private static readonly Action<ILogger, string, double, Exception?> DoctorAvailabilityCached =
+            LoggerMessage.Define<string, double>(
+                LogLevel.Information,
+                new EventId(1003, nameof(DoctorAvailabilityCached)),
+                "Doctor availability cached. CacheKey: {CacheKey}, ExpiryMinutes: {ExpiryMinutes}");
 
         private static readonly TimeSpan DoctorAvailabilityCacheDuration = TimeSpan.FromMinutes(5);
         private static string BuildDoctorAvailabilityCacheKey(
@@ -303,16 +320,18 @@ namespace HealthAxis.Api.Services
 
                 if (cachedAvailability is not null)
                 {
-                    logger.LogInformation(
-                        "Doctor availability cache HIT. CacheKey: {CacheKey}",
-                        cacheKey);
+                    DoctorAvailabilityCacheHit(
+    logger,
+    cacheKey,
+    null);
 
                     return cachedAvailability;
                 }
 
-                logger.LogInformation(
-                    "Doctor availability cache MISS. CacheKey: {CacheKey}",
-                    cacheKey);
+                DoctorAvailabilityCacheMiss(
+    logger,
+    cacheKey,
+    null);
 
                 var bookedSlots =
                     await appointmentRepository.GetBookedTimeSlotsByDoctorAndDateAsync(
@@ -335,11 +354,11 @@ namespace HealthAxis.Api.Services
                     availability,
                     DoctorAvailabilityCacheDuration);
 
-                logger.LogInformation(
-                    "Doctor availability cached. CacheKey: {CacheKey}, ExpiryMinutes: {ExpiryMinutes}",
-                    cacheKey,
-                    DoctorAvailabilityCacheDuration.TotalMinutes);
-
+                DoctorAvailabilityCached(
+    logger,
+    cacheKey,
+    DoctorAvailabilityCacheDuration.TotalMinutes,
+    null);
 
                 return availability;
             }

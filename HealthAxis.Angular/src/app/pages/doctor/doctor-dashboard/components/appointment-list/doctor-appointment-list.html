@@ -279,9 +279,17 @@
   }
 
   @if (isConfirmModalOpen && selectedAppointment) {
-    <div class="da-modal-backdrop" (click)="closeConfirmModal()">
+    <div>
+      <button
+    type="button"
+    class="da-modal-backdrop"
+    (click)="closeConfirmModal()">
+</button>
 
-      <section class="da-action-modal" (click)="$event.stopPropagation()">
+        <section
+  class="da-action-modal"
+  (click)="$event.stopPropagation()"
+  (keydown)="$event.stopPropagation()">
 
         <div class="da-modal-accent"></div>
 
@@ -346,9 +354,17 @@
   }
 
   @if (isHealthRecordModalOpen && selectedAppointment) {
-    <div class="da-modal-backdrop" (click)="requestCloseHealthRecordModal()">
+    <div>
+      <button
+    type="button"
+    class="da-modal-backdrop"
+    (click)="requestCloseHealthRecordModal()">
+</button>
 
-      <section class="da-action-modal wide" (click)="$event.stopPropagation()">
+        <section
+  class="da-action-modal"
+  (click)="$event.stopPropagation()"
+  (keydown)="$event.stopPropagation()">
 
         <div class="da-modal-accent complete"></div>
 
@@ -475,9 +491,17 @@
   }
 
   @if (isHealthRecordSaveConfirmOpen && selectedAppointment) {
-    <div class="da-modal-backdrop" (click)="closeHealthRecordSaveConfirm()">
+    <div>
+      <button
+    type="button"
+    class="da-modal-backdrop"
+    (click)="closeHealthRecordSaveConfirm()">
+</button>
 
-      <section class="da-action-modal" (click)="$event.stopPropagation()">
+        <section
+  class="da-action-modal"
+  (click)="$event.stopPropagation()"
+  (keydown)="$event.stopPropagation()">
 
         <div class="da-modal-accent complete"></div>
 
@@ -536,9 +560,17 @@
   }
 
   @if (isDiscardHealthRecordModalOpen) {
-    <div class="da-modal-backdrop" (click)="closeDiscardHealthRecordModal()">
+    <div>
+      <button
+    type="button"
+    class="da-modal-backdrop"
+    (click)="closeDiscardHealthRecordModal()">
+</button>
 
-      <section class="da-action-modal" (click)="$event.stopPropagation()">
+        <section
+  class="da-action-modal"
+  (click)="$event.stopPropagation()"
+  (keydown)="$event.stopPropagation()">
 
         <div class="da-modal-accent danger"></div>
 

@@ -124,9 +124,12 @@
 
       @for (record of records; track record.healthRecordId) {
 
-        <article
-          class="dr-record-card"
-          (click)="openDetails(record)">
+        <article class="dr-record-card">
+
+  <button
+    type="button"
+    class="dr-record-button"
+    (click)="openDetails(record)">
 
           <div class="dr-record-top">
             <div class="dr-record-icon">
@@ -141,11 +144,9 @@
               <p>{{ formatDate(record.visitDate) }}</p>
             </div>
 
-            <button
-              type="button"
-              class="dr-view-btn">
-              View
-            </button>
+            <span class="dr-view-btn">
+  View
+</span>
           </div>
 
           <div class="dr-diagnosis-box">
@@ -173,7 +174,7 @@
             <span>Appointment #{{ record.appointmentId }}</span>
             <small>Click to view full medical summary</small>
           </div>
-
+  </button>
         </article>
 
       }
@@ -208,81 +209,91 @@
     </section>
   }
 
-  @if (isModalOpen && selectedRecord) {
+ @if (isModalOpen && selectedRecord) {
 
-    <div
-      class="dr-modal-backdrop"
-      (click)="closeModal()">
+  <div
+    class="dr-modal-backdrop"
+    tabindex="0"
+    role="button"
+    aria-label="Close health record dialog"
+    (click)="onBackdropClick($event)"
+    (keydown.enter)="closeModal()"
+    (keydown.space)="closeModal()">
 
-      <section
-        class="dr-modal"
-        (click)="$event.stopPropagation()">
+    <section
+      class="dr-modal"
+      aria-labelledby="recordDialogTitle"
+      role="dialog"
+      aria-modal="true">
 
-        <div class="dr-modal-accent"></div>
+      <div class="dr-modal-accent"></div>
 
-        <div class="dr-modal-header">
-          <div>
-            <span class="dr-modal-kicker">Health Record Details</span>
+      <div class="dr-modal-header">
+        <div>
+          <span class="dr-modal-kicker">Health Record Details</span>
 
-            <h3>{{ selectedRecord.patientName }}</h3>
+          <h3 id="recordDialogTitle">
+            {{ selectedRecord.patientName }}
+          </h3>
 
-            <p>
-              {{ formatDate(selectedRecord.visitDate) }} • Appointment #{{ selectedRecord.appointmentId }}
-            </p>
-          </div>
-
-          <button
-            type="button"
-            class="dr-modal-close"
-            (click)="closeModal()">
-            ×
-          </button>
+          <p>
+            {{ formatDate(selectedRecord.visitDate) }} • Appointment #{{ selectedRecord.appointmentId }}
+          </p>
         </div>
 
-        <div class="dr-modal-summary">
+        <button
+          type="button"
+          class="dr-modal-close"
+          aria-label="Close dialog"
+          (click)="closeModal()">
+          ×
+        </button>
+      </div>
 
-          <div>
-            <span>Patient</span>
-            <strong>{{ selectedRecord.patientName }}</strong>
-          </div>
+      <div class="dr-modal-summary">
 
-          <div>
-            <span>Doctor</span>
-            <strong>{{ selectedRecord.doctorName }}</strong>
-          </div>
-
-          <div>
-            <span>Visit Date</span>
-            <strong>{{ formatDate(selectedRecord.visitDate) }}</strong>
-          </div>
-
+        <div>
+          <span>Patient</span>
+          <strong>{{ selectedRecord.patientName }}</strong>
         </div>
 
-        <div class="dr-modal-body">
+        <div>
+          <span>Doctor</span>
+          <strong>{{ selectedRecord.doctorName }}</strong>
+        </div>
 
-          <div class="dr-modal-section diagnosis">
-            <span>Diagnosis</span>
-            <p>{{ selectedRecord.diagnosis }}</p>
-          </div>
+        <div>
+          <span>Visit Date</span>
+          <strong>{{ formatDate(selectedRecord.visitDate) }}</strong>
+        </div>
 
+      </div>
+
+      <div class="dr-modal-body">
+
+        <div class="dr-modal-section diagnosis">
+          <span>Diagnosis</span>
+          <p>{{ selectedRecord.diagnosis }}</p>
+        </div>
+
+        <div class="dr-modal-section">
+          <span>Prescription</span>
+          <p>{{ selectedRecord.prescription }}</p>
+        </div>
+
+        @if (selectedRecord.notes) {
           <div class="dr-modal-section">
-            <span>Prescription</span>
-            <p>{{ selectedRecord.prescription }}</p>
+            <span>Doctor Notes</span>
+            <p>{{ selectedRecord.notes }}</p>
           </div>
+        }
 
-          @if (selectedRecord.notes) {
-            <div class="dr-modal-section">
-              <span>Doctor Notes</span>
-              <p>{{ selectedRecord.notes }}</p>
-            </div>
-          }
+      </div>
 
-        </div>
+    </section>
 
-      </section>
+  </div>
 
-    </div>
-
-  }
+}
 
 </section>

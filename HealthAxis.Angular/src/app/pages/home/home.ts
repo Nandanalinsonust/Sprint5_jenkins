@@ -148,7 +148,9 @@ export class Home implements OnInit {
 
     return this.highlights[this.currentHighlightIndex];
   }
-
+stopPropagation(event: Event): void {
+  event.stopPropagation();
+}
   get isPasswordMismatch(): boolean {
     const password = this.patientRegisterForm.password.trim();
     const confirmPassword = this.patientRegisterForm.confirmPassword.trim();

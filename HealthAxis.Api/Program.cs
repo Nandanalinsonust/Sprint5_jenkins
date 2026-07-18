@@ -167,7 +167,6 @@ builder.Services.AddScoped<ICacheService, CacheService>();
 
 // Register background services.
 builder.Services.AddHostedService<HeartbeatBackgroundService>();
-//builder.Services.AddHostedService<NotificationCleanupService>();
 
 // Register MassTransit with RabbitMQ.
 var rabbitmqConfig = builder.Configuration.GetSection("RabbitMQ");

@@ -5,6 +5,7 @@ namespace HealthAxis.Api.Services.Impl
     public class GarnetHostedService : IHostedService, IDisposable
     {
         private GarnetServer? server;
+        private bool disposed;
 
         private readonly ILogger<GarnetHostedService> logger;
 
@@ -33,16 +34,33 @@ namespace HealthAxis.Api.Services.Impl
 
         public Task StopAsync(CancellationToken cancellationToken)
         {
-            server?.Dispose();
+            Dispose();
 
             logger.LogInformation("Embedded Garnet server stopped.");
 
             return Task.CompletedTask;
         }
 
+        protected virtual void Dispose(bool disposing)
+        {
+            if (disposed)
+            {
+                return;
+            }
+
+            if (disposing)
+            {
+                server?.Dispose();
+                server = null;
+            }
+
+            disposed = true;
+        }
+
         public void Dispose()
         {
-            server?.Dispose();
+            Dispose(true);
+            GC.SuppressFinalize(this);
         }
     }
 }

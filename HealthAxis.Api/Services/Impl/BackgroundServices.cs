@@ -4,12 +4,18 @@ namespace HealthAxis.Api.BackgroundServices
 {
     public class HeartbeatBackgroundService : BackgroundService
     {
-        private readonly ILogger<HeartbeatBackgroundService> _logger;
+        private readonly ILogger<HeartbeatBackgroundService> logger;
+
+        private static readonly Action<ILogger, DateTime, Exception?> HeartbeatRunning =
+            LoggerMessage.Define<DateTime>(
+                LogLevel.Information,
+                new EventId(1, nameof(HeartbeatRunning)),
+                "Heartbeat running at: {Time}");
 
         public HeartbeatBackgroundService(
             ILogger<HeartbeatBackgroundService> logger)
         {
-            _logger = logger;
+            this.logger = logger;
         }
 
         protected override async Task ExecuteAsync(
@@ -17,9 +23,10 @@ namespace HealthAxis.Api.BackgroundServices
         {
             while (!stoppingToken.IsCancellationRequested)
             {
-                _logger.LogInformation(
-                    "Heartbeat running at: {Time}",
-                    DateTime.UtcNow);
+                HeartbeatRunning(
+                    logger,
+                    DateTime.UtcNow,
+                    null);
 
                 await Task.Delay(
                     TimeSpan.FromSeconds(10),
