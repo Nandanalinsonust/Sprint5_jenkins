@@ -16,7 +16,6 @@ using Microsoft.OpenApi;
 using Serilog;
 using System.Text;
 using MassTransit;
-using HealthAxis.Api.Options;
 using HealthAxis.Api.Messaging.Consumers;
 
 
@@ -45,24 +44,6 @@ builder.Services.AddControllers()
         options.JsonSerializerOptions.PropertyNamingPolicy =
             System.Text.Json.JsonNamingPolicy.CamelCase;
     });
-
-// Register garnet hosted service for background processing.
-builder.Services.AddHostedService<GarnetHostedService>();
-
-// Register Garnet options from configuration.
-builder.Services.Configure<GarnetOptions>(
-    builder.Configuration.GetSection("Garnet"));
-
-// Register distributed cache using embedded Garnet.
-builder.Services.AddStackExchangeRedisCache(options =>
-{
-    var garnetOptions = builder.Configuration
-        .GetSection("Garnet")
-        .Get<GarnetOptions>()!;
-
-    options.Configuration = garnetOptions.ConnectionString;
-    options.InstanceName = garnetOptions.InstanceName;
-});
 
 // Register HealthAxisDbContext with SQL Server.
 builder.Services.AddDbContext<HealthAxisDbContext>(options =>
@@ -162,7 +143,6 @@ builder.Services.AddScoped<IPatientService, PatientService>();
 builder.Services.AddScoped<IDoctorService, DoctorService>();
 builder.Services.AddScoped<IAppointmentService, AppointmentService>();
 builder.Services.AddScoped<IHealthRecordService, HealthRecordService>();
-builder.Services.AddScoped<ICacheService, CacheService>();
 
 
 // Register background services.

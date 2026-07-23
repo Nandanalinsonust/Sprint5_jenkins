@@ -18,7 +18,7 @@ namespace HealthAxis.Api.Services.Impl
         IPatientRepository patientRepository,
         IDoctorRepository doctorRepository,
         IHealthRecordRepository healthRecordRepository,
-        IMapper mapper, IPublishEndpoint publishEndpoint, ILogger<AppointmentService> logger, ICacheService cacheService) : IAppointmentService
+        IMapper mapper, IPublishEndpoint publishEndpoint, ILogger<AppointmentService> logger) : IAppointmentService
     {
 
         private const string AppointmentBookedEventType = "AppointmentBooked";
@@ -323,15 +323,6 @@ namespace HealthAxis.Api.Services.Impl
             appointment.CreatedDate = DateTime.Now;
 
             var savedAppointment = await appointmentRepository.CreateAsync(appointment);
-            var cacheKey = BuildDoctorAvailabilityCacheKey(
-    savedAppointment.DoctorId,
-    savedAppointment.ScheduledDate);
-
-            await cacheService.RemoveAsync(cacheKey);
-
-            logger.LogInformation(
-                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
-                cacheKey);
 
             var patient = await patientRepository.GetByIdAsync(dto.PatientId);
 
@@ -403,22 +394,6 @@ namespace HealthAxis.Api.Services.Impl
             var updatedAppointment = await appointmentRepository.UpdateAsync(
                 appointmentId,
                 existingAppointment);
-
-
-            if (updatedAppointment is null)
-            {
-                throw new EntityNotFoundException(AppointmentEntityName, appointmentId);
-            }
-
-            var cacheKey = BuildDoctorAvailabilityCacheKey(
-    updatedAppointment.DoctorId,
-    updatedAppointment.ScheduledDate);
-
-            await cacheService.RemoveAsync(cacheKey);
-
-            logger.LogInformation(
-                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
-                cacheKey);
 
             if (updatedAppointment is null)
             {
@@ -548,22 +523,6 @@ namespace HealthAxis.Api.Services.Impl
             {
                 throw new EntityNotFoundException(AppointmentEntityName, dto.AppointmentId);
             }
-
-            var cacheKey = BuildDoctorAvailabilityCacheKey(
-    updatedAppointment.DoctorId,
-    updatedAppointment.ScheduledDate);
-
-            await cacheService.RemoveAsync(cacheKey);
-
-            logger.LogInformation(
-                "Doctor availability cache invalidated. CacheKey: {CacheKey}",
-                cacheKey);
-
-            if (updatedAppointment is null)
-            {
-                throw new EntityNotFoundException(AppointmentEntityName, dto.AppointmentId);
-            }
-
             return mapper.Map<AppointmentDto>(updatedAppointment);
         }
 
@@ -1056,12 +1015,6 @@ namespace HealthAxis.Api.Services.Impl
             logger.LogInformation(
                 "Appointment booked event published to RabbitMQ. EventStage: {EventStage}",
                 EventStagePublished);
-        }
-        private static string BuildDoctorAvailabilityCacheKey(
-    int doctorId,
-    DateTime date)
-        {
-            return $"doctor-availability:{doctorId}:{date:yyyy-MM-dd}";
         }
 
     }

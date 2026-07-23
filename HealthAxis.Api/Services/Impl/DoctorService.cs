@@ -18,7 +18,6 @@ namespace HealthAxis.Api.Services
         IMapper mapper,
         UserManager<IdentityUser> userManager,
         RoleManager<IdentityRole> roleManager,
-        ICacheService cacheService,
         ILogger<DoctorService> logger
         ) : IDoctorService
     {
@@ -29,31 +28,7 @@ namespace HealthAxis.Api.Services
         private const string DoctorEntityName = "Doctor";
         private const string DoctorRoleName = "Doctor";
         private const string DoctorDetailsRequiredMessage = "Doctor details are required.";
-        private static readonly Action<ILogger, string, Exception?> DoctorAvailabilityCacheHit =
-    LoggerMessage.Define<string>(
-        LogLevel.Information,
-        new EventId(1001, nameof(DoctorAvailabilityCacheHit)),
-        "Doctor availability cache HIT. CacheKey: {CacheKey}");
 
-        private static readonly Action<ILogger, string, Exception?> DoctorAvailabilityCacheMiss =
-            LoggerMessage.Define<string>(
-                LogLevel.Information,
-                new EventId(1002, nameof(DoctorAvailabilityCacheMiss)),
-                "Doctor availability cache MISS. CacheKey: {CacheKey}");
-
-        private static readonly Action<ILogger, string, double, Exception?> DoctorAvailabilityCached =
-            LoggerMessage.Define<string, double>(
-                LogLevel.Information,
-                new EventId(1003, nameof(DoctorAvailabilityCached)),
-                "Doctor availability cached. CacheKey: {CacheKey}, ExpiryMinutes: {ExpiryMinutes}");
-
-        private static readonly TimeSpan DoctorAvailabilityCacheDuration = TimeSpan.FromMinutes(5);
-        private static string BuildDoctorAvailabilityCacheKey(
-    int doctorId,
-    DateTime date)
-        {
-            return $"doctor-availability:{doctorId}:{date:yyyy-MM-dd}";
-        }
         public async Task<List<DoctorDto>> GetAllDoctorsAsync()
         {
             var doctors = await repository.GetAllAsync();
@@ -311,28 +286,6 @@ namespace HealthAxis.Api.Services
             {
                 var selectedDate = date.Value.Date;
 
-                var cacheKey = BuildDoctorAvailabilityCacheKey(
-                    doctorId,
-                    selectedDate);
-
-                var cachedAvailability =
-                    await cacheService.GetAsync<List<SlotAvailabilityDto>>(cacheKey);
-
-                if (cachedAvailability is not null)
-                {
-                    DoctorAvailabilityCacheHit(
-    logger,
-    cacheKey,
-    null);
-
-                    return cachedAvailability;
-                }
-
-                DoctorAvailabilityCacheMiss(
-    logger,
-    cacheKey,
-    null);
-
                 var bookedSlots =
                     await appointmentRepository.GetBookedTimeSlotsByDoctorAndDateAsync(
                         doctorId,
@@ -341,26 +294,13 @@ namespace HealthAxis.Api.Services
                 var bookedSlotSet = bookedSlots.ToHashSet(
                     StringComparer.OrdinalIgnoreCase);
 
-                var availability = TimeSlots.Slots
+                return TimeSlots.Slots
                     .Select(slot => new SlotAvailabilityDto
                     {
                         TimeSlot = slot,
                         IsBooked = bookedSlotSet.Contains(slot)
                     })
                     .ToList();
-
-                await cacheService.SetAsync(
-                    cacheKey,
-                    availability,
-                    DoctorAvailabilityCacheDuration);
-
-                DoctorAvailabilityCached(
-    logger,
-    cacheKey,
-    DoctorAvailabilityCacheDuration.TotalMinutes,
-    null);
-
-                return availability;
             }
 
             return TimeSlots.Slots
@@ -371,7 +311,6 @@ namespace HealthAxis.Api.Services
                 })
                 .ToList();
         }
-
         private static void ValidateDoctorId(int doctorId)
         {
             if (doctorId <= 0)

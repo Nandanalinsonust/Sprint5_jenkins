@@ -24,7 +24,6 @@ namespace HealthAxis.Api.ServiceTest
         private readonly Mock<IMapper> mapperMock;
         private readonly Mock<IPublishEndpoint> publishEndpointMock;
         private readonly Mock<ILogger<AppointmentService>> loggerMock;
-        private readonly Mock<ICacheService> cacheServiceMock;
 
         private readonly AppointmentService appointmentService;
 
@@ -37,7 +36,6 @@ namespace HealthAxis.Api.ServiceTest
             mapperMock = new Mock<IMapper>();
             publishEndpointMock = new Mock<IPublishEndpoint>();
             loggerMock = new Mock<ILogger<AppointmentService>>();
-            cacheServiceMock = new Mock<ICacheService>();
 
             SetupMapper();
 
@@ -48,8 +46,7 @@ namespace HealthAxis.Api.ServiceTest
     healthRecordRepositoryMock.Object,
     mapperMock.Object,
     publishEndpointMock.Object,
-    loggerMock.Object,
-    cacheServiceMock.Object);
+    loggerMock.Object);
         }
 
         [Fact]

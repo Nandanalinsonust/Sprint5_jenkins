@@ -26,7 +26,6 @@ namespace HealthAxis.Api.ServiceTest
         private readonly Mock<RoleManager<IdentityRole>> roleManagerMock;
 
         private readonly DoctorService doctorService;
-        private readonly Mock<ICacheService> cacheServiceMock;
         private readonly Mock<ILogger<DoctorService>> loggerMock;
 
         private readonly Mock<IAppointmentRepository> appointmentRepositoryMock;
@@ -38,7 +37,6 @@ namespace HealthAxis.Api.ServiceTest
             appointmentRepositoryMock = new Mock<IAppointmentRepository>();
 
             mapperMock = new Mock<IMapper>();
-            cacheServiceMock = new Mock<ICacheService>();
             loggerMock = new Mock<ILogger<DoctorService>>();
             userManagerMock = CreateUserManagerMock();
 
@@ -52,7 +50,6 @@ namespace HealthAxis.Api.ServiceTest
     mapperMock.Object,
     userManagerMock.Object,
     roleManagerMock.Object,
-    cacheServiceMock.Object,
     loggerMock.Object);
         }
 
