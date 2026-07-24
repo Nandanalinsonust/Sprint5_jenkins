@@ -56,9 +56,11 @@ namespace HealthAxis.Api.Migrations
 
                     b.HasKey("AppointmentId");
 
-                    b.HasIndex("DoctorId");
+                    b.HasIndex("DoctorId", "ScheduledDate", "TimeSlot")
+                        .IsUnique();
 
-                    b.HasIndex("PatientId");
+                    b.HasIndex("PatientId", "ScheduledDate", "TimeSlot")
+                        .IsUnique();
 
                     b.ToTable("Appointments");
                 });

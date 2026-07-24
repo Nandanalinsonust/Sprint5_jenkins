@@ -1,4 +1,7 @@
 <Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="copy-admin-blazor-to-api.ps1" />
+  </Folder>
   <Project Path="HealthAxis.Admin/HealthAxis.Admin.csproj" Id="25ae0822-bf8e-4c46-9771-24ae86b9401c" />
   <Project Path="HealthAxis.Api/HealthAxis.Api.csproj" />
   <Project Path="HealthAxis.Shared/HealthAxis.Shared.csproj" Id="c4c15f2a-d19e-4766-87e9-9ad2ded24572" />

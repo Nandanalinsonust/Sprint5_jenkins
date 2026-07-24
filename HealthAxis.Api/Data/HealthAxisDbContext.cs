@@ -1,8 +1,9 @@
-﻿using HealthAxis.Shared.Enums;
-using HealthAxis.Api.Models;
+﻿using HealthAxis.Api.Models;
+using HealthAxis.Shared.Enums;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
+using System.Reflection.Emit;
 
 namespace HealthAxis.Api.Data
 {
@@ -70,8 +71,24 @@ namespace HealthAxis.Api.Data
                 .HasForeignKey<HealthRecord>(hr => hr.AppointmentId)
                 .OnDelete(DeleteBehavior.NoAction);
 
-           
-            
+
+            Builder.Entity<Appointment>()
+    .HasIndex(a => new
+    {
+        a.DoctorId,
+        a.ScheduledDate,
+        a.TimeSlot
+    })
+    .IsUnique();
+
+            Builder.Entity<Appointment>()
+                .HasIndex(a => new
+                {
+                    a.PatientId,
+                    a.ScheduledDate,
+                    a.TimeSlot
+                })
+                .IsUnique();
         }
     }
 }

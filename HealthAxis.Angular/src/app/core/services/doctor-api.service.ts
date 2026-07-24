@@ -31,7 +31,7 @@ interface ApiSlotAvailabilityDto {
   providedIn: 'root'
 })
 export class DoctorApiService {
-  private readonly apiUrl = 'https://localhost:7250/api/Doctors';
+  private readonly apiUrl = '/api/Doctors';
 
   constructor(private readonly http: HttpClient) {
   }

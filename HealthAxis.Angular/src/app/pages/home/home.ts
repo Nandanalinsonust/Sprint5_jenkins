@@ -326,8 +326,13 @@ stopPropagation(event: Event): void {
     if (role === 'Admin') {
       const token = this.authService.getToken();
 
-      window.location.href =
-        `https://localhost:7075/admin-login-bridge?token=${encodeURIComponent(token)}`;
+     if (!token) {
+        this.authService.logout();
+        this.loginMessage = 'Admin session token was not found. Please login again.';
+        return;
+      }
+       globalThis.location.href =
+        `/blazor/admin-login-bridge?token=${encodeURIComponent(token)}`;
 
       return;
     }

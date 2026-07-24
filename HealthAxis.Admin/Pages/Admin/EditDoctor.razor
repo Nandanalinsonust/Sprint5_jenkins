@@ -289,7 +289,7 @@ else
                 "Doctor Updated",
                 $"{updatedDoctor.FullName} was updated successfully.");
 
-            Navigation.NavigateTo("/admin/doctors");
+            Navigation.NavigateTo("admin/doctors");
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -334,6 +334,6 @@ else
 
     private void BackToDoctors()
     {
-        Navigation.NavigateTo("/admin/doctors");
+        Navigation.NavigateTo("admin/doctors");
     }
 }

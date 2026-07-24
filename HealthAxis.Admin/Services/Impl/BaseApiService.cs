@@ -10,6 +10,8 @@ namespace HealthAxis.Admin.Services.Impl
     {
         private const string TokenStorageKey = "token";
 
+        private const string LoginRedirectPath = "/angular?sessionExpired=true";
+
         private readonly HttpClient _httpClient;
 
         private readonly IJSRuntime _jsRuntime;
